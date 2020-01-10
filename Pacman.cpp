@@ -9,8 +9,9 @@ Pacman::Pacman(sf::RenderWindow& window,sf::Texture* PacmanTexture, sf::Vector2u
 	row = 1;
 	direction.x = -1;
 	direction.y = 0;
-	body.setSize(sf::Vector2f(50.0f, 50.0f));
-	body.setPosition(0.0f,0.0f);
+	body.setSize(sf::Vector2f(PacmanSizeX, PacmanSizeY));
+	body.setOrigin(PacmanSizeX /2, PacmanSizeY /2);
+	body.setPosition(500.0f,820.0f);
 	body.setTexture(PacmanTexture);
 }
 
@@ -21,7 +22,7 @@ void Pacman::Draw(sf::RenderWindow& window)
 
 }
 
-void Pacman::Update(float dTime, sf::RenderWindow& window)
+void Pacman::Update(float dTime, sf::RenderWindow& window,Map& map)
 {
 	sf::Vector2f movement(0.0f, 0.0f);
 
@@ -55,7 +56,53 @@ void Pacman::Update(float dTime, sf::RenderWindow& window)
 	//system("cls");
 	//std::cout << body.getPosition().x/100 << " " << body.getPosition().y /100;
 	body.setTextureRect(animation.uvRect);
-	body.move(movement);
+
+	if(canPacMove(movement,map))
+		body.move(movement);
+	//else {
+	//	pushBack(); //nem haszálnom csúnyán néz ki.
+	//}
+}
+
+sf::Vector2u Pacman::getUPosition() const
+{
+	sf::Vector2u Position;
+
+	Position.x = static_cast<unsigned int> (body.getPosition().x / CellSizeDef);
+	Position.y = static_cast<unsigned int>(body.getPosition().y / CellSizeDef);
+
+	return Position;
+}
+
+bool Pacman::canPacMove(sf::Vector2f& movement,Map& map) //nemszép
+{
+	sf::Vector2u PacPos;
+	PacPos.x = static_cast<unsigned int>((body.getPosition().x + movement.x+(direction.x*15.0f)) / CellSizeDef);
+	PacPos.y = static_cast<unsigned int>((body.getPosition().y + movement.y+(direction.y * 15.0f))/ CellSizeDef);
+	if(map.getMapArrayValue(PacPos.x,PacPos.y) == 1){
+		
+		return false;
+	}
+	return true;
+}
+
+void Pacman::pushBack() // nemhjaszálnom de hátha leszá idõ
+{
+	float pushbackWith = 20.0f;
+	//sf::Vector2f movement(0.0f, 0.0f);
+
+	if (direction.x == -1 == direction.y == 0) {
+		body.move(pushbackWith,0.0f);
+	}
+	if (direction.x == 1 && direction.y == 0) {
+		body.move(-pushbackWith, 0.0f);
+	}
+	if (direction.x == 0 && direction.y == 1) {
+		body.move(0.0f, -pushbackWith);
+	}
+	if (direction.x == 1 && direction.y == 0) {
+		body.move(0.0f, pushbackWith);
+	}
 }
 
 

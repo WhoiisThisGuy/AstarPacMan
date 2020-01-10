@@ -1,5 +1,11 @@
 #pragma once
 #include "Animation.h"
+#include "Map.h"
+
+#define PacmanSizeX 35.0f
+#define PacmanSizeY 35.0f
+
+#define pacmanstartcell 15,12
 
 class Pacman
 {
@@ -9,7 +15,7 @@ public:
 
 
 	void Draw(sf::RenderWindow& window);
-	void Update(float dTime, sf::RenderWindow& window);
+	void Update(float dTime, sf::RenderWindow& window, Map& map);
 
 	//Collider GetCollider() { return Collider(body); }
 
@@ -18,8 +24,13 @@ public:
 	sf::RectangleShape body;
 
 	sf::Vector2f getPosition() const { return body.getPosition(); };
+	sf::Vector2u getUPosition() const;
+
+	bool canPacMove(sf::Vector2f& movement,Map& map);
+
+	void pushBack();
+
 private:
-	
 	float speed;
 	std::string health;
 	unsigned int row;

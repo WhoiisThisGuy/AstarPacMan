@@ -1,16 +1,17 @@
 ﻿#include "Game.h"
 #include <fstream>
 
-#define PacmanMovementSpeed 100.0f
-#define Videomode 1280.0f, 720.0f
+
+//int ScreenWidth = sf::VideoMode::getDesktopMode().width;
+//int ScreenHeight = sf::VideoMode::getDesktopMode().height;
 
 Game::Game()
-	: window(sf::VideoMode(Videomode), "Pacman"),
+	: window(sf::VideoMode(Videomode),"PacmanAstar",sf::Style::Close | sf::Style::Titlebar),
 	dt(0.0)
 {
 	font.loadFromFile("consola.ttf");
 	PacManPosText.setFont(font);
-	PacManPosText.setPosition(800.0f,650.0f);
+	PacManPosText.setPosition(1100.0f,650.0f);
 	PacManPosText.setFillColor(sf::Color::White);
 	PacManPosText.setCharacterSize(20);
 	PacmanTexture.loadFromFile("Pacman.png");
@@ -45,9 +46,10 @@ void Game::Update()
 {
 	UpdateDt();
 	UpdateSfmlEvents();
-	pacman->Update(dt,window);
+	map.Update(pacman->getUPosition());
+	pacman->Update(dt,window,map);
 	std::stringstream st;
-	st << "Pacman pozicioja: (X,Y): " << pacman->getPosition().x / 50 << " " << pacman->getPosition().y / 50;
+	st << "Pacman pozicioja: (X,Y): " << pacman->getPosition().x / CellSizeDef << " " << pacman->getPosition().y / CellSizeDef;// CellSizeDef
 	PacManPosText.setString(st.str());
 }
 

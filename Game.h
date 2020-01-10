@@ -3,8 +3,11 @@
 #include <iostream>
 #include <exception>
 #include <sstream>
-#include "Pacman.h"
 #include "Map.h"
+#include "Pacman.h"
+
+#define PacmanMovementSpeed 200.0f
+#define Videomode 1600.0f, 1000.0f
 
 class Game {
 
