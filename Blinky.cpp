@@ -1,15 +1,20 @@
 #include "Blinky.h"
 
-Blinky::Blinky(sf::Texture* GhostTexture,float speed) {
+Blinky::Blinky(sf::Texture* GhostTexture,float speedf) {
 
+	speed = speedf;
+	tempDirection.x = 1;
+	tempDirection.y = 0;
 	GhostBody.setTexture(GhostTexture);
+	GhostBody.setSize(sf::Vector2f(40.0f,40.0f));
+	GhostBody.setPosition(sf::Vector2f(BLINKYSTARTPOSITIONX * CELLSIZE, BLINKYSTARTPOSITIONY * CELLSIZE));
+	GhostBody.setOrigin(20.0f, 20.0f);
+
 }
 
 void Blinky::Update(float dt)
 {
-
-	if()
-
+	
 }
 
 void Blinky::Draw(sf::RenderWindow& window)
@@ -19,9 +24,6 @@ void Blinky::Draw(sf::RenderWindow& window)
 
 }
 
-void Blinky::AstarSearch()
+void Blinky::findPath()
 {
-
-
-
 }

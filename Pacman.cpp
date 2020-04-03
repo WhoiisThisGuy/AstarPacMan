@@ -2,17 +2,21 @@
 #include <iostream>
 #include <Windows.h>
 
-Pacman::Pacman(sf::RenderWindow& window,sf::Texture* PacmanTexture, sf::Vector2u imageCount, float speed)
+
+Pacman::Pacman(sf::Texture* PacmanTexture, sf::Vector2u imageCount)
 	: animation(PacmanTexture, imageCount)
 {
-	this->speed = speed;
+	speed = PACMANSPEED;
 	row = 1;
-	direction.x = -1;
-	direction.y = 0;
-	body.setSize(sf::Vector2f(PacmanSizeX, PacmanSizeY));
-	body.setOrigin(PacmanSizeX /2, PacmanSizeY /2);
-	body.setPosition(500.0f,820.0f);
+
+	tempDirection = { STARTDIRECTION };
+	bufferedDirection = tempDirection ;
+
+	body.setSize(sf::Vector2f(PACMANSIZEX, PACMANSIZEY));
+	body.setPosition(STARTPOSX * CELLSIZE, STARTPOSY * CELLSIZE);
+
 	body.setTexture(PacmanTexture);
+
 }
 
 void Pacman::Draw(sf::RenderWindow& window)
@@ -22,117 +26,176 @@ void Pacman::Draw(sf::RenderWindow& window)
 
 }
 
-void Pacman::Update(float dTime, sf::RenderWindow& window,Map& map)
+void Pacman::Update(float dTime, sf::RenderWindow& window)
 {
 	sf::Vector2f movement(0.0f, 0.0f);
 
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && body.getPosition().y > 0){
-			//movement.y -= speed * dTime;
-			direction.y = -1;
-			direction.x = 0;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)){
+			
+			bufferedDirection.y = -1;
+			bufferedDirection.x = 0;
 			row = 2;
+			
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) && body.getPosition().y < window.getSize().y - 75) {
-			//movement.y += speed * dTime;
-			direction.y = 1;
-			direction.x = 0;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+			
+			bufferedDirection.y = 1;
+			bufferedDirection.x = 0;
 			row = 3;
+			
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && body.getPosition().x > 0) {
-			//movement.x -= speed * dTime;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+			
 			row = 1;
-			direction.x = -1;
-			direction.y = 0;
+			bufferedDirection.x = -1;
+			bufferedDirection.y = 0;
+			
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && body.getPosition().x < window.getSize().x - 75) {
-			//movement.x += speed * dTime;
-			direction.x = 1;
-			direction.y = 0;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+			
+			bufferedDirection.x = 1;
+			bufferedDirection.y = 0;
 			row = 0;
+			
 		}
-	movement.x += speed * dTime*direction.x;
-	movement.y += speed * dTime * direction.y;
-	animation.Update(row, dTime, 0.30f);
-	//system("cls");
-	//std::cout << body.getPosition().x/100 << " " << body.getPosition().y /100;
+	movement.x = speed * dTime;
+	movement.y = speed * dTime;
+	animation.Update(row, dTime, 0.10f);
 	body.setTextureRect(animation.uvRect);
+	
+	/* The logic implemented here is:
+	If the entered direction differs from the temporary direction then check if we can move into that direction else try move to the temporary direction,
+	if that is not possible then stop moving. */
 
-	if(canPacMove(movement,map))
-		body.move(movement);
-	//else {
-	//	pushBack(); //nem haszálnom csúnyán néz ki.
-	//}
+	if (tempDirection != bufferedDirection && canPacBufferedMove(bufferedDirection)) {
+		tempDirection = bufferedDirection;
+	}
+	else if (!canPacMove(movement, tempDirection)) {
+		tempDirection.x = 0;
+		tempDirection.y = 0;
+	}
+
+	movement.x *= tempDirection.x;
+	movement.y *= tempDirection.y;
+
+	body.move(movement);
 }
 
 sf::Vector2u Pacman::getUPosition() const
 {
 	sf::Vector2u Position;
 
-	Position.x = static_cast<unsigned int> (body.getPosition().x / CellSizeDef);
-	Position.y = static_cast<unsigned int>(body.getPosition().y / CellSizeDef);
+	Position.x = static_cast<unsigned int> (body.getPosition().x / CELLSIZE);
+	Position.y = static_cast<unsigned int>(body.getPosition().y / CELLSIZE);
 
 	return Position;
 }
 
-bool Pacman::canPacMove(sf::Vector2f& movement,Map& map) //nemszép
-{
-	sf::Vector2u PacPos;
-	PacPos.x = static_cast<unsigned int>((body.getPosition().x + movement.x+(direction.x*15.0f)) / CellSizeDef);
-	PacPos.y = static_cast<unsigned int>((body.getPosition().y + movement.y+(direction.y * 15.0f))/ CellSizeDef);
-	if(map.getMapArrayValue(PacPos.x,PacPos.y) == 1){
+bool Pacman::canPacMove(sf::Vector2f movement,sf::Vector2i& Direction) const{ /* Collision detection */
+
+	sf::Vector2u pacNextPosA = { 0,0 }; /* These two vectors define that where the top and bottom - depending on which direction is pacman going -
+									of pacman's tile will be after the movement is added to the current position. */
+	sf::Vector2u pacNextPosB = { 0,0 };
+
+	sf::Vector2f tempPosition = body.getPosition();
+	sf::Vector2f tempCoordinates = body.getPosition()/CELLSIZE;
+
+	movement.x *= Direction.x;
+	movement.y *= Direction.y;
+
+	/* Decide which direction is pacman going. Then I calculate the position where pacman will be after movement vector is added to the position. */
+
+	if (Direction.x == 1) {
+
+		pacNextPosA.x = (unsigned int)(((tempPosition.x+ PACMANSIZEX) + movement.x) / CELLSIZE); //calculation of the top right corner of the rectangleshape
+		pacNextPosA.y = tempCoordinates.y;
+
+		pacNextPosB.x = pacNextPosA.x;
+		pacNextPosB.y = (unsigned int)(((tempPosition.y + PACMANSIZEY) + movement.y) / CELLSIZE); //calculation of the bottom right corner of the rectangleshape
+		
+	}
+	else if (Direction.y == 1) {
+
+		pacNextPosA.x = tempCoordinates.x;
+		pacNextPosA.y = (unsigned int)(((tempPosition.y+PACMANSIZEY ) + movement.y) / CELLSIZE);
+
+		pacNextPosB.x = (unsigned int)((tempPosition.x+PACMANSIZEX ) / CELLSIZE);
+		pacNextPosB.y = pacNextPosA.y;
+	}
+	else if(Direction.x == -1){
+
+		pacNextPosA.x = (unsigned int)((tempPosition.x + movement.x) / CELLSIZE);
+		pacNextPosA.y = tempCoordinates.y;
+
+		pacNextPosB.x = pacNextPosA.x;
+		pacNextPosB.y = (unsigned int)((tempPosition.y + PACMANSIZEY ) / CELLSIZE);
+		
+	}
+	else if(Direction.y == -1) {
+		
+		pacNextPosA.x = tempCoordinates.x;
+		pacNextPosA.y = (unsigned int)((tempPosition.y + movement.y) / CELLSIZE);
+
+		pacNextPosB.x = (unsigned int)((tempPosition.x + PACMANSIZEX )/ CELLSIZE);
+		pacNextPosB.y = pacNextPosA.y;
+	}
+	
+	if(map[pacNextPosA.y][pacNextPosA.x] == 1 || map[pacNextPosB.y][pacNextPosB.x] == 1){ //Coordinates are switched (y first then x) because moving horizontally means moving between columns in the map matrix and moving vertically means moving trough the rows in the map matrix.
 		
 		return false;
 	}
 	return true;
 }
 
-void Pacman::pushBack() // nemhjaszálnom de hátha leszá idõ
-{
-	float pushbackWith = 20.0f;
-	//sf::Vector2f movement(0.0f, 0.0f);
 
-	if (direction.x == -1 == direction.y == 0) {
-		body.move(pushbackWith,0.0f);
+bool Pacman::canPacBufferedMove(sf::Vector2i& Direction) const { /* Using the exact same logic like in the canPacMove() function.
+																 The only difference is that I check more further into the direction Pacman would like to go.
+																 This is to tell for sure that the cell is free or not. */
+
+	sf::Vector2u pacNextPosA = { 0,0 }; 
+	sf::Vector2u pacNextPosB = { 0,0 };
+
+	sf::Vector2f tempPosition = body.getPosition();
+	sf::Vector2f tempCoordinates = body.getPosition() / CELLSIZE;
+
+	if (Direction.x == 1) {
+
+		pacNextPosA.x = (unsigned int)((tempPosition.x + (PACMANSIZEX + OFFSET)) / CELLSIZE); //calculation of the top right corner of the rectangleshape
+		pacNextPosA.y = tempCoordinates.y;
+
+		pacNextPosB.x = pacNextPosA.x;
+		pacNextPosB.y = (unsigned int)((tempPosition.y + PACMANSIZEY) / CELLSIZE); //calculation of the bottom right corner of the rectangleshape
+
 	}
-	if (direction.x == 1 && direction.y == 0) {
-		body.move(-pushbackWith, 0.0f);
+	else if (Direction.y == 1) {
+
+		pacNextPosA.x = tempCoordinates.x;
+		pacNextPosA.y = (unsigned int)((tempPosition.y + (PACMANSIZEY + OFFSET)) / CELLSIZE);
+
+		pacNextPosB.x = (unsigned int)((tempPosition.x + PACMANSIZEX) / CELLSIZE);
+		pacNextPosB.y = pacNextPosA.y;
 	}
-	if (direction.x == 0 && direction.y == 1) {
-		body.move(0.0f, -pushbackWith);
+	else if (Direction.x == -1) {
+
+		pacNextPosA.x = (unsigned int)((tempPosition.x - OFFSET) / CELLSIZE);
+		pacNextPosA.y = tempCoordinates.y;
+
+		pacNextPosB.x = pacNextPosA.x;
+		pacNextPosB.y = (unsigned int)((tempPosition.y + PACMANSIZEY) / CELLSIZE);
+
 	}
-	if (direction.x == 1 && direction.y == 0) {
-		body.move(0.0f, pushbackWith);
+	else if (Direction.y == -1) {
+
+		pacNextPosA.x = tempCoordinates.x;
+		pacNextPosA.y = (unsigned int)((tempPosition.y - OFFSET) / CELLSIZE);
+
+		pacNextPosB.x = (unsigned int)((tempPosition.x + PACMANSIZEX) / CELLSIZE);
+		pacNextPosB.y = pacNextPosA.y;
 	}
+
+	if (map[pacNextPosA.y][pacNextPosA.x] == 1 || map[pacNextPosB.y][pacNextPosB.x] == 1) { //map comes from Map.h also the coordinates are switched watch for it, y is first.
+		return false;
+	}
+
+	return true;
 }
-
-
-
-//bool Pacman::fruitCollisionCheck(Fruits& fruit)
-//{
-//	float RectX, RectY, RectWidth, RectHeight, NearestX, NearestY, DeltaX, DeltaY, CircleX, CircleY;
-//
-//	CircleX = fruit.getFruitShape().getPosition().x;
-//	CircleY = fruit.getFruitShape().getPosition().y;
-//
-//	RectX = head->getPacmanHeadShape().getGlobalBounds().left;
-//	RectY = head->getPacmanHeadShape().getGlobalBounds().top;
-//
-//	RectWidth = head->getPacmanHeadShape().getGlobalBounds().width;
-//	RectHeight = head->getPacmanHeadShape().getGlobalBounds().height;
-//
-//	NearestX = std::max(RectX, std::min(CircleX, RectX + RectWidth));
-//	NearestY = std::max(RectY, std::min(CircleY, RectY + RectHeight));
-//
-//	DeltaX = CircleX - NearestX;
-//	DeltaY = CircleY - NearestY;
-//
-//
-//	if ((DeltaX * DeltaX + DeltaY * DeltaY) < (fruit.getRadius() * fruit.getRadius())) {
-//
-//		return true;
-//	}
-//
-//	return false;
-//
-//
-//}

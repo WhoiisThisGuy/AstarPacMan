@@ -6,7 +6,7 @@
 //int ScreenHeight = sf::VideoMode::getDesktopMode().height;
 
 Game::Game()
-	: window(sf::VideoMode(Videomode),"PacmanAstar",sf::Style::Close | sf::Style::Titlebar),
+	: window(sf::VideoMode(VIDEOMODE),"PacmanAstar",sf::Style::Close | sf::Style::Titlebar),
 	dt(0.0)
 {
 	font.loadFromFile("consola.ttf");
@@ -14,13 +14,16 @@ Game::Game()
 	PacManPosText.setPosition(1100.0f,650.0f);
 	PacManPosText.setFillColor(sf::Color::White);
 	PacManPosText.setCharacterSize(20);
-	PacmanTexture.loadFromFile("Pacman.png");
-	pacman = new Pacman(window, &PacmanTexture, sf::Vector2u(2,4), PacmanMovementSpeed);
-	window.setFramerateLimit(200);
+	PacmanTexture.loadFromFile("pacman.png");
+	BlinkyTexture.loadFromFile("blinky.png");
+	pacman = new Pacman(&PacmanTexture, sf::Vector2u(2,4));
+	blinky = new Blinky(&BlinkyTexture,100.0f);
+	window.setFramerateLimit(60);
+	
 }
 
 Game::~Game() {
-
+	delete blinky;
 	delete pacman;
 }
 
@@ -46,10 +49,11 @@ void Game::Update()
 {
 	UpdateDt();
 	UpdateSfmlEvents();
-	map.Update(pacman->getUPosition());
-	pacman->Update(dt,window,map);
+	pacman->Update(dt,window);
+	//map.Update(pacman->getUPosition());
+	//blinky->Update(dt);
 	std::stringstream st;
-	st << "Pacman pozicioja: (X,Y): " << pacman->getPosition().x / CellSizeDef << " " << pacman->getPosition().y / CellSizeDef;// CellSizeDef
+	st << "Pacman pozicioja(X,Y): " << pacman->getPosition().x / CELLSIZE << " " << pacman->getPosition().y / CELLSIZE; // Only for debugging deletable
 	PacManPosText.setString(st.str());
 }
 

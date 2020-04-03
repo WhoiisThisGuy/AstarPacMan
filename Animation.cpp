@@ -18,7 +18,7 @@ void Animation::Update(int row, float deltaTime, float switchTime)
 	totalTime += deltaTime;
 	if (totalTime >= switchTime) {
 
-		totalTime = 0; // jobban meggondolni az = 0át totalTime -= switchTime;
+		totalTime = 0;
 		currentImage.x++;
 
 		if (currentImage.x >= AimageCount.x) {

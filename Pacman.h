@@ -2,22 +2,23 @@
 #include "Animation.h"
 #include "Map.h"
 
-#define PacmanSizeX 35.0f
-#define PacmanSizeY 35.0f
+#define PACMANSIZEX 30.0f
+#define PACMANSIZEY 30.0f
+#define PACMANSPEED 250.0f
+#define STARTPOSX 1
+#define STARTPOSY 1
+#define STARTDIRECTION 1,0
 
-#define pacmanstartcell 15,12
+#define OFFSET PACMANSIZEX/2 // This is needed to look further in front of pacmans direction. Used in canPacBufferedMove().
 
 class Pacman
 {
 
 public:
-	Pacman(sf::RenderWindow& window, sf::Texture* PacmanTexture, sf::Vector2u imageCount, float speed);
-
+	Pacman(sf::Texture* PacmanTexture, sf::Vector2u imageCount);
 
 	void Draw(sf::RenderWindow& window);
-	void Update(float dTime, sf::RenderWindow& window, Map& map);
-
-	//Collider GetCollider() { return Collider(body); }
+	void Update(float dTime, sf::RenderWindow& window);
 
 	sf::RectangleShape GetBody() { return this->body; };
 
@@ -26,15 +27,18 @@ public:
 	sf::Vector2f getPosition() const { return body.getPosition(); };
 	sf::Vector2u getUPosition() const;
 
-	bool canPacMove(sf::Vector2f& movement,Map& map);
+	bool canPacMove(sf::Vector2f movement, sf::Vector2i& Direction) const; /* Collision detection */
 
-	void pushBack();
+	bool canPacBufferedMove(sf::Vector2i& Direction) const; /* Collision detection */
 
 private:
+
 	float speed;
 	std::string health;
 	unsigned int row;
 	Animation animation;
-	sf::Vector2i direction;
+	sf::Vector2i tempDirection;
+	sf::Vector2i bufferedDirection;
+	
 };
 

@@ -3,11 +3,12 @@
 #include <iostream>
 #include <exception>
 #include <sstream>
-#include "Map.h"
+#include <memory.h>
+#include "Blinky.h"
 #include "Pacman.h"
+#include "Map.h"
 
-#define PacmanMovementSpeed 200.0f
-#define Videomode 1600.0f, 1000.0f
+#define VIDEOMODE 1600.0f, 1000.0f
 
 class Game {
 
@@ -20,13 +21,13 @@ public:
 	void UpdateDt();
 	void UpdateSfmlEvents();
 	void Render();
+
 private:
 
 	sf::Text PacManPosText;
 	
 	sf::Font font;
 	//Info kiiras pacman poziciojarol
-
 
 	float dt;
 	sf::RenderWindow window;
@@ -36,7 +37,11 @@ private:
 
 	sf::Texture PacmanTexture;
 	Pacman* pacman;
-	//A fõhõs
+	//The hero
+	
+	sf::Texture BlinkyTexture;
+	Blinky* blinky;
+	//Chasers
 
 	Map map;
 	//pálya
