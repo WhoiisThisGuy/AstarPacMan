@@ -1,30 +1,30 @@
 ﻿#include "Game.h"
+#include "LoadFile.h"
 #include <fstream>
+#include <iostream>
+#include <exception>
+#include <sstream>
+#include <memory>
 
-
-//int ScreenWidth = sf::VideoMode::getDesktopMode().width;
-//int ScreenHeight = sf::VideoMode::getDesktopMode().height;
+using std::cout;
 
 Game::Game()
-	: window(sf::VideoMode(VIDEOMODE),"PacmanAstar",sf::Style::Close | sf::Style::Titlebar),
+	: window(sf::VideoMode(1200,1000), "PacmanAstar", sf::Style::Close | sf::Style::Titlebar ),
 	dt(0.0)
 {
-	font.loadFromFile("consola.ttf");
-	PacManPosText.setFont(font);
-	PacManPosText.setPosition(1100.0f,650.0f);
-	PacManPosText.setFillColor(sf::Color::White);
-	PacManPosText.setCharacterSize(20);
-	PacmanTexture.loadFromFile("pacman.png");
-	BlinkyTexture.loadFromFile("blinky.png");
-	pacman = new Pacman(&PacmanTexture, sf::Vector2u(2,4));
-	blinky = new Blinky(&BlinkyTexture,100.0f);
+	if (!loadFiles())
+		cout << "Failed to load a file.";
+	backgroundSprite.setTexture(backgroundTexture);
+	backgroundSprite.setPosition(0.0f,MAPOFFSET);
+
+
+	//font.loadFromFile("consola.ttf");
 	window.setFramerateLimit(60);
-	
+	//pacManTempCoordsOnLevel = pacman.getTempCoordsOnLevel();
 }
 
 Game::~Game() {
-	delete blinky;
-	delete pacman;
+	
 }
 
 void Game::run()
@@ -38,9 +38,8 @@ void Game::run()
 
 }
 
-void Game::UpdateDt() //Állapot frissites
+void Game::UpdateDt()
 {
-	//Update: mennyi idõ alatt frissít egy képkockát így más teljesitményû pc-n is ugyanannyi idõvel mozog a unit
 	dt = deltaClock.restart().asSeconds();
 
 }
@@ -49,42 +48,41 @@ void Game::Update()
 {
 	UpdateDt();
 	UpdateSfmlEvents();
-	pacman->Update(dt,window);
-	//map.Update(pacman->getUPosition());
-	//blinky->Update(dt);
-	std::stringstream st;
-	st << "Pacman pozicioja(X,Y): " << pacman->getPosition().x / CELLSIZE << " " << pacman->getPosition().y / CELLSIZE; // Only for debugging deletable
-	PacManPosText.setString(st.str());
+
+	//map.Update(blinky.getPath()); // GET PATH USED FOR BLINKY, CHANGE THIS
+	
+	pacman.Update(dt);
+	blinky.Update(dt);
+
+	inky.Update(dt);
+	pinky.Update(dt);
+	clyde.Update(dt);
 }
 
 void Game::UpdateSfmlEvents()
 {
-
+	
 	while (window.pollEvent(event))
 	{
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
 			window.close();
 		if (event.type == sf::Event::Closed)
 			window.close();
-		//if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) //kell ? kesobb megnezni
-		//	Restart();
 	}
 
 }
 
-void Game::Render() //Rajzolas
+void Game::Render()
 {
 
 	window.clear();
-	map.DrawMap(window);
-	pacman->Draw(window);
-	window.draw(PacManPosText);
+	window.draw(backgroundSprite);
+	//map.DrawMap(window); // GET PATH USED FOR BLINKY, CHANGE THIS
+	blinky.Draw(window);
+	inky.Draw(window);
+	pacman.Draw(window);
+	pinky.Draw(window);
+	clyde.Draw(window);
 	window.display();
 
 }
-
-//void Game::Restart() {
-//
-//	
-//	GameOver = false;
-//}

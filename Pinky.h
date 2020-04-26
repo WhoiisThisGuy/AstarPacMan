@@ -5,35 +5,38 @@ he gets aggressive and starts chasing until he catches PACMAN or PACMAN gets out
 #include "Ghost.h"
 //#include "ActorState.h"
 //#include "Scatter.h"
-#ifndef H_BLINKY
-#define H_BLINKY
-#define BLINKYTEXTUREPATH "Textures/blinky.png"
+#ifndef H_PINKY
+#define H_PINKY
+#define PINKYTEXTUREPATH "Textures/pinky.png"
 
-class Blinky:public Ghost
+class Pinky :public Ghost
 {
 
 public:
 
-	Blinky();
-	~Blinky();
+	Pinky();
+	~Pinky();
 	void Update(float dt);
 	void Draw(sf::RenderWindow& window);
 	void setTargetNode(Vector2i) override;
+
+	virtual void moveUpAndDown() override;
+	virtual bool moveToFourteenDotThirtyFive() override;
 	void setChaseTargetNode() override;
 	void setScatterTargetNode() override;
-	Vector2i getTempCoordsOnLevel() const;
-
-	static Vector2i sTempCoordsOnLevel;
+	
+public:
+	Vector2i pacmanTempDirection;
 
 private:
 	/* Constants start */
-	const short unsigned int BLINKYSTARTX = 13;
-	const short unsigned int BLINKYSTARTY = 11;
+	const float PINKYSTARTX = 13.60f; //13.60
+	const float PINKYSTARTY = 14.0f;
 
-	const Vector2i scatterTargetNode = {27,0};
-	Texture BlinkyTexture;//Have to do this at every single character... change it
+	const Vector2i scatterTargetNode = { 0,0 };
+	Texture PinkyTexture;//Have to do this at every single character... change it
 	Texture targettexture;
-	
+
 	/* Constants end */
 	Animation* animation;
 };

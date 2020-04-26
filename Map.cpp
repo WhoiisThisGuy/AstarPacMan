@@ -1,75 +1,68 @@
 #include "Map.h"
 
+string Map::level = "";
+
 Map::Map(){
+
 	CellSize = CELLSIZE;
-	tile.setSize(sf::Vector2f(CellSize, CellSize));
 	uCellSize = static_cast<unsigned int>(CellSize);
-	tileTexture.loadFromFile("tiletest.png");
-	LoadMap(map);
 
+	LoadMap();
+}
+Map::~Map()
+{
+
+
+
+}
+
+void Map::Update()
+{
 	
 }
 
-void Map::DrawMap(sf::RenderWindow& window)
+char Map::GetTile(int x, int y)
 {
-
-	for (size_t x = 0; x < MAPARRAYSIZEX; x++)
-	{
-		for (size_t y = 0; y < MAPARRAYSIZEY; y++)
-		{
-			if (MapArray[x][y] == 1) {
-				window.draw(RectMapArr[x][y]);
-			}
-			//if (MapArray[x][y] == 7)
-			//{
-			//	
-			//	//window.draw(RectMapArr[x][y]);
-			//}
-
-		}
-	}
-
+	return level[y * MAPWIDTH + x];
 }
 
-//Could create a faster method for this maybe
-
-void Map::Update(sf::Vector2u PacManPos)
+void Map::LoadMap()
 {
-	for (size_t x = 0; x < MAPARRAYSIZEX; x++)
-	{
-		for (size_t y = 0; y < MAPARRAYSIZEY; y++)
-		{
-			//PacMan-t setelni az int arrayba.
-			//if (x == PacManPos.x && y == PacManPos.y) {
-			//	MapArray[x][y] = 7;
-			//}
-		}
-	}
-}
+	//35*28
+	level += "############################"; //Define as big off set as the plus rows, see in the Map.h
+	level += "############################"; // plus row
+	level += "############################"; // plus row
+	level += "############################"; // plus row
+	level += "############################";
+	level += "#            ##            #";
+	level += "# #### ##### ## ##### #### #";
+	level += "# #### ##### ## ##### #### #";
+	level += "# #### ##### ## ##### #### #";
+	level += "#                          #";
+	level += "# #### ## ######## ## #### #";
+	level += "# #### ## ######## ## #### #";
+	level += "#      ##    ##    ##      #";
+	level += "###### ##### ## ##### ######";
+	level += "###### #####d##d##### ######";
+	level += "###### ##          ## ######";
+	level += "###### ## ######## ## ######";
+	level += "###### ## #      # ## ######";
+	level += "######    #      #    ######";
+	level += "###### ## #      # ## ######";
+	level += "###### ## ######## ## ######";
+	level += "###### ##          ## ######";
+	level += "###### ## ######## ## ######";
+	level += "###### ## ######## ## ######";
+	level += "#            ##            #";
+	level += "# #### ##### ## ##### #### #";
+	level += "# #### #####d##d##### #### #";
+	level += "#   ##                ##   #";
+	level += "### ## ## ######## ## ## ###";
+	level += "### ## ## ######## ## ## ###";
+	level += "#      ##    ##    ##      #";
+	level += "# ########## ## ########## #";
+	level += "# ########## ## ########## #";
+	level += "#                          #";
+	level += "############################";
 
-void Map::LoadMap(int arr[MAPARRAYSIZEX][MAPARRAYSIZEY])
-{
-
-	for (size_t i = 0; i < MAPARRAYSIZEX; i++)//Másolni a map felépítést.
-	{
-		for (size_t j = 0; j < MAPARRAYSIZEY; j++)
-		{
-			MapArray[i][j] = arr[i][j];
-			
-		}
-	}
-	
-	for (size_t x = 0; x < MAPARRAYSIZEX; x++)
-	{
-		for (size_t y = 0; y < MAPARRAYSIZEY; y++)
-		{
-			if (MapArray[x][y] == 1) {
-				RectMapArr[x][y].setSize(sf::Vector2f(CellSize, CellSize));
-				RectMapArr[x][y].setTexture(&tileTexture);
-				/*RectMapArr[x][y].setOutlineThickness(2);
-				RectMapArr[x][y].setOutlineColor(sf::Color::Black);*/
-				RectMapArr[x][y].setPosition(y * CellSize+1, x * CellSize+1);
-			}
-		}
-	}
 }

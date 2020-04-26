@@ -1,47 +1,43 @@
-#pragma once
 #include <SFML\Graphics.hpp>
 #include <iostream>
+#include <stack>
+#include <string>
+#include <vector>
 
-#define MAPARRAYSIZEX 10
-#define MAPARRAYSIZEY 9
-#define CELLSIZE 37.0f
+using namespace sf;
+using std::string;
+using std::vector;
 
-//0 = szabad terület
-//1 = block
-//7 = PacMan
+#ifndef MAP_H
+#define MAP_H
 
-static int map[MAPARRAYSIZEX][MAPARRAYSIZEY] = {
-{ 1,1,1,1,1,1,1,1,1 },
-{ 1,0,0,0,0,0,0,0,1 },
-{ 1,0,1,0,1,0,1,0,1 },
-{ 1,0,1,0,0,0,1,0,1 },
-{ 1,0,1,1,1,0,1,0,1 },
-{ 1,0,0,0,0,0,0,0,1 },
-{ 1,0,1,1,1,0,1,0,1 },
-{ 1,0,1,0,0,0,1,0,1 },
-{ 1,0,0,0,1,0,0,0,1 },
-{ 1,1,1,1,1,1,1,1,1 },
-};
+#define MAPOFFSET 4*24 //Needed this for the start positions of the characters
+#define MAPWIDTH 28
+#define MAPSIZEX 28 //not used just to remember
+#define MAPSIZEY 31 //not used just to remember
+#define CELLSIZE 24.0f
+
 
 class Map
 {
 
 public:
 	Map();
-	void DrawMap(sf::RenderWindow& window);
-	void Update(sf::Vector2u PacManPos);
+	~Map();
+	void Update();
+
+	static char GetTile(int x, int y);
+	
 
 private:
-	int MapArray[MAPARRAYSIZEX][MAPARRAYSIZEY];
+
+	static string level;
 	float CellSize;
 	unsigned int uCellSize;
-private:
 
-	sf::Texture tileTexture;
-	sf::RectangleShape tile;
-	sf::RectangleShape RectMapArr[MAPARRAYSIZEX][MAPARRAYSIZEY];
-	void LoadMap(int arr[MAPARRAYSIZEX][MAPARRAYSIZEY]);
-	
+private:
+	void LoadMap();
 
 };
 
+#endif

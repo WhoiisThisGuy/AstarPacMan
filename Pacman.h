@@ -1,44 +1,71 @@
-#pragma once
-#include "Animation.h"
+#include "Animation.h" //Animation includes the Grahpics.hpp
 #include "Map.h"
 
-#define PACMANSIZEX 30.0f
-#define PACMANSIZEY 30.0f
-#define PACMANSPEED 250.0f
-#define STARTPOSX 1
-#define STARTPOSY 1
-#define STARTDIRECTION 1,0
+#ifndef H_PACMAN
+#define H_PACMAN
 
-#define OFFSET PACMANSIZEX/2 // This is needed to look further in front of pacmans direction. Used in canPacBufferedMove().
+#define PACMANTEXTUREPATH "Textures/pacman.png"
+#define PACMANSTARTPOSX 13
+#define PACMANSTARTPOSY 28
+
+
 
 class Pacman
 {
 
 public:
-	Pacman(sf::Texture* PacmanTexture, sf::Vector2u imageCount);
 
-	void Draw(sf::RenderWindow& window);
-	void Update(float dTime, sf::RenderWindow& window);
+	Pacman();
+	~Pacman();
+	void Draw(RenderWindow& window);
+	void Update(float dTime);
 
-	sf::RectangleShape GetBody() { return this->body; };
+	//Vector2i getTempCoordsOnLevel() const;
+	Vector2f getTempPosOnLevel() const { return body.getPosition(); };
 
-	sf::RectangleShape body;
+	Vector2i getTempDirection() const { return tempDirection; }
 
-	sf::Vector2f getPosition() const { return body.getPosition(); };
-	sf::Vector2u getUPosition() const;
+	Vector2i getTempCoordsOnLevel() const;
 
-	bool canPacMove(sf::Vector2f movement, sf::Vector2i& Direction) const; /* Collision detection */
+	static Vector2i sTempCoordsOnLevel;
+	static Vector2i sTempDirectionOnLevel;
 
-	bool canPacBufferedMove(sf::Vector2i& Direction) const; /* Collision detection */
+private:
+	bool checkBufferedCollision(float& dTime);
+	bool checkCollision(float& dTime);
 
 private:
 
+	/*
+	Constants START
+	*/
+	//All the OFFSET and the
+	const float PACMANSPEED = 150.0f;
+	const float OFFSET = 12.0f; //For collision check.
+	const float OFFSETB = 30.0f; //For changing direction, to prevent turning into walls in tunnels
+	const float PACMANSIZEX = 40.0f;
+	const float PACMANSIZEY = 40.0f;
+	const float  OFFSETMOVE = 6.0f;
+	const float ANIMATIONSWITCHTIME = 0.08f;
+	const Vector2i STARTDIRECTION = {-1,0};
+	const Vector2u textureRowNColNumber = {2,4};
+
+	/*
+	Constants END
+	*/
+	RectangleShape body;
+	Texture PacmanTexture;//Have to do this at every single character... change it
+	string health;
+
+	bool havebufferedmove;
 	float speed;
-	std::string health;
 	unsigned int row;
-	Animation animation;
-	sf::Vector2i tempDirection;
-	sf::Vector2i bufferedDirection;
+
+	Animation* animation;
+
+	Vector2i tempDirection;
+	Vector2i bufferedDirection;
 	
 };
 
+#endif

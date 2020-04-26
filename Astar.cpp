@@ -1,279 +1,412 @@
-//#include "Astar.h"
-//
-//Astar::Astar() {
-//
-//	
-//
-//}
-//
-//void Astar::createPath(node AstarArray[MapArraySizeX][MapArraySizeY], Coordinate goal, Coordinate start)
-//{
-//
-//	int x, y;
-//
-//	x = y = 0;
-//
-//	x = goal.x;
-//	y = goal.y;
-//
-//	std::list<Coordinate> Path;
-//	Coordinate temp;
-//
-//	temp.x = x;
-//	temp.y = y;
-//
-//	while (x != start.x || y != start.y) {
-//
-//		temp.x = x;
-//		temp.y = y;
-//		Path.push_front(temp);
-//		x = AstarArray[temp.x][temp.y].parentX;
-//		y = AstarArray[temp.x][temp.y].parentY;
-//	}
-//	Path.push_front(temp);
-//	std::cout << "The Found Path: " << std::endl;
-//	while (!Path.empty()) {
-//
-//		Coordinate temp;
-//
-//		temp.x = (*Path.begin()).x;
-//		temp.y = (*Path.begin()).y;
-//
-//		std::cout << "x: " << temp.x << " " << "y: " << temp.y << std::endl;
-//
-//		Path.pop_front();
-//	}
-//
-//}
-//
-//bool Astar::isFreeCell()
-//{
-//	
-//	return false;
-//}
-//
-//bool Astar::StandardAstar(int MapArray[MapArraySizeX][MapArraySizeY], Coordinate start, Coordinate goal)
-//{
-//
-//	float tempG, tempF, tempH;
-//
-//	bool closedList[MapArraySizeX][MapArraySizeY];
-//
-//	memset(closedList,0,sizeof(closedList));
-//
-//	node AstarMap[MapArraySizeX][MapArraySizeY];
-//
-//	//std::vector<node> openlist, closedlist;
-//	std::list<node> openlist; // vector helyett gyorsabb
-//
-//	for (size_t x = 0; x < MapArraySizeX; x++)
-//	{
-//		for (size_t y = 0; y < MapArraySizeY; y++)
-//		{
-//			AstarMap[x][y].parentX = -1;
-//			AstarMap[x][y].parentX = -1;
-//			AstarMap[x][y].f = -1;
-//			AstarMap[x][y].g = -1;
-//			AstarMap[x][y].h = -1;
-//		}
-//	}
-//	node tempNode; // aktualis node
-//
-//	tempNode.f = tempNode.g = tempNode.h = 0.0;
-//	tempNode.parentX = tempNode.parentX = 0;
-//	tempNode.posX = start.x; 
-//	tempNode.posY = start.y;
-//	//Elsõt hozzá adjuk az openlisthez
-//	openlist.push_front(tempNode);
-//
-///*Look for the node which has the lowest
-//f on the open list. Refer to this node
-//as the current node.
-//b. Switch it to the closed list.*/
-//
-//	while (!openlist.empty())
-//	{
-//		//p = removefirst(q)
-//		//x = lastnode(p)
-//
-//		lookforsmallestF(openlist,&tempNode); //legkisebbet keresi, és ki is szedjük az openlistrõl
-//		//legkisebb f értékût vegyük aktuálisnak
-//
-//		closedList[tempNode.posX][tempNode.posY] = 1;
-//
-//		//node Right
-//
-//		//    [Right]
-//		//[][tempnode][]
-//		//      []
-//		if (closedList[tempNode.posX][tempNode.posY-1] != 1 && MapArray[tempNode.posX][tempNode.posY-1] != 1) {
-//
-//			if (tempNode.posX == goal.x && tempNode.posY == goal.y - 1) { /////////END
-//				//a szomszédos node a cél node, end.
-//				AstarMap[tempNode.posX][tempNode.posY - 1].parentX = tempNode.posX;
-//				AstarMap[tempNode.posX][tempNode.posY - 1].parentY = tempNode.posY;
-//
-//			}
-//
-//			//ha nincs closed listen és nem blokkolt cella.
-//			tempG = tempNode.g + 1;
-//			tempH = ManHattan(tempNode.posX, tempNode.posY - 1, goal);
-//			tempF = tempG + tempH;
-//
-//			if (AstarMap[tempNode.posX][tempNode.posY - 1].f == -1) {
-//				//nincs még az open listen mert nincs f értéke sem, felvesszük
-//
-//				AstarMap[tempNode.posX][tempNode.posY - 1].g = tempG;
-//				AstarMap[tempNode.posX][tempNode.posY - 1].h = tempH;
-//				AstarMap[tempNode.posX][tempNode.posY - 1].f = tempF;
-//				AstarMap[tempNode.posX][tempNode.posY - 1].parentX = tempNode.posX;
-//				AstarMap[tempNode.posX][tempNode.posY - 1].parentY = tempNode.posY;
-//			}
-//			else if (AstarMap[tempNode.posX][tempNode.posY - 1].f > tempF) {
-//				//Ha ez jobb útvonal az Up node-ba akkor rögzítjük
-//				AstarMap[tempNode.posX][tempNode.posY - 1].g = tempG;
-//				AstarMap[tempNode.posX][tempNode.posY - 1].h = tempH;
-//				AstarMap[tempNode.posX][tempNode.posY - 1].f = tempF;
-//				AstarMap[tempNode.posX][tempNode.posY - 1].parentX = tempNode.posX;
-//				AstarMap[tempNode.posX][tempNode.posY - 1].parentY = tempNode.posY;
-//
-//				openlist.push_back(AstarMap[tempNode.posX][tempNode.posY - 1]);
-//				
-//			}
-//		}
-//
-//		//node Down
-//
-//		//     []
-//		//[][tempnode][Down]
-//		//      []
-//		if (closedList[tempNode.posX+1][tempNode.posY] != 1 && MapArray[tempNode.posX + 1][tempNode.posY] != 1) {
-//
-//			if (tempNode.posX == goal.x+1 && tempNode.posY == goal.y) { //////END
-//				//a szomszédos node a cél node, end.
-//				AstarMap[tempNode.posX + 1][tempNode.posY].parentX = tempNode.posX;
-//				AstarMap[tempNode.posX + 1][tempNode.posY].parentY = tempNode.posY;
-//
-//			}
-//
-//			//ha nincs closed listen és nem blokkolt cella.
-//			tempG = tempNode.g + 1;
-//			tempH = ManHattan(tempNode.posX + 1, tempNode.posY, goal);
-//			tempF = tempG + tempH;
-//
-//			if (AstarMap[tempNode.posX + 1][tempNode.posY].f == -1) {
-//				//nincs még az open listen mert nincs f értéke sem, felvesszük
-//
-//				AstarMap[tempNode.posX + 1][tempNode.posY].g = tempG;
-//				AstarMap[tempNode.posX + 1][tempNode.posY].h = tempH;
-//				AstarMap[tempNode.posX + 1][tempNode.posY].f = tempF;
-//				AstarMap[tempNode.posX + 1][tempNode.posY].parentX = tempNode.posX;
-//				AstarMap[tempNode.posX + 1][tempNode.posY].parentY = tempNode.posY;
-//			}
-//			else if (AstarMap[tempNode.posX + 1][tempNode.posY].f > tempF) {
-//				//Ha ez jobb útvonal az Up node-ba akkor rögzítjük
-//				AstarMap[tempNode.posX + 1][tempNode.posY].g = tempG;
-//				AstarMap[tempNode.posX + 1][tempNode.posY].h = tempH;
-//				AstarMap[tempNode.posX + 1][tempNode.posY].f = tempF;
-//				AstarMap[tempNode.posX + 1][tempNode.posY].parentX = tempNode.posX;
-//				AstarMap[tempNode.posX + 1][tempNode.posY].parentY = tempNode.posY;
-//
-//				openlist.push_back(AstarMap[tempNode.posX + 1][tempNode.posY]);
-//
-//			}
-//		}
-//
-//		//node Down
-//
-//		//     []
-//		//[][tempnode][]
-//		//    [Left]
-//		if (closedList[tempNode.posX][tempNode.posY + 1] != 1 && MapArray[tempNode.posX][tempNode.posY + 1] != 1) {
-//
-//			if (tempNode.posX == goal.x && tempNode.posY == goal.y + 1) { ////ENDD
-//				//a szomszédos node a cél node, end.
-//				AstarMap[tempNode.posX][tempNode.posY + 1].parentX = tempNode.posX;
-//				AstarMap[tempNode.posX][tempNode.posY + 1].parentY = tempNode.posY;
-//			}
-//
-//			//ha nincs closed listen és nem blokkolt cella.
-//			tempG = tempNode.g + 1;
-//			tempH = ManHattan(tempNode.posX, tempNode.posY + 1, goal);
-//			tempF = tempG + tempH;
-//
-//			if (AstarMap[tempNode.posX][tempNode.posY + 1].f == -1) {
-//				//nincs még az open listen mert nincs f értéke sem, felvesszük
-//
-//				AstarMap[tempNode.posX][tempNode.posY + 1].g = tempG;
-//				AstarMap[tempNode.posX][tempNode.posY + 1].h = tempH;
-//				AstarMap[tempNode.posX][tempNode.posY + 1].f = tempF;
-//				AstarMap[tempNode.posX][tempNode.posY + 1].parentX = tempNode.posX;
-//				AstarMap[tempNode.posX][tempNode.posY + 1].parentY = tempNode.posY;
-//			}
-//			else if (AstarMap[tempNode.posX][tempNode.posY + 1].f > tempF) {
-//				//Ha ez jobb útvonal az Up node-ba akkor rögzítjük
-//				AstarMap[tempNode.posX][tempNode.posY + 1].g = tempG;
-//				AstarMap[tempNode.posX][tempNode.posY + 1].h = tempH;
-//				AstarMap[tempNode.posX][tempNode.posY + 1].f = tempF;
-//				AstarMap[tempNode.posX][tempNode.posY + 1].parentX = tempNode.posX;
-//				AstarMap[tempNode.posX][tempNode.posY + 1].parentY = tempNode.posY;
-//
-//				openlist.push_back(AstarMap[tempNode.posX][tempNode.posY + 1]);
-//
-//			}
-//		}
-//
-//		//         []
-//		//[Up][tempnode][]
-//		//         []
-//		if (closedList[tempNode.posX - 1][tempNode.posY] != 1 && MapArray[tempNode.posX - 1][tempNode.posY] != 1) {
-//
-//			if (tempNode.posX == goal.x - 1 && tempNode.posY == goal.y) { ////ENDD
-//				//a szomszédos node a cél node, end.
-//				AstarMap[tempNode.posX - 1][tempNode.posY].parentX = tempNode.posX;
-//				AstarMap[tempNode.posX - 1][tempNode.posY].parentY = tempNode.posY;
-//			}
-//
-//			//ha nincs closed listen és nem blokkolt cella.
-//			tempG = tempNode.g + 1;
-//			tempH = ManHattan(tempNode.posX - 1, tempNode.posY, goal);
-//			tempF = tempG + tempH;
-//			if (AstarMap[tempNode.posX - 1][tempNode.posY].f == -1) {
-//				//nincs még az open listen mert nincs f értéke sem, felvesszük
-//
-//				AstarMap[tempNode.posX - 1][tempNode.posY].g = tempG;
-//				AstarMap[tempNode.posX - 1][tempNode.posY].h = tempH;
-//				AstarMap[tempNode.posX - 1][tempNode.posY].f = tempF;
-//				AstarMap[tempNode.posX - 1][tempNode.posY].parentX = tempNode.posX;
-//				AstarMap[tempNode.posX - 1][tempNode.posY].parentY = tempNode.posY;
-//			}
-//			else if (AstarMap[tempNode.posX - 1][tempNode.posY].f > tempF) {
-//				//Ha ez jobb útvonal az Up node-ba akkor rögzítjük
-//				AstarMap[tempNode.posX - 1][tempNode.posY].g = tempG;
-//				AstarMap[tempNode.posX - 1][tempNode.posY].h = tempH;
-//				AstarMap[tempNode.posX - 1][tempNode.posY].f = tempF;
-//				AstarMap[tempNode.posX - 1][tempNode.posY].parentX = tempNode.posX;
-//				AstarMap[tempNode.posX - 1][tempNode.posY].parentY = tempNode.posY;
-//
-//				openlist.push_back(AstarMap[tempNode.posX + 1][tempNode.posY]);
-//
-//			}
-//		}
-//
-//	}
-//	return false;
-//}
-//
-//void Astar::lookforsmallestF(std::list<node>& openlist,node* tempNode) {
-//
-//	std::list<node>::iterator it,tempit;
-//
-//	for (it = openlist.begin(); it != openlist.end(); ++it)
-//	{
-//		if ((*it).f < (*tempNode).f) {
-//			*tempNode = *it;
-//			tempit = it;
-//		}
-//	}
-//	openlist.erase(tempit);
-//}
+#include "Astar.h"
+
+using namespace std;
+
+// A Utility Function to check whether given cell (row, col) 
+// is a valid cell or not. 
+bool isValid(int row, int col)
+{
+	// Returns true if row number and column number 
+	// is in range 
+	return (row >= 0) && (row < MAPSIZEX) &&
+		(col >= 0) && (col < MAPSIZEY);
+}
+
+// A Utility Function to check whether the given cell is 
+// blocked or not 
+bool isUnBlocked(int row, int col)
+{
+	// Returns true if the cell is not blocked else false 
+	//if (level[row][col] == 0)
+	//	return (true);
+	//else
+	return (false);
+}
+
+// A Utility Function to check whether destination cell has 
+// been reached or not 
+bool isDestination(int row, int col, Pair dest)
+{
+	if (row == dest.first && col == dest.second)
+		return (true);
+	else
+		return (false);
+}
+
+// A Utility Function to calculate the 'h' heuristics. 
+double calculateHValue(int row, int col, Pair dest)
+{
+	// Return using the distance formula 
+	return ((double)sqrt((row - dest.first) * (row - dest.first)
+		+ (col - dest.second) * (col - dest.second)));
+}
+
+// A Utility Function to trace the path from the source 
+// to destination 
+stack<Pair> tracePath(cell cellDetails[][MAPSIZEY], Pair dest)
+{
+	int row = dest.first;
+	int col = dest.second;
+
+	stack<Pair> Path;
+
+	while (!(cellDetails[row][col].parent_i == row
+		&& cellDetails[row][col].parent_j == col))
+	{
+		Path.push(make_pair(row, col));
+		int temp_row = cellDetails[row][col].parent_i;
+		int temp_col = cellDetails[row][col].parent_j;
+		row = temp_row;
+		col = temp_col;
+	}
+
+	//Path.push(make_pair(row, col)); //this is the actual place where the character is ATM.
+
+
+	//while (!Path.empty())
+	//{
+	//	pair<int, int> p = Path.top();
+	//	Path.pop();
+	//	printf("-> (%d,%d) ", p.first, p.second);
+	//}
+
+	return Path;
+}
+
+// A Function to find the shortest path between 
+// a given source cell to a destination cell according 
+// to A* Search Algorithm 
+int aStarSearch(Pair src, Pair dest, std::stack<Pair>& Path)
+{
+	// If the source is out of range 
+	if (isValid(src.first, src.second) == false)
+	{
+		printf("Source is invalid\n");
+		return -1;
+	}
+
+	// If the destination is out of range 
+	if (isValid(dest.first, dest.second) == false)
+	{
+		printf("Destination is invalid\n");
+		return -1;
+	}
+
+	// Either the source or the destination is blocked 
+	if (isUnBlocked(src.first, src.second) == false ||
+		isUnBlocked(dest.first, dest.second) == false)
+	{
+		printf("Source or the destination is blocked\n");
+		return -1;
+	}
+
+	// If the destination cell is the same as source cell 
+	if (isDestination(src.first, src.second, dest) == true)
+	{
+		printf("We are already at the destination\n");
+		return 1337;
+	}
+
+	// Create a closed list and initialise it to false which means 
+	// that no cell has been included yet 
+	// This closed list is implemented as a boolean 2D array 
+	bool closedList[MAPSIZEX][MAPSIZEY];
+	memset(closedList, false, sizeof(closedList));
+
+	// Declare a 2D array of structure to hold the details 
+	//of that cell 
+	cell cellDetails[MAPSIZEX][MAPSIZEY];
+
+	int i, j;
+
+	for (i = 0; i < MAPSIZEX; i++)
+	{
+		for (j = 0; j < MAPSIZEY; j++)
+		{
+			cellDetails[i][j].f = FLT_MAX;
+			cellDetails[i][j].g = FLT_MAX;
+			cellDetails[i][j].h = FLT_MAX;
+			cellDetails[i][j].parent_i = -1;
+			cellDetails[i][j].parent_j = -1;
+		}
+	}
+
+	// Initialising the parameters of the starting node 
+	i = src.first, j = src.second;
+	cellDetails[i][j].f = 0.0;
+	cellDetails[i][j].g = 0.0;
+	cellDetails[i][j].h = 0.0;
+	cellDetails[i][j].parent_i = i;
+	cellDetails[i][j].parent_j = j;
+
+	/*
+	 Create an open list having information as-
+	 <f, <i, j>>
+	 where f = g + h,
+	 and i, j are the row and column index of that cell
+	 Note that 0 <= i <= MAPSIZEX-1 & 0 <= j <= MAPSIZEY-1
+	 This open list is implenented as a set of pair of pair.*/
+	set<pPair> openList;
+
+	// Put the starting cell on the open list and set its 
+	// 'f' as 0 
+	openList.insert(make_pair(0.0, make_pair(i, j)));
+
+	// We set this boolean value as false as initially 
+	// the destination is not reached. 
+	bool foundDest = false;
+
+	while (!openList.empty())
+	{
+		pPair p = *openList.begin();
+
+		// Remove this vertex from the open list 
+		openList.erase(openList.begin());
+
+		// Add this vertex to the closed list 
+		i = p.second.first;
+		j = p.second.second;
+		closedList[i][j] = true;
+
+		/*
+		 Generating all the 8 successor of this cell
+
+			 N.W   N   N.E
+			   \   |   /
+				\  |  /
+			 W----Cell----E
+				  / | \
+				/   |  \
+			 S.W    S   S.E
+
+		 Cell-->Popped Cell (i, j)
+		 N -->  North       (i-1, j)
+		 S -->  South       (i+1, j)
+		 E -->  East        (i, j+1)
+		 W -->  West           (i, j-1)
+		 N.E--> North-East  (i-1, j+1)
+		 N.W--> North-West  (i-1, j-1)
+		 S.E--> South-East  (i+1, j+1)
+		 S.W--> South-West  (i+1, j-1)*/
+
+		 // To store the 'g', 'h' and 'f' of the 8 successors 
+		double gNew, hNew, fNew;
+
+		//----------- 1st Successor (North) ------------ 
+
+		// Only process this cell if this is a valid one 
+		if (isValid(i - 1, j) == true)
+		{
+			// If the destination cell is the same as the 
+			// current successor 
+			if (isDestination(i - 1, j, dest) == true)
+			{
+				// Set the Parent of the destination cell 
+				cellDetails[i - 1][j].parent_i = i;
+				cellDetails[i - 1][j].parent_j = j;
+				//printf("The destination cell is found\n");
+				
+				foundDest = true;
+				Path = tracePath(cellDetails, dest);
+				return 0;
+			}
+			// If the successor is already on the closed 
+			// list or if it is blocked, then ignore it. 
+			// Else do the following 
+			else if (closedList[i - 1][j] == false &&
+				isUnBlocked(i - 1, j) == true)
+			{
+				gNew = cellDetails[i][j].g + 1.0;
+				hNew = calculateHValue(i - 1, j, dest);
+				fNew = gNew + hNew;
+
+				// If it isn’t on the open list, add it to 
+				// the open list. Make the current square 
+				// the parent of this square. Record the 
+				// f, g, and h costs of the square cell 
+				//                OR 
+				// If it is on the open list already, check 
+				// to see if this path to that square is better, 
+				// using 'f' cost as the measure. 
+				if (cellDetails[i - 1][j].f == FLT_MAX ||
+					cellDetails[i - 1][j].f > fNew)
+				{
+					openList.insert(make_pair(fNew,
+						make_pair(i - 1, j)));
+
+					// Update the details of this cell 
+					cellDetails[i - 1][j].f = fNew;
+					cellDetails[i - 1][j].g = gNew;
+					cellDetails[i - 1][j].h = hNew;
+					cellDetails[i - 1][j].parent_i = i;
+					cellDetails[i - 1][j].parent_j = j;
+				}
+			}
+		}
+
+		//----------- 2nd Successor (South) ------------ 
+
+		// Only process this cell if this is a valid one 
+		if (isValid(i + 1, j) == true)
+		{
+			// If the destination cell is the same as the 
+			// current successor 
+			if (isDestination(i + 1, j, dest) == true)
+			{
+				// Set the Parent of the destination cell 
+				cellDetails[i + 1][j].parent_i = i;
+				cellDetails[i + 1][j].parent_j = j;
+				//printf("The destination cell is found\n");
+				
+				foundDest = true;
+				Path = tracePath(cellDetails, dest);
+				return 0;
+			}
+			// If the successor is already on the closed 
+			// list or if it is blocked, then ignore it. 
+			// Else do the following 
+			else if (closedList[i + 1][j] == false &&
+				isUnBlocked( i + 1, j) == true)
+			{
+				gNew = cellDetails[i][j].g + 1.0;
+				hNew = calculateHValue(i + 1, j, dest);
+				fNew = gNew + hNew;
+
+				// If it isn’t on the open list, add it to 
+				// the open list. Make the current square 
+				// the parent of this square. Record the 
+				// f, g, and h costs of the square cell 
+				//                OR 
+				// If it is on the open list already, check 
+				// to see if this path to that square is better, 
+				// using 'f' cost as the measure. 
+				if (cellDetails[i + 1][j].f == FLT_MAX ||
+					cellDetails[i + 1][j].f > fNew)
+				{
+					openList.insert(make_pair(fNew, make_pair(i + 1, j)));
+					// Update the details of this cell 
+					cellDetails[i + 1][j].f = fNew;
+					cellDetails[i + 1][j].g = gNew;
+					cellDetails[i + 1][j].h = hNew;
+					cellDetails[i + 1][j].parent_i = i;
+					cellDetails[i + 1][j].parent_j = j;
+				}
+			}
+		}
+
+		//----------- 3rd Successor (East) ------------ 
+
+		// Only process this cell if this is a valid one 
+		if (isValid(i, j + 1) == true)
+		{
+			// If the destination cell is the same as the 
+			// current successor 
+			if (isDestination(i, j + 1, dest) == true)
+			{
+				// Set the Parent of the destination cell 
+				cellDetails[i][j + 1].parent_i = i;
+				cellDetails[i][j + 1].parent_j = j;
+				//printf("The destination cell is found\n");
+				
+				foundDest = true;
+				Path = tracePath(cellDetails, dest);
+				return 0;
+			}
+
+			// If the successor is already on the closed 
+			// list or if it is blocked, then ignore it. 
+			// Else do the following 
+			else if (closedList[i][j + 1] == false &&
+				isUnBlocked( i, j + 1) == true)
+			{
+				gNew = cellDetails[i][j].g + 1.0;
+				hNew = calculateHValue(i, j + 1, dest);
+				fNew = gNew + hNew;
+
+				// If it isn’t on the open list, add it to 
+				// the open list. Make the current square 
+				// the parent of this square. Record the 
+				// f, g, and h costs of the square cell 
+				//                OR 
+				// If it is on the open list already, check 
+				// to see if this path to that square is better, 
+				// using 'f' cost as the measure. 
+				if (cellDetails[i][j + 1].f == FLT_MAX ||
+					cellDetails[i][j + 1].f > fNew)
+				{
+					openList.insert(make_pair(fNew,
+						make_pair(i, j + 1)));
+
+					// Update the details of this cell 
+					cellDetails[i][j + 1].f = fNew;
+					cellDetails[i][j + 1].g = gNew;
+					cellDetails[i][j + 1].h = hNew;
+					cellDetails[i][j + 1].parent_i = i;
+					cellDetails[i][j + 1].parent_j = j;
+				}
+			}
+		}
+
+		//----------- 4th Successor (West) ------------ 
+
+		// Only process this cell if this is a valid one 
+		if (isValid(i, j - 1) == true)
+		{
+			// If the destination cell is the same as the 
+			// current successor 
+			if (isDestination(i, j - 1, dest) == true)
+			{
+				// Set the Parent of the destination cell 
+				cellDetails[i][j - 1].parent_i = i;
+				cellDetails[i][j - 1].parent_j = j;
+				//printf("The destination cell is found\n");
+				
+				foundDest = true;
+				Path = tracePath(cellDetails, dest);
+				return 0;
+			}
+
+			// If the successor is already on the closed 
+			// list or if it is blocked, then ignore it. 
+			// Else do the following 
+			else if (closedList[i][j - 1] == false &&
+				isUnBlocked( i, j - 1) == true)
+			{
+				gNew = cellDetails[i][j].g + 1.0;
+				hNew = calculateHValue(i, j - 1, dest);
+				fNew = gNew + hNew;
+
+				// If it isn’t on the open list, add it to 
+				// the open list. Make the current square 
+				// the parent of this square. Record the 
+				// f, g, and h costs of the square cell 
+				//                OR 
+				// If it is on the open list already, check 
+				// to see if this path to that square is better, 
+				// using 'f' cost as the measure. 
+				if (cellDetails[i][j - 1].f == FLT_MAX ||
+					cellDetails[i][j - 1].f > fNew)
+				{
+					openList.insert(make_pair(fNew,
+						make_pair(i, j - 1)));
+
+					// Update the details of this cell 
+					cellDetails[i][j - 1].f = fNew;
+					cellDetails[i][j - 1].g = gNew;
+					cellDetails[i][j - 1].h = hNew;
+					cellDetails[i][j - 1].parent_i = i;
+					cellDetails[i][j - 1].parent_j = j;
+				}
+			}
+		}
+	}
+
+	// When the destination cell is not found and the open 
+	// list is empty, then we conclude that we failed to 
+	// reach the destiantion cell. This may happen when the 
+	// there is no way to destination cell (due to blockages) 
+	if (foundDest == false)
+		printf("Failed to find the Destination Cell\n");
+
+	return -1;
+}
