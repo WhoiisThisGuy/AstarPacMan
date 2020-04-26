@@ -43,7 +43,8 @@ Pinky::~Pinky()
 
 void Pinky::Update(float dt)
 {
-	pacmanTempDirection = Pacman::sTempCoordsOnLevel;
+	pacmanTempDirection = Pacman::sTempDirectionOnLevel;
+	pacManTempCoordsOnLevel = Pacman::sTempCoordsOnLevel;
 
 	state->Update();
 	moveOn(dt);
