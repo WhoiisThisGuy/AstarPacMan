@@ -42,7 +42,7 @@ public:
 
 private:
 
-	unordered_map<string, pellet*> pelletmap;
+	
 
 	typedef struct pellet{
 		
@@ -77,16 +77,11 @@ private:
 		};
 
 	}pellet;
-
+	unordered_map<string, pellet*> pelletmap;
 	static string level;
 	float CellSize;
 	unsigned int uCellSize;
 
-	//vector<pellet*> pellets;
-
-	
-
-	//pellet pellets[242];
 
 private:
 	void LoadMap();
