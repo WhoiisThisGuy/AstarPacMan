@@ -9,7 +9,9 @@ Scatter::Scatter(Ghost* ghostToHandle) {
 
 void Scatter::Update()
 {
+
 	if (ghost->nextNodeReached()) { //Check for next node.
+		//if()
 		if (stateClock.getElapsedTime().asSeconds() > 7) {
 			Exit();
 			return;

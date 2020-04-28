@@ -10,13 +10,13 @@ public:
 
 	~GhostHouse() {};
 	void Update() override; //Update
-	void Init() override;
+	
 private:
 	Ghost* ghost;
 
 
 private:
-
+	void Init() override;
 	void Exit() override; //Clean up
 
 };

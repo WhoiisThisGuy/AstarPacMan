@@ -25,8 +25,8 @@ public:
 	virtual bool moveToFourteenDotThirtyFive() override;
 private:
 	/* Constants start */
-	const short unsigned int CLYDESTARTX = 15.50f;
-	const short unsigned int CLYDESTARTY = 14.0f;
+	const float CLYDESTARTX = 15.70;
+	const float CLYDESTARTY = 14;
 
 	const Vector2i scatterTargetNode = { 0,34 };
 	Texture ClydeTexture;//Have to do this at every single character... change it

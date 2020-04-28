@@ -2,8 +2,11 @@
 #include <iostream>
 #include <Windows.h>
 
+using std::to_string;
+
 Vector2i Pacman::sTempCoordsOnLevel = { 0 ,0};
 Vector2i Pacman::sTempDirectionOnLevel = { 0 ,0 };
+string Pacman::sTempCoordsOnLevelString = "00";
 
 Pacman::Pacman() {
 
@@ -39,7 +42,6 @@ void Pacman::Draw(RenderWindow& window)
 
 void Pacman::Update(float dTime)
 {
-
 	if (Keyboard::isKeyPressed(Keyboard::Up)) {
 
 		bufferedDirection.y = -1;
@@ -83,6 +85,11 @@ void Pacman::Update(float dTime)
 	}
 	sTempCoordsOnLevel = getTempCoordsOnLevel();
 	sTempDirectionOnLevel = tempDirection;
+
+
+
+	sTempCoordsOnLevelString = "";
+	sTempCoordsOnLevelString = to_string(sTempCoordsOnLevel.x)+"x"+ to_string(sTempCoordsOnLevel.y); //see the +x explanation in Map.cpp
 //	Ghost::setPacManTempCoordsOnLevel(getTempCoordsOnLevel());
 	//else we dont move anywhere
 }

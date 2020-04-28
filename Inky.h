@@ -31,7 +31,7 @@ public:
 
 private:
 	/* Constants start */
-	const float INKYSTARTX = 11.50f; //13.60
+	const float INKYSTARTX = 11.40f; //13.60
 	const float INKYSTARTY = 14.0f;
 
 	const Vector2i scatterTargetNode = { 27,34 };

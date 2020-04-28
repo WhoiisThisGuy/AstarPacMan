@@ -9,9 +9,10 @@
 using std::cout;
 
 Game::Game()
-	: window(sf::VideoMode(1200,1000), "PacmanAstar", sf::Style::Close | sf::Style::Titlebar ),
+	: window(sf::VideoMode(680,900), "PacmanAstar", sf::Style::Close | sf::Style::Titlebar ),
 	dt(0.0)
-{
+{	
+	window.setPosition(Vector2i(0,0));
 	if (!loadFiles())
 		cout << "Failed to load a file.";
 	backgroundSprite.setTexture(backgroundTexture);
@@ -48,10 +49,9 @@ void Game::Update()
 {
 	UpdateDt();
 	UpdateSfmlEvents();
-
-	//map.Update(blinky.getPath()); // GET PATH USED FOR BLINKY, CHANGE THIS
 	
 	pacman.Update(dt);
+	map.Update();
 	blinky.Update(dt);
 
 	inky.Update(dt);
@@ -77,7 +77,7 @@ void Game::Render()
 
 	window.clear();
 	window.draw(backgroundSprite);
-	//map.DrawMap(window); // GET PATH USED FOR BLINKY, CHANGE THIS
+	map.Draw(window);
 	blinky.Draw(window);
 	inky.Draw(window);
 	pacman.Draw(window);

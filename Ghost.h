@@ -3,6 +3,7 @@
 #include "Map.h"
 
 
+
 #ifndef H_GHOST
 #define H_GHOST
 
@@ -11,14 +12,15 @@ class Ghost
 	
 
 public:
+	Ghost();
 	virtual ~Ghost();
 	virtual void Draw(sf::RenderWindow& window) = 0;
 	virtual void setTargetNode(Vector2i) = 0; //Maybe not needed
 
 	virtual void setChaseTargetNode() = 0;
 	virtual void setScatterTargetNode() = 0;
+
 	bool nextNodeReached();
-	
 	void turnAround();
 	void setDirection();
 	void calculateNewNextNode();
@@ -40,16 +42,13 @@ public:
 	virtual void moveUpAndDown() {}; //really amateur solution to move up and down in the ghost house
 	virtual bool moveToFourteenDotThirtyFive() { return true; }; //really amateur solution to get the ghost into the middle of the ghost house
 	bool comeOutFromHouse();
-	//virtual bool moveDown();
-	//virtual void moveOut();
 	bool isActive() const { return active; }
 
 public:
-	
 	bool firstcomeout; //coming out first from the house?
 	bool limitspeed; //coming out first from the house?
-	
 	float activateTimer; //When can the ghost come out from the house
+
 protected:
 
 	/* constants start */
@@ -60,8 +59,6 @@ protected:
 	const float ANIMATIONSWITCHTIME = 0.50f;
 	const Vector2u imageCount = {2,8};
 	/* constants end */
-
-	
 
 	RectangleShape pictureBody; //PictureBody
 	RectangleShape realBody; //RealBody
@@ -80,16 +77,7 @@ protected:
 	int row; //row for animation
 	bool active;
 
-
 protected:
-
-	// Function to calculate distance 
-	int eucledianDistance(int x1, int y1, int x2, int y2)
-	{
-		// Calculating distance 
-		return sqrt(pow(x2 - x1, 2) +
-			pow(y2 - y1, 2) * 1.0);
-	}
 
 	inline sf::Vector2i ghostTempCorrdinate() const {
 
@@ -107,8 +95,16 @@ protected:
 			: row = 0;
 	}
 
-
+	// Function to calculate distance 
+	int eucledianDistance(int x1, int y1, int x2, int y2)
+	{
+		// Calculating distance 
+		return sqrt(pow(x2 - x1, 2) +
+			pow(y2 - y1, 2) * 1.0);
+	}
 	void moveOn(float& dt);
 };
+
+
 
 #endif

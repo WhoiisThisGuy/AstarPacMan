@@ -13,15 +13,12 @@ class ActorState
 public:
 	ActorState() { stateClock.restart().asSeconds(); }
 	virtual ~ActorState() {};
-	virtual void Init() = 0;
 	virtual void Update() = 0; //Update
 protected:
 	Clock stateClock;
 private:
-
-	
+	virtual void Init() = 0;
 	virtual void Exit() = 0; //Clean up
-
 };
 
 #endif

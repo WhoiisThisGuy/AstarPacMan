@@ -61,7 +61,7 @@ void Blinky::Draw(sf::RenderWindow& window)
 
 	window.draw(pictureBody);
 	window.draw(targetMark);
-	//window.draw(realBody); only for debug DELETE IT
+
 }
 
 void Blinky::setTargetNode(Vector2i target)

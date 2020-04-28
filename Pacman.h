@@ -29,6 +29,7 @@ public:
 
 	static Vector2i sTempCoordsOnLevel;
 	static Vector2i sTempDirectionOnLevel;
+	static string sTempCoordsOnLevelString;
 
 private:
 	bool checkBufferedCollision(float& dTime);

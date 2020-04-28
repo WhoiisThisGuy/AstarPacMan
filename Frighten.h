@@ -2,22 +2,21 @@
 #include "ActorState.h"
 #include "Ghost.h"
 
-class Chase :
+class Frighten :
 	public ActorState
 {
 
 public:
-	Chase(Ghost*);
-
-	~Chase() {};
+	Frighten(Ghost*);
+	~Frighten() {};
 	void Update() override; //Update
 	
 private:
 	Ghost* ghost;
 
-
 private:
 	void Init() override;
 	void Exit() override; //Clean up
+
 };
 

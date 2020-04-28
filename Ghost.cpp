@@ -16,6 +16,10 @@
 //	return false;
 //}
 
+Ghost::Ghost() {
+	stateToSet = NULL;
+}
+
 Ghost::~Ghost()
 {
 	if (state)

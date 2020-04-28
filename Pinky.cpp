@@ -67,7 +67,7 @@ void Pinky::Draw(sf::RenderWindow& window)
 
 	window.draw(pictureBody);
 	window.draw(targetMark);
-	//window.draw(realBody); only for debug DELETE IT
+	
 }
 
 
