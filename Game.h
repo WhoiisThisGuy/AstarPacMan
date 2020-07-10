@@ -1,9 +1,9 @@
-#include "Blinky.h"
-#include "Pinky.h"
-#include "Inky.h"
-#include "Clyde.h"
-//#include "Blinky.h"
-#include "Pacman.h"
+#include <stack>
+#include "GameState.h"
+#include "Menu.h"
+#include "Playing.h"
+
+using std::stack;
 
 class Game {
 
@@ -12,10 +12,7 @@ public:
 	Game();
 	~Game();
 	void run();
-	void Update();
-	void UpdateDt();
 	void UpdateSfmlEvents();
-	void Render();
 private:
 	
 //	sf::Font font;
@@ -24,21 +21,8 @@ private:
 	float dt;
 	RenderWindow window;
 	Event event;
-	Clock deltaClock;
-	//Game futáshoz
-	Sprite backgroundSprite;
+	unsigned short int stateFlag; // 0 = Quit, 1 = Menu, 2 = Play
 
-	Map map;
-	//pálya
-
-	Pacman pacman;
-	//The hero
-	
-	Blinky blinky;
-	Pinky pinky;
-	Inky inky;
-	Clyde clyde;
-	//Chasers
-
-	
+	GameState* gameState;
+	GameState* newStateToSet;
 };

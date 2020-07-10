@@ -1,39 +1,82 @@
 #include "Scatter.h"
 #include "Chase.h"
+#include "Frighten.h"
+#include "GhostGameOver.h"
 
 Scatter::Scatter(Ghost* ghostToHandle) {
+	
 	ghost = ghostToHandle;	
-	//std::cout << "SCATTER\n";
+	
 	Init();
 }
 
-void Scatter::Update()
+void Scatter::Update(const float &dt)
 {
-
-	if (ghost->nextNodeReached()) { //Check for next node.
-		//if()
-		if (stateClock.getElapsedTime().asSeconds() > 7) {
-			Exit();
-			return;
-		}
-		ghost->calculateNewNextNode(); //Get new next node.
-		ghost->setDirection();
+	
+	if (Game_Over) {
+		Exit(eGameOver);
+		return;
 	}
+
+	float stateTime = stateClock.getElapsedTime().asSeconds();
+
+	ghost->animation.Update(ghost->rowToSetForAnimation(), dt, ghost->ANIMATIONSWITCHTIME);
+
+
+	/*Collision check*/
+	if (!Game_Over && ghost->collideWithPacman())
+	{
+		Game_Over = true;
+
+		Exit(eGameOver);
+		return;
+	}
+
+
+
+	if (glob_powerOn && !ghost->isFrightened) {
+
+		Exit(eFrighten);
+		return;
+	}
+
+	if (stateTime > 8) {
+		Exit();
+		return;
+	}
+	if(ghost->turningPointReached()){
+		ghost->calculateNewDirection();
+	}
+	ghost->moveOn(dt);
 }
 
 void Scatter::Init()
 {
 	stateClock.restart().asSeconds();
-	//Flip direction if can
-	ghost->turnAround();
+	ghost->currentState = eScatter;
 	ghost->setScatterTargetNode();
-	ghost->calculateNewNextNode();
-	ghost->setDirection();
+	//ghost->calculateNewDirection();
 }
 
-void Scatter::Exit()
+void Scatter::Exit(const ghostState& state)
 {
+	switch (state) {
 
-	ghost->setState(new Chase(ghost));
+	case eChase:
+		ghost->turnAround();
+		ghost->setState(new Chase(ghost));
+		break;
+	case eFrighten:
+		ghost->turnAround();
+		ghost->setState(new Frighten(ghost, ghost->currentState));
+		break;
+	case eGameOver:
+		ghost->setState(new GhostGameOver(ghost));
+		break;
 
+	}
+	
+	//******************************
+	//Dont use ghost from this point cause of deletion
 }
+

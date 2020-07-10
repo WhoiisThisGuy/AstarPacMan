@@ -3,22 +3,31 @@
 #ifndef ANIM_H
 #define ANIM_H
 
+using namespace sf;
+
 class Animation
 {
 
 public:
-	Animation(sf::Texture texture,sf::Vector2u imageCount);
+	Animation(Texture,Vector2u); //This is for pacman
+	Animation (bool);
+	Animation(); //This is for the Ghosts;
 
-	void Update(int row, float deltaTime, float switchTime);
-	void Update(int row, int column);
+	void Update(const int&, const float&, const float&);
+	int UpdateCustomOfColumns(int, int, const float&, float );
+	void UpdateWithSingleImage(int);
 
 public:
-	sf::IntRect uvRect;
+
+	IntRect uvRect;
+	Vector2u AimageCount;
 	
 private:
-	sf::Vector2u AimageCount;
-	sf::Vector2u currentImage;
+
+	
+	Vector2u currentImage;
 
 	float totalTime;
+
 };
 #endif

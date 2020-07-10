@@ -7,16 +7,16 @@ class Frighten :
 {
 
 public:
-	Frighten(Ghost*);
+	Frighten(Ghost*, ghostState);
 	~Frighten() {};
-	void Update() override; //Update
-	
+	void Update(const float &dt) override; //Update
 private:
 	Ghost* ghost;
-
+	ghostState previousState;
 private:
+	void Animate(const float &stateTime,const float &dt);
 	void Init() override;
-	void Exit() override; //Clean up
+	void Exit(const ghostState&) override; //Clean up
 
 };
 

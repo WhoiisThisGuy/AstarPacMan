@@ -7,45 +7,71 @@ using std::iterator;
 string Map::level = "";
 
 bool glob_powerOn = false;
+bool Game_Over = false;
+unsigned short int glob_frightenModeTimer = 6;
 
-Map::Map(){
+Map::Map() {
+	
+	powerPellet p1(7,1);
+	powerPellet p2(7, 26);
+	powerPellet p3(27, 1);
+	powerPellet p4(27, 26);
+
+	powerPelletList.push_back(p1);
+	powerPelletList.push_back(p2);
+	powerPelletList.push_back(p3);
+	powerPelletList.push_back(p4);
 
 	CellSize = CELLSIZE;
 	uCellSize = static_cast<unsigned int>(CellSize);
 
 	LoadMap();
 	LoadPellets();
-
 	//texturePowerPellet.loadFromFile("powerpellet.png");
 }
 Map::~Map()
 {
-
-	for (auto it = pelletmap.begin(); it != pelletmap.end(); ++it) {
-		delete it->second;
-	}
 
 }
 
 void Map::Update()
 {
 
-	auto it = pelletmap.find(Pacman::sTempCoordsOnLevelString);
-	if (it != pelletmap.end()) {
-		delete(it->second);
-		pelletmap.erase(it);
-	}
+	checkPelletPacmanCollision();
 }
 
 void Map::Draw(RenderWindow& window)
 {
 
-	for (auto p : pelletmap) {
-		if(!(p.second->ispowerPellet))
-			window.draw(*(p.second->pelletBody));
-		else
-			window.draw(*(p.second->powerPelletBody));
+	for (auto& a : pelletArray)
+		if (a.isActive) {
+			window.draw(a.pelletBody);
+		}
+	for (auto& a : powerPelletList)
+		window.draw(a.powerPelletBody);
+}
+
+void Map::checkPelletPacmanCollision()
+{
+
+	Vector2i pelletTempCoords;
+
+	for (auto& a : powerPelletList) {
+			
+			if (a.getCoordinates() == Pacman::sTempCoordsOnLevel) {
+				powerPelletList.remove(a);
+				glob_powerOn = true;
+				return;
+			}
 	}
+
+	for (auto& a : pelletArray) {
+		if (a.isActive && a.getCoordinates() == Pacman::sTempCoordsOnLevel) {
+			a.isActive = false;
+			return;
+		}
+	}
+
 }
 
 char Map::GetTile(int x, int y)
@@ -61,63 +87,77 @@ void Map::LoadMap()
 	level += "############################"; // plus row
 	level += "############################"; // plus row
 	level += "############################"; // change the position se instead of these plus rows
-	level += "#............##............#";
+	level += "#T....T.....T##T.....T....T#";
 	level += "#.####.#####.##.#####.####.#";
 	level += "#O####.#####.##.#####.####O#";
 	level += "#.####.#####.##.#####.####.#";
-	level += "#..........................#";
+	level += "#T....T..T..T..T..T..T....T#";
 	level += "#.####.##.########.##.####.#";
 	level += "#.####.##.########.##.####.#";
-	level += "#......##....##....##......#";
+	level += "#T....T##T..T##T..T##T....T#";
 	level += "######.#####.##.#####.######";
 	level += "######.#####d##d#####.######";
-	level += "######.##          ##.######";
+	level += "######.##t  t  t  t##.######";
 	level += "######.## ######## ##.######";
 	level += "######.## #      # ##.######";
-	level += "######.   #      #   .######";
+	level += "######T  t#      #t  T######";
 	level += "######.## #      # ##.######";
 	level += "######.## ######## ##.######";
-	level += "######.##          ##.######";
+	level += "######.##t        t##.######";
 	level += "######.## ######## ##.######";
 	level += "######.## ######## ##.######";
-	level += "#............##............#";
+	level += "#T....T..T..T##T..T..T....T#";
 	level += "#.####.#####.##.#####.####.#";
 	level += "#.####.#####d##d#####.####.#";
-	level += "#O..##................##..O#";
+	level += "#O.T##T..T..T..T..T..T##T.O#";
 	level += "###.##.##.########.##.##.###";
 	level += "###.##.##.########.##.##.###";
-	level += "#......##....##....##......#";
+	level += "#T.T..T##T..T##T..T##T..T.T#";
 	level += "#.##########.##.##########.#";
 	level += "#.##########.##.##########.#";
-	level += "#..........................#";
+	level += "#T..........T..T..........T#";
 	level += "############################";
 
 }
 
 void Map::LoadPellets()
 {
-	
-	pellet* temp;
 
-	string asd;
+	//Idea is that I can directly index the level array and here I can set the pelletArray elements directly aswell by using the index variable to help counting.
+	//I only increase index if I passed a pellet (power or not).
+	//I should get the reversed version of this so I could directly access the actual pellet with pacmans actual coordinates.
 
-	for (int i = 5; i < MAPROWS;++i) {
-		for (int j = 1; j < MAPCOLUMNS; ++j) {
-			asd = "";
-			if (level[i * MAPWIDTH + j] == '.') {
-					
-				asd = to_string(j)+"x"+ to_string(i); // The +x is a funny story here. Longstory short, the map datastructure wont hold the same keys.
-													//Since I am storing coordinates in strings as keys, the x = 12 + y = 5 coordinates in the string is "125", the x = 1 and y = 25 is guess what... "125". Now you get it.
-													//I had no idea why some pellets just wont appear on the screen. It was a... funny moment when I found out this so I leave it here.
-				pelletmap.insert({ asd , new pellet(i,j) });
+	int index = 0;
+	for (int i = 5; i < MAPROWS; ++i) {
+		for (int j = 1; j < MAPCOLUMNS - 1; ++j) {
 
-			}
-			else if (level[i * MAPWIDTH + j] == 'O') {
-				asd = to_string(j)+"x" + to_string(i);
-				pelletmap.insert({ asd , new pellet(8,i,j) });
+			if (level[i * MAPWIDTH + j] == '.' || level[i * MAPWIDTH + j] == 'T') {
+
+				pelletArray[index].pelletBody.setPosition((j * CELLSIZE)+9, (i * CELLSIZE)+9);
+				pelletArray[index].setCoordinates(j,i);
+				++index;
 			}
 		}
 
 	}
+
+	//for (int i = 5; i < MAPROWS;++i) {
+	//	for (int j = 1; j < MAPCOLUMNS; ++j) {
+	//		asd = "";
+	//		if (level[i * MAPWIDTH + j] == '.' || level[i * MAPWIDTH + j] == 'T') {
+	//				
+	//			asd = to_string(j)+"x"+ to_string(i); // The +x is a funny thing... Longstory short, the map datastructure cannot hold the same keys.
+	//												//Since I am storing coordinates in strings as keys, the x = 12 + y = 5 coordinates concatenated together is "125", the x = 1 and y = 25 is guess what... "125". Now you get it.
+	//												//I had no idea why some pellets just wont appear on the screen. It was a funny moment when I found out this so I leave it here. Should be changed to a better logic later on.
+	//			pelletmap.insert({ asd , new pellet(i,j) });
+
+	//		}
+	//		else if (level[i * MAPWIDTH + j] == 'O') {
+	//			asd = to_string(j)+"x" + to_string(i);
+	//			pelletmap.insert({ asd , new pellet(8,i,j) });
+	//		}
+	//	}
+
+	//}
 
 }

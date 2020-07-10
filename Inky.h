@@ -14,16 +14,17 @@ class Inky :public Ghost
 
 public:
 
-	Inky();
+	Inky();//Have to do this at every single character... change it);
 	~Inky();
-	void Update(float dt);
-	void Draw(sf::RenderWindow& window);
+	void Update(const float& dt);
+	//void Draw(RenderWindow& window);
 	void setTargetNode(Vector2i) override;
 
 	virtual void moveUpAndDown() override;
 	virtual bool moveToFourteenDotThirtyFive() override;
 	void setChaseTargetNode() override;
 	void setScatterTargetNode() override;
+	void setStartPositions();
 
 public:
 	Vector2i pacmanTempDirection;
@@ -35,11 +36,10 @@ private:
 	const float INKYSTARTY = 14.0f;
 
 	const Vector2i scatterTargetNode = { 27,34 };
-	Texture InkyTexture;//Have to do this at every single character... change it
+	
 	Texture targettexture;
-
+	Texture InkyTexture;
 	/* Constants end */
-	Animation* animation;
 };
 
 #endif

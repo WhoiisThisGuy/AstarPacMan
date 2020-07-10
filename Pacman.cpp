@@ -1,12 +1,10 @@
 #include "Pacman.h"
-#include <iostream>
 #include <Windows.h>
 
 using std::to_string;
 
-Vector2i Pacman::sTempCoordsOnLevel = { 0 ,0};
+Vector2i Pacman::sTempCoordsOnLevel = { 0 ,0 };
 Vector2i Pacman::sTempDirectionOnLevel = { 0 ,0 };
-string Pacman::sTempCoordsOnLevelString = "00";
 
 Pacman::Pacman() {
 
@@ -19,12 +17,14 @@ Pacman::Pacman() {
 
 	body.setSize(Vector2f(PACMANSIZEX, PACMANSIZEY));
 	body.setOrigin(PACMANSIZEX / 2, PACMANSIZEY / 2);
-	body.setPosition(Vector2f{ (PACMANSTARTPOSX * CELLSIZE) -12.0f, (((PACMANSTARTPOSY * CELLSIZE)-12.0f )) });
+	body.setPosition(Vector2f{ (PACMANSTARTPOSX * CELLSIZE) - 12.0f, (((PACMANSTARTPOSY * CELLSIZE) - 12.0f)) });
 
 	PacmanTexture.loadFromFile(PACMANTEXTUREPATH);//Have to do this at every single character... change it, do not want to use pointers
-	animation = new Animation(PacmanTexture, textureRowNColNumber);
+	animation = new Animation(true);
 	body.setTexture(&PacmanTexture);
 
+
+	deathStarted = false;
 }
 
 Pacman::~Pacman()
@@ -40,25 +40,41 @@ void Pacman::Draw(RenderWindow& window)
 
 }
 
-void Pacman::Update(float dTime)
+bool Pacman::Update(const float& dTime)
 {
+	if (Game_Over) {
+		if (!deathStarted) {
+			deathClock.restart().asSeconds();
+			animation->AimageCount = Vector2u(12, 1);
+			animation->uvRect.width = 16.0f;
+			animation->uvRect.height = 14.0f;
+			deathStarted = true;
+		}
+		else if (deathClock.getElapsedTime().asSeconds() > 2) {
+			/* animation and return; */
+			if (animation->UpdateCustomOfColumns(4, 12, dTime, 0.10f) >= 12) {
+				return true;
+			}
+			body.setTextureRect(animation->uvRect);
+		}
+		return false;
+	}
+
+
 	if (Keyboard::isKeyPressed(Keyboard::Up)) {
 
 		bufferedDirection.y = -1;
 		bufferedDirection.x = 0;
-		row = 2;
 		havebufferedmove = true;
 	}
 	if (Keyboard::isKeyPressed(Keyboard::Down)) {
-
 		bufferedDirection.y = 1;
 		bufferedDirection.x = 0;
-		row = 3;
 		havebufferedmove = true;
 	}
 	if (Keyboard::isKeyPressed(Keyboard::Left)) {
 
-		row = 1;
+
 		bufferedDirection.x = -1;
 		bufferedDirection.y = 0;
 		havebufferedmove = true;
@@ -67,34 +83,58 @@ void Pacman::Update(float dTime)
 
 		bufferedDirection.x = 1;
 		bufferedDirection.y = 0;
-		row = 0;
+
 		havebufferedmove = true;
 	}
-	//tempDirection = bufferedDirection; //DELETE THIS ONLY DEBUG
-	if (havebufferedmove && checkBufferedCollision(dTime)) {
-		havebufferedmove = false;
+
+	Vector2i tempCoords = getTempCoordsOnLevel();
+	char c = Map::GetTile(tempCoords.x, tempCoords.y);
+
+	if (havebufferedmove && c == 'T' || c == 't' || c == 'O') { //T,t,O are marked positions on the Map. These are the places where changing direction is allowed - except when turning around 180°.
+		//In the buffered direction I check that: 
+		//1, if the Tile in the buffered direction is blocked
+		//2, is pacmans origin in the turning zone. The turning zone is like a little square inside the tile, it helps to tell if pacman can turn, prevents half of pacmans texture turn into the wall. The origin has to be inbetween the lower and upper bound, from all axis.
+		Vector2f tempPosition;
+		tempPosition = { body.getPosition().x / CELLSIZE, body.getPosition().y / CELLSIZE };
+
+		if (bufferedDirection.x == 1 && Map::GetTile(tempCoords.x + 1, tempCoords.y) != '#' && (tempPosition.x >= tempCoords.x + TURNNZONELOWERBOUND && tempPosition.x <= tempCoords.x + TURNNZONEUPPERBOUND && tempPosition.y >= tempCoords.y + TURNNZONELOWERBOUND && tempPosition.y <= tempCoords.y + TURNNZONEUPPERBOUND)) { //Right
+			tempDirection = bufferedDirection;
+			row = 0;
+		}
+		else if (bufferedDirection.y == 1 && Map::GetTile(tempCoords.x, tempCoords.y + 1) != '#' && (tempPosition.x >= tempCoords.x + TURNNZONELOWERBOUND && tempPosition.x <= tempCoords.x + TURNNZONEUPPERBOUND && tempPosition.y >= tempCoords.y + TURNNZONELOWERBOUND && tempPosition.y <= tempCoords.y + TURNNZONEUPPERBOUND)) {
+			tempDirection = bufferedDirection;
+			row = 3;
+		}
+		else if (bufferedDirection.x == -1 && Map::GetTile(tempCoords.x - 1, tempCoords.y) != '#' && (tempPosition.x >= tempCoords.x + TURNNZONELOWERBOUND && tempPosition.x <= tempCoords.x + TURNNZONEUPPERBOUND && tempPosition.y >= tempCoords.y + TURNNZONELOWERBOUND && tempPosition.y <= tempCoords.y + TURNNZONEUPPERBOUND)) {
+			tempDirection = bufferedDirection;
+			row = 1;
+		}
+		else if (bufferedDirection.y == -1 && Map::GetTile(tempCoords.x, tempCoords.y - 1) != '#' && (tempPosition.x >= tempCoords.x + TURNNZONELOWERBOUND && tempPosition.x <= tempCoords.x + TURNNZONEUPPERBOUND && tempPosition.y >= tempCoords.y + TURNNZONELOWERBOUND && tempPosition.y <= tempCoords.y + TURNNZONEUPPERBOUND)) {
+			tempDirection = bufferedDirection;
+			row = 2;
+		}
+
+	}
+	else if (bufferedDirection == (tempDirection * -1)) { /* Turning to the opposite direction is allowed anytime. */
 		tempDirection = bufferedDirection;
-		animation->Update(row, dTime, ANIMATIONSWITCHTIME);
+		row = rowToSetForAnimation();
+	}
+
+	if (checkCollision(dTime)) { //if checkcollision is OK then pacman can move
 		body.move(Vector2f(speed * dTime * tempDirection.x, speed * dTime * tempDirection.y));
+		animation->Update(row, dTime, ANIMATIONSWITCHTIME);
 		body.setTextureRect(animation->uvRect);
 	}
-	else if (checkCollision(dTime)) {
-		body.move(Vector2f(speed * dTime * tempDirection.x, speed * dTime * tempDirection.y));
-		animation->Update(row, dTime, ANIMATIONSWITCHTIME);
-		body.setTextureRect(animation->uvRect);
-	}
+
+	/* Pacman should update his data, so the other Ghosts can work with them trough Game and Map. */
+
 	sTempCoordsOnLevel = getTempCoordsOnLevel();
 	sTempDirectionOnLevel = tempDirection;
-
-
-
-	sTempCoordsOnLevelString = "";
-	sTempCoordsOnLevelString = to_string(sTempCoordsOnLevel.x)+"x"+ to_string(sTempCoordsOnLevel.y); //see the +x explanation in Map.cpp
-//	Ghost::setPacManTempCoordsOnLevel(getTempCoordsOnLevel());
-	//else we dont move anywhere
+	
+	return false;
 }
 
-Vector2i Pacman::getTempCoordsOnLevel() const/* Gives back the top left corners coordinates (1,1), (2,1) etc.. */
+Vector2i Pacman::getTempCoordsOnLevel() const/* Gives back the coordinates (1,1), (2,1) etc.. */
 {
 	Vector2i Position;
 
@@ -104,7 +144,7 @@ Vector2i Pacman::getTempCoordsOnLevel() const/* Gives back the top left corners 
 	return Position;
 }
 
-bool Pacman::checkCollision(float& dTime)
+bool Pacman::checkCollision(const float& dTime)
 {
 
 	Vector2f moveWith = { speed * dTime * tempDirection.x,speed * dTime * tempDirection.y };
@@ -133,42 +173,18 @@ bool Pacman::checkCollision(float& dTime)
 }
 
 
-bool Pacman::checkBufferedCollision(float& dTime)
+
+unsigned short int Pacman::rowToSetForAnimation()
 {
+	unsigned short int row;
 
-	Vector2f moveWith = { speed * dTime * bufferedDirection.x,speed * dTime * bufferedDirection.y };
-	Vector2f tempPosition = body.getPosition();
-	Vector2i nextPosition;
+	tempDirection.x == 1 ? row = 0
+		: tempDirection.x == -1 ? row = 1
+		: tempDirection.y == -1 ? row = 2
+		: tempDirection.y == 1 ? row = 3
+		: row = 0;
 
-	sf::Vector2i tempCoordinates = getTempCoordsOnLevel();
-
-	sf::Vector2i pacNextPosA = { 0,0 }; /* These two vectors define that where the top and bottom - depending on which direction is pacman going -
-									of pacman's tile will be after the movement is added to the current position. */
-	sf::Vector2i pacNextPosB = { 0,0 };
-
-	if (bufferedDirection.x == 1) {
-		moveWith.x += OFFSETB;
-	}
-	else if (bufferedDirection.y == 1) {
-		moveWith.y += OFFSETB;
-	}
-	else if (bufferedDirection.x == -1) {
-
-		moveWith.x -= OFFSETB;
-
-	}
-	else if (bufferedDirection.y == -1) {
-
-		moveWith.y -= OFFSETB;
-
-	}
-
-	nextPosition.x = int((tempPosition.x + moveWith.x) / CELLSIZE);
-	nextPosition.y = int((tempPosition.y + moveWith.y) / CELLSIZE);
-
-	if (Map::GetTile(nextPosition.x, nextPosition.y) != '#')
-		return true;
-	return false;
+	return row;
 }
 
 //Found an easier solution instead of these

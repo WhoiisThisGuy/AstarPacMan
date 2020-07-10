@@ -6,73 +6,56 @@
 
 //#include "Chase.h"
 
-Inky::Inky() {
+Inky::Inky(){
 
 	InkyTexture.loadFromFile(INKYTEXTUREPATH);//Have to do this at every single character... change it
 
-	animation = new Animation(InkyTexture, imageCount);
-
-	pictureBody.setSize(Vector2f(PICTUREBODYSIZE, PICTUREBODYSIZE));
-	pictureBody.setOrigin(PICTUREBODYSIZE / 2, PICTUREBODYSIZE / 2);
-	pictureBody.setPosition(Vector2f((INKYSTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (INKYSTARTY * CELLSIZE) + CELLSIZE / 2));
-	pictureBody.setTexture(&InkyTexture);
-
-	realBody.setSize(Vector2f(REALBODYSIZE, REALBODYSIZE));
-	realBody.setOrigin(REALBODYSIZE / 2, REALBODYSIZE / 2);
-	realBody.setPosition(pictureBody.getPosition());
+	ghostBody.setSize(Vector2f(GHOSTBODYSIZE, GHOSTBODYSIZE));
+	ghostBody.setOrigin(GHOSTBODYSIZE / 2, GHOSTBODYSIZE / 2);
+	ghostBody.setPosition(Vector2f((INKYSTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (INKYSTARTY * CELLSIZE) + CELLSIZE / 2));
+	ghostBody.setTexture(&InkyTexture);
 
 	activateTimer = 5.0f;
 	active = false;
-	limitspeed = true;
 	firstcomeout = true;
 	direction.y = -1;
-	row = 0;
-	pictureBody.setTextureRect(animation->uvRect); //DELETE THIS
 
 	state = new GhostHouse(this);
-	targettexture.loadFromFile("Textures/blinkytarget.png");
+	//targettexture.loadFromFile("Textures/blinkytarget.png");
 
-	targetMark.setPosition(scatterTargetNode.x * CELLSIZE, scatterTargetNode.y);//Used to show where the target tile is atm
-	targetMark.setTexture(&targettexture);
-	targetMark.setSize(Vector2f{ CELLSIZE,CELLSIZE });
+	//targetMark.setPosition(scatterTargetNode.x * CELLSIZE, scatterTargetNode.y);//Used to show where the target tile is atm
+	//targetMark.setTexture(&targettexture);
+	//targetMark.setSize(Vector2f{ CELLSIZE,CELLSIZE });
 }
 
 Inky::~Inky()
 {
 
-	delete animation;
 }
 
-void Inky::Update(float dt)
+void Inky::Update(const float& dt)
 {
-
+	/* update current positions to work with */
 	pacManTempCoordsOnLevel = Pacman::sTempCoordsOnLevel;
 	pacmanTempDirection = Pacman::sTempDirectionOnLevel;
-
 	blinkyTempCoordsOnLevel = Blinky::sTempCoordsOnLevel;
-	state->Update();
-	moveOn(dt);
 
-	setRow();
-	animation->Update(row, dt, ANIMATIONSWITCHTIME);
-	pictureBody.setTextureRect(animation->uvRect);
+	state->Update(dt); // Update actual state
 
-	if (stateToSet) { /* Handling new states here, this is ... wierd? Try change it. */
-		delete state;
-		state = stateToSet;
-		stateToSet = NULL;
-	}
-	targetMark.setPosition((targetNode.x * CELLSIZE) + CELLSIZE / 2, (targetNode.y * CELLSIZE) + CELLSIZE / 2);//Used to show where the target tile is atm
+	ghostBody.setTextureRect(animation.uvRect); //Uvrect is always changed in the actual state in the Animate function.
+
+	//move
+	//moveOn(dt);
+	
+	//targetMark.setPosition((targetNode.x * CELLSIZE) + CELLSIZE / 2, (targetNode.y * CELLSIZE) + CELLSIZE / 2);//Used to show where the target tile is atm
 
 }
 
-void Inky::Draw(sf::RenderWindow& window)
-{
-
-	window.draw(pictureBody);
-	window.draw(targetMark);
-	//window.draw(realBody); only for debug DELETE IT
-}
+//void Inky::Draw(RenderWindow& window)
+//{
+//	window.draw(ghostBody);
+//	//window.draw(targetMark);
+//}
 
 
 void Inky::setTargetNode(Vector2i target)
@@ -84,18 +67,17 @@ void Inky::moveUpAndDown()
 {
 	//Starts up by default.
 
-	realBody.setPosition(pictureBody.getPosition());
 	float tempCoords;
 
 	if (direction.y == -1) {
-		tempCoords = ((realBody.getPosition().y - 10.0f) / CELLSIZE);
+		tempCoords = ((ghostBody.getPosition().y - 10.0f) / CELLSIZE);
 		if ((tempCoords) <= 17.50f
 			) {
 			turnAround();
 		}
 	}
 	else if (direction.y == 1) {
-		tempCoords = ((realBody.getPosition().y + 10.0f) / CELLSIZE);
+		tempCoords = ((ghostBody.getPosition().y + 10.0f) / CELLSIZE);
 		if ((tempCoords) >= 19.50f
 			) {
 			turnAround();
@@ -110,8 +92,8 @@ bool Inky::moveToFourteenDotThirtyFive()
 		direction.x = 1;
 		direction.y = 0;
 	}
-	realBody.setPosition(pictureBody.getPosition());
-	if (14.35 > (realBody.getPosition().x + 10.0f) / CELLSIZE) {
+	ghostBody.setPosition(ghostBody.getPosition());
+	if (14.35 > (ghostBody.getPosition().x + 10.0f) / CELLSIZE) {
 		return false;
 	}
 
@@ -152,4 +134,22 @@ void Inky::setChaseTargetNode()
 void Inky::setScatterTargetNode()
 {
 	targetNode = scatterTargetNode;
+}
+
+void Inky::setStartPositions()
+{
+
+	if (state)
+		delete state;
+
+	ghostBody.setPosition(Vector2f((INKYSTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (INKYSTARTY * CELLSIZE) + CELLSIZE / 2));
+
+	activateTimer = 5.0f;
+	active = false;
+	firstcomeout = true;
+	direction.y = -1;
+
+
+	state = new GhostHouse(this);
+
 }

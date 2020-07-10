@@ -1,23 +1,22 @@
 #include "Ghost.h"
+#include <list>
+#include <cstdlib>
 
-//bool Ghost::didIcatchPacmanV2() /* I will check if the coordinate of the top left OR the bottom right corner of pacmans tile is in the same cell as the actual ghost is.
-//								if yes, then unfortunatley pacman has been caught else the game goes on. */
-//{
-//	sf::Vector2u ghostTempCoord = ghostTempCorrdinate();
-//
-//	sf::Vector2f pacmantempPosition = Map::getPacmanTempPosition();
-//
-//	sf::Vector2u pacmanTopLeft = { (unsigned int)(pacmantempPosition.y / CELLSIZE), (unsigned int)(pacmantempPosition.x / CELLSIZE) };
-//	sf::Vector2u pacmanBottomRight = { (unsigned int)((pacmantempPosition.y+PACMANSIZEX) / CELLSIZE), (unsigned int)((pacmantempPosition.x+PACMANSIZEY) / CELLSIZE) };
-//
-//
-//	if (pacmanTopLeft == ghostTempCoord || pacmanBottomRight == ghostTempCoord)
-//		return true;
-//	return false;
-//}
+using std::list;
+
+bool Ghost::collideWithPacman()
+{
+	sf::Vector2i ghostTempCoord = ghostTempCorrdinate();
+
+	if (pacManTempCoordsOnLevel == ghostTempCoord)
+		return true;
+	return false;
+}
 
 Ghost::Ghost() {
-	stateToSet = NULL;
+	isFrightened = false;
+	previousTurningpoint = {0,0};
+	visible = true;
 }
 
 Ghost::~Ghost()
@@ -27,49 +26,139 @@ Ghost::~Ghost()
 
 }
 
-bool Ghost::nextNodeReached()
+bool Ghost::turningPointReached()
 {
 
-	realBody.setPosition(pictureBody.getPosition());
+	Vector2i tempCoords = ghostTempCorrdinate();
+	char c = Map::GetTile(tempCoords.x, tempCoords.y);
 
-	Vector2u ghostRealTopLeft = { (unsigned int)((realBody.getPosition().x - realBody.getOrigin().x) / CELLSIZE), (unsigned int)((realBody.getPosition().y - realBody.getOrigin().y) / CELLSIZE) };
-	Vector2u ghostRealBottomRight = { (unsigned int)((realBody.getPosition().x + realBody.getOrigin().x) / CELLSIZE), (unsigned int)((realBody.getPosition().y+realBody.getOrigin().y) / CELLSIZE) };
+	if ((c == 'T' || c == 't' || c == 'O') && previousTurningpoint != tempCoords) { //(previousTurningpoint.x != tempCoords.x || previousTurningpoint.y != tempCoords.y)
+	
+		Vector2f tempPosition;
+		tempPosition = { ghostBody.getPosition().x / CELLSIZE, ghostBody.getPosition().y / CELLSIZE };
 
-	if (
-		nextNode.x == ghostRealTopLeft.x
-		&& nextNode.y == ghostRealTopLeft.y
-		&& nextNode.x == ghostRealBottomRight.x
-		&& nextNode.y == ghostRealBottomRight.y
-		) {
-		return true;
+		if (tempPosition.x >= tempCoords.x + TURNNZONELOWERBOUND && tempPosition.x <= tempCoords.x + TURNNZONEUPPERBOUND && tempPosition.y >= tempCoords.y + TURNNZONELOWERBOUND && tempPosition.y <= tempCoords.y + TURNNZONEUPPERBOUND) {
+			previousTurningpoint = tempCoords;
+			return true;
+		}
+
 	}
 	return false;
 }
 
-void Ghost::moveOn(float& dt)
+void Ghost::calculateNewDirection()
+{
+	Vector2i tempCoordinates = ghostTempCorrdinate();
+	int shortestDistFromTargetNode = 1000, temp;
+
+	//Right
+	if (direction.x != -1 && Map::GetTile(tempCoordinates.x + 1, tempCoordinates.y) != '#') {
+		shortestDistFromTargetNode = manhattanDistance(tempCoordinates.x + 1, tempCoordinates.y, targetNode.x, targetNode.y);
+		directionNode = { tempCoordinates.x + 1, tempCoordinates.y };
+
+	}
+	//Down
+	if (direction.y != -1 && Map::GetTile(tempCoordinates.x, tempCoordinates.y + 1) != '#') {
+		temp = manhattanDistance(tempCoordinates.x, tempCoordinates.y + 1, targetNode.x, targetNode.y);
+		if (temp <= shortestDistFromTargetNode) {
+			shortestDistFromTargetNode = temp;
+			directionNode = { tempCoordinates.x, tempCoordinates.y+1 };
+
+		}
+		
+	}
+	//Left
+	if (direction.x != 1 && Map::GetTile(tempCoordinates.x - 1, tempCoordinates.y) != '#') {
+		temp = manhattanDistance(tempCoordinates.x - 1, tempCoordinates.y, targetNode.x, targetNode.y);
+		if (temp <= shortestDistFromTargetNode) {
+			shortestDistFromTargetNode = temp;
+			directionNode = { tempCoordinates.x - 1, tempCoordinates.y };
+
+		}
+	}
+	//Up
+	if (direction.y != 1 && Map::GetTile(tempCoordinates.x, tempCoordinates.y - 1) != '#' && Map::GetTile(tempCoordinates.x, tempCoordinates.y - 1) != 'd') {
+		temp = manhattanDistance(tempCoordinates.x, tempCoordinates.y - 1, targetNode.x, targetNode.y);
+		if (temp <= shortestDistFromTargetNode) {
+			directionNode = { tempCoordinates.x, tempCoordinates.y - 1 };
+		}
+
+	}
+
+	setDirection();
+}
+
+void Ghost::chooseRandomDirection()
+{
+
+	Vector2i tempCoordinates = ghostTempCorrdinate();
+
+	list<Vector2i> possibleDirectionsList = { Vector2i{1,0},Vector2i{0,1},Vector2i{-1,0},Vector2i{0,-1} };
+
+	//Eliminate not allowed directions
+
+	//Right
+	if (direction.x == -1 || Map::GetTile(tempCoordinates.x + 1, tempCoordinates.y) == '#') {
+		possibleDirectionsList.remove(Vector2i{ 1,0 });
+	}
+	//Down
+	if (direction.y == -1 || Map::GetTile(tempCoordinates.x, tempCoordinates.y + 1) == '#') {
+		possibleDirectionsList.remove(Vector2i{ 0,1 });
+
+	}
+	//Left
+	if (direction.x == 1 || Map::GetTile(tempCoordinates.x - 1, tempCoordinates.y) == '#') {
+		possibleDirectionsList.remove(Vector2i{ -1,0 });
+	}
+	//Up
+	if (direction.y == 1 || Map::GetTile(tempCoordinates.x, tempCoordinates.y - 1) == '#' || Map::GetTile(tempCoordinates.x, tempCoordinates.y - 1) == 'd') {
+		possibleDirectionsList.remove(Vector2i{ 0,-1 });
+	}
+
+	auto it = possibleDirectionsList.begin();
+
+	advance(it, (rand() % possibleDirectionsList.size()));
+
+	direction = *it;
+
+}
+
+unsigned short int Ghost::rowToSetForAnimation()
+{
+	unsigned short int row;
+
+
+	direction.x == 1 ? row = 0
+		: direction.x == -1 ? row = 1
+		: direction.y == -1 ? row = 2
+		: direction.y == 1 ? row = 3
+		: row = 0;
+
+	return row;
+}
+
+void Ghost::moveOn(const float& dt)
 {
 
 	Vector2f movement = {0.0f,0.0f};
 
 	if (limitspeed) {
-		movement.x = (LIMITEDSPEED) * dt * direction.x;
-		movement.y = (LIMITEDSPEED) * dt * direction.y;
+		movement.x = LIMITEDSPEED * dt * direction.x;
+		movement.y = LIMITEDSPEED * dt * direction.y;
 	}
 	else {
 		movement.x = SPEED * dt * direction.x;
 		movement.y = SPEED * dt * direction.y;
 	}
 
-	pictureBody.move(movement);
+	ghostBody.move(movement);
 	return;
 }
-
 void Ghost::turnAround()
 {
-
 	direction.x *= -1;
 	direction.y *= -1;
-
+	previousTurningpoint = { 0,0 };
 }
 
 void Ghost::setDirection() /* sets the coordinate based on the top of the Path */
@@ -78,8 +167,8 @@ void Ghost::setDirection() /* sets the coordinate based on the top of the Path *
 	Vector2i ghostTempCoord = ghostTempCorrdinate();
 	Vector2i newDirection;
 	
-	newDirection.x = ghostTempCoord.x - nextNode.x;
-	newDirection.y = ghostTempCoord.y - nextNode.y;
+	newDirection.x = ghostTempCoord.x - directionNode.x;
+	newDirection.y = ghostTempCoord.y - directionNode.y;
 
 	newDirection.x *= -1;
 	newDirection.y *= -1;
@@ -87,48 +176,6 @@ void Ghost::setDirection() /* sets the coordinate based on the top of the Path *
 	direction.x = newDirection.x;
 	direction.y = newDirection.y;
 
-	return;
-}
-
-void Ghost::calculateNewNextNode() //The ghost is not allowed to go opposite direction, and check if the node is empty
-{
-
-	Vector2i tempCoordinates = ghostTempCorrdinate();
-	int shortestDistFromTargetNode = 1000, temp;
-
-	//Right
-	if (direction.x != -1 && Map::GetTile(tempCoordinates.x+1, tempCoordinates.y) != '#') {
-		temp = eucledianDistance(tempCoordinates.x+1, tempCoordinates.y, targetNode.x, targetNode.y);
-		if (temp <= shortestDistFromTargetNode) {
-			shortestDistFromTargetNode = temp;
-			nextNode = { tempCoordinates.x+1, tempCoordinates.y };
-		}
-	}
-	//Down
-	if (direction.y != -1 && Map::GetTile(tempCoordinates.x, tempCoordinates.y+1 ) != '#') {
-		temp = eucledianDistance(tempCoordinates.x, tempCoordinates.y+1, targetNode.x, targetNode.y);
-		if (temp <= shortestDistFromTargetNode) {
-			shortestDistFromTargetNode = temp;
-			nextNode = { tempCoordinates.x, tempCoordinates.y+1 };
-		}
-	}
-	//Left
-	if (direction.x != 1 && Map::GetTile(tempCoordinates.x-1, tempCoordinates.y) != '#') {
-		temp = eucledianDistance(tempCoordinates.x-1, tempCoordinates.y, targetNode.x, targetNode.y);
-		if (temp <= shortestDistFromTargetNode) {
-			shortestDistFromTargetNode = temp;
-			nextNode = {tempCoordinates.x-1, tempCoordinates.y };
-		}
-	}
-	//Up
-	if (direction.y != 1 && Map::GetTile(tempCoordinates.x, tempCoordinates.y-1) != '#' && Map::GetTile(tempCoordinates.x, tempCoordinates.y - 1) != 'd') {
-		temp = eucledianDistance(tempCoordinates.x, tempCoordinates.y-1 , targetNode.x, targetNode.y);
-		if (temp <= shortestDistFromTargetNode) {
-			nextNode = { tempCoordinates.x, tempCoordinates.y-1 };
-		}
-			
-	}
-	
 	return;
 }
 
@@ -141,18 +188,23 @@ bool Ghost::comeOutFromHouse()
 		direction.x = 0;
 		direction.y = -1;
 	}
-	realBody.setPosition(pictureBody.getPosition());
-	if (15.0f < (realBody.getPosition().y - 10.0f) / CELLSIZE) {
+	if (15.60f < (ghostBody.getPosition().y) / CELLSIZE) {
 		return false;
 	}
 
-	realBody.setPosition((14 * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (11 * CELLSIZE) + CELLSIZE / 2);// This is really a wierd solution.
-	pictureBody.setPosition((14 * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (11 * CELLSIZE) + CELLSIZE / 2);//
+	//ghostBody.setPosition((14 * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (11 * CELLSIZE) + CELLSIZE / 2);// This is really a wierd solution.
+	//ghostBody.setPosition((14 * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (11 * CELLSIZE) + CELLSIZE / 2);//
 
 	active = true;
-
+	direction = {0,0};
 	return true;
 }
 
+void Ghost::Draw(sf::RenderWindow& window)
+{
+	if(visible)
+		window.draw(ghostBody);
+	//window.draw(targetMark);
 
+}
 

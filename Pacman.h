@@ -8,8 +8,6 @@
 #define PACMANSTARTPOSX 13
 #define PACMANSTARTPOSY 28
 
-
-
 class Pacman
 {
 
@@ -18,7 +16,7 @@ public:
 	Pacman();
 	~Pacman();
 	void Draw(RenderWindow& window);
-	void Update(float dTime);
+	bool Update(const float& dTime);
 
 	//Vector2i getTempCoordsOnLevel() const;
 	Vector2f getTempPosOnLevel() const { return body.getPosition(); };
@@ -29,11 +27,11 @@ public:
 
 	static Vector2i sTempCoordsOnLevel;
 	static Vector2i sTempDirectionOnLevel;
-	static string sTempCoordsOnLevelString;
 
 private:
-	bool checkBufferedCollision(float& dTime);
-	bool checkCollision(float& dTime);
+
+	bool checkCollision(const float& dTime);
+	unsigned short int rowToSetForAnimation();
 
 private:
 
@@ -41,11 +39,12 @@ private:
 	Constants START
 	*/
 	//All the OFFSET and the
-	const float PACMANSPEED = 150.0f;
-	const float OFFSET = 12.0f; //For collision check.
-	const float OFFSETB = 30.0f; //For changing direction, to prevent turning into walls in tunnels
-	const float PACMANSIZEX = 40.0f;
-	const float PACMANSIZEY = 40.0f;
+	const float PACMANSPEED = 170.0f;
+	const float OFFSET = 10.0f; //For collision check.
+	const float TURNNZONELOWERBOUND = 0.30f;
+	const float TURNNZONEUPPERBOUND = 0.70f;
+	const float PACMANSIZEX = 50.0f;
+	const float PACMANSIZEY = 50.0f;
 	const float  OFFSETMOVE = 6.0f;
 	const float ANIMATIONSWITCHTIME = 0.08f;
 	const Vector2i STARTDIRECTION = {-1,0};
@@ -67,6 +66,8 @@ private:
 	Vector2i tempDirection;
 	Vector2i bufferedDirection;
 	
+	Clock deathClock; //used for death animation
+	bool deathStarted;
 };
 
 #endif

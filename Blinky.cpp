@@ -1,67 +1,47 @@
 #include "Blinky.h"
 #include "Scatter.h"
+#include "Chase.h"
 #include "Pacman.h"
-//#include "Chase.h"
+
 Vector2i Blinky::sTempCoordsOnLevel = { 0 ,0}; //Not accurate...
 
 Blinky::Blinky(){
 	BlinkyTexture.loadFromFile(BLINKYTEXTUREPATH);//Have to do this at every single character... change it
 
-	animation = new Animation(BlinkyTexture, imageCount);
-
-	pictureBody.setSize(Vector2f(PICTUREBODYSIZE, PICTUREBODYSIZE));
-	pictureBody.setOrigin(PICTUREBODYSIZE / 2, PICTUREBODYSIZE / 2);
-	pictureBody.setPosition(Vector2f((BLINKYSTARTX * CELLSIZE)+ CELLSIZE/2, MAPOFFSET+(BLINKYSTARTY * CELLSIZE)+ CELLSIZE / 2));
-	pictureBody.setTexture(&BlinkyTexture);
-
-	realBody.setSize(Vector2f(REALBODYSIZE, REALBODYSIZE));
-	realBody.setOrigin(REALBODYSIZE /2, REALBODYSIZE /2);
-	realBody.setPosition(pictureBody.getPosition());
+	ghostBody.setSize(Vector2f(GHOSTBODYSIZE, GHOSTBODYSIZE));
+	ghostBody.setOrigin(GHOSTBODYSIZE / 2, GHOSTBODYSIZE / 2);
+	ghostBody.setPosition(Vector2f((BLINKYSTARTX * CELLSIZE)+ CELLSIZE/2, MAPOFFSET+(BLINKYSTARTY * CELLSIZE)+ CELLSIZE / 2));
+	ghostBody.setTexture(&BlinkyTexture);
 
 	firstcomeout = false;
-	direction.x = 1;
-	row = 0;
+	direction.x = -1;
+	
 	state = new Scatter(this);
 	
-	targettexture.loadFromFile("Textures/blinkytarget.png");
+	//targettexture.loadFromFile("Textures/blinkytarget.png");
 
 
-	targetMark.setPosition(scatterTargetNode.x*CELLSIZE, scatterTargetNode.y);//Used to show where the target tile is atm
-	targetMark.setTexture(&targettexture);
-	targetMark.setSize(Vector2f{ CELLSIZE,CELLSIZE });
+	//targetMark.setPosition(scatterTargetNode.x*CELLSIZE, scatterTargetNode.y);//Used to show where the target tile is atm
+	//targetMark.setTexture(&targettexture);
+	//targetMark.setSize(Vector2f{ CELLSIZE,CELLSIZE });
 }
 
 Blinky::~Blinky()
 {
 
-	delete animation;
 }
 
-void Blinky::Update(float dt)
+void Blinky::Update(const float& dt)
 {
 	pacManTempCoordsOnLevel = Pacman::sTempCoordsOnLevel;
-	state->Update();
-	moveOn(dt);
-	targetMark.setPosition((targetNode.x * CELLSIZE) + CELLSIZE / 2, (targetNode.y * CELLSIZE) + CELLSIZE / 2);//Used to show where the target tile is atm
-	setRow();
-	animation->Update(row, dt, ANIMATIONSWITCHTIME);
-	pictureBody.setTextureRect(animation->uvRect);
 
-	if (stateToSet) {
-		delete state;
-		state = stateToSet;
-		stateToSet = NULL;
-	}
+	state->Update(dt);
+	//moveOn(dt);
+	//targetMark.setPosition((targetNode.x * CELLSIZE) + CELLSIZE / 2, (targetNode.y * CELLSIZE) + CELLSIZE / 2);//Used to show where the target tile is atm
+
+	ghostBody.setTextureRect(animation.uvRect);
 	
-	sTempCoordsOnLevel = getTempCoordsOnLevel();
-}
-
-void Blinky::Draw(sf::RenderWindow& window)
-{
-
-	window.draw(pictureBody);
-	window.draw(targetMark);
-
+	sTempCoordsOnLevel = getTempCoordsOnLevel(); //For Inky
 }
 
 void Blinky::setTargetNode(Vector2i target)
@@ -83,10 +63,22 @@ Vector2i Blinky::getTempCoordsOnLevel() const /* Gives back the top left corners
 {
 	Vector2i Position;
 
-	Position.x = (int)(pictureBody.getPosition().x / CELLSIZE);
-	Position.y = (int)(pictureBody.getPosition().y / CELLSIZE);
+	Position.x = (int)(ghostBody.getPosition().x / CELLSIZE);
+	Position.y = (int)(ghostBody.getPosition().y / CELLSIZE);
 
 	return Position;
+}
+
+void Blinky::setStartPositions()
+{
+	if (state)
+		delete state;
+	
+	ghostBody.setPosition(Vector2f((BLINKYSTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (BLINKYSTARTY * CELLSIZE) + CELLSIZE / 2));
+	firstcomeout = false;
+	direction.x = -1;
+
+	state = new Scatter(this);
 }
 
 //void Blinky::FindPath() Old method

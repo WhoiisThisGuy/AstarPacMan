@@ -16,26 +16,25 @@ public:
 
 	Blinky();
 	~Blinky();
-	void Update(float dt);
-	void Draw(sf::RenderWindow& window);
+	void Update(const float& dt);
+	//void Draw(RenderWindow& window);
 	void setTargetNode(Vector2i) override;
 	void setChaseTargetNode() override;
 	void setScatterTargetNode() override;
 	Vector2i getTempCoordsOnLevel() const;
 
 	static Vector2i sTempCoordsOnLevel;
-
+	void setStartPositions();
 private:
 	/* Constants start */
 	const short unsigned int BLINKYSTARTX = 13;
 	const short unsigned int BLINKYSTARTY = 11;
 
-	const Vector2i scatterTargetNode = {27,0};
+	const Vector2i scatterTargetNode = {27,9};
 	Texture BlinkyTexture;//Have to do this at every single character... change it
 	Texture targettexture;
 	
 	/* Constants end */
-	Animation* animation;
 };
 
 #endif

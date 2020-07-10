@@ -1,5 +1,4 @@
 ﻿#include "Game.h"
-#include "LoadFile.h"
 #include <fstream>
 #include <iostream>
 #include <exception>
@@ -9,54 +8,40 @@
 using std::cout;
 
 Game::Game()
-	: window(sf::VideoMode(680,900), "PacmanAstar", sf::Style::Close | sf::Style::Titlebar ),
+	: window(sf::VideoMode(680,900), "Pacman", sf::Style::Close | sf::Style::Titlebar ),
 	dt(0.0)
 {	
 	window.setPosition(Vector2i(0,0));
-	if (!loadFiles())
-		cout << "Failed to load a file.";
-	backgroundSprite.setTexture(backgroundTexture);
-	backgroundSprite.setPosition(0.0f,MAPOFFSET);
 
-
-	//font.loadFromFile("consola.ttf");
 	window.setFramerateLimit(60);
-	//pacManTempCoordsOnLevel = pacman.getTempCoordsOnLevel();
+	gameState = new Menu();
+	newStateToSet = NULL;
 }
 
 Game::~Game() {
-	
-}
 
-void Game::run()
-{
+	if(gameState) {
 
-	while (window.isOpen())
-	{
-		Update();
-		Render();
+		delete gameState;
 	}
 
 }
 
-void Game::UpdateDt()
+void Game::run()
 {
-	dt = deltaClock.restart().asSeconds();
-
-}
-
-void Game::Update()
-{
-	UpdateDt();
-	UpdateSfmlEvents();
 	
-	pacman.Update(dt);
-	map.Update();
-	blinky.Update(dt);
+	while (window.isOpen())
+	{
 
-	inky.Update(dt);
-	pinky.Update(dt);
-	clyde.Update(dt);
+		newStateToSet = gameState->Update(window);
+		if (newStateToSet) {
+			delete gameState;
+			gameState = newStateToSet;
+			newStateToSet = NULL;
+		}
+
+	}
+
 }
 
 void Game::UpdateSfmlEvents()
@@ -64,25 +49,11 @@ void Game::UpdateSfmlEvents()
 	
 	while (window.pollEvent(event))
 	{
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
 			window.close();
+		}
 		if (event.type == sf::Event::Closed)
 			window.close();
 	}
-
-}
-
-void Game::Render()
-{
-
-	window.clear();
-	window.draw(backgroundSprite);
-	map.Draw(window);
-	blinky.Draw(window);
-	inky.Draw(window);
-	pacman.Draw(window);
-	pinky.Draw(window);
-	clyde.Draw(window);
-	window.display();
 
 }

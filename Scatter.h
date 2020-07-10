@@ -9,14 +9,13 @@ class Scatter :
 public:
 	Scatter(Ghost*);
 	~Scatter() {};
-	void Update() override; //Update
-
+	void Update(const float &dt) override; //Update
 private:
 	Ghost* ghost;
 	
 private:
 	void Init() override;
 	
-	void Exit() override; //Clean up
+	void Exit(const ghostState& state = eChase) override; //Clean up
 };
 

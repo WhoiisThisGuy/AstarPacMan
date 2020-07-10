@@ -16,14 +16,15 @@ public:
 
 	Pinky();
 	~Pinky();
-	void Update(float dt);
-	void Draw(sf::RenderWindow& window);
+	void Update(const float& dt);
+	//void Draw(RenderWindow& window);
 	void setTargetNode(Vector2i) override;
 
 	virtual void moveUpAndDown() override;
 	virtual bool moveToFourteenDotThirtyFive() override;
 	void setChaseTargetNode() override;
 	void setScatterTargetNode() override;
+	void setStartPositions();
 	
 public:
 	Vector2i pacmanTempDirection;
@@ -34,11 +35,10 @@ private:
 	const float PINKYSTARTY = 14.0f;
 
 	const Vector2i scatterTargetNode = { 0,0 };
-	Texture PinkyTexture;//Have to do this at every single character... change it
+	Texture PinkyTexture;
 	Texture targettexture;
 
 	/* Constants end */
-	Animation* animation;
 };
 
 #endif

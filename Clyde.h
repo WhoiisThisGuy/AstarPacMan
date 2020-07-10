@@ -13,8 +13,8 @@ public:
 
 	Clyde();
 	~Clyde();
-	void Update(float dt);
-	void Draw(sf::RenderWindow& window);
+	void Update(const float& dt);
+	//void Draw(RenderWindow& window);
 	void setTargetNode(Vector2i) override;
 	void setChaseTargetNode() override;
 	void setScatterTargetNode() override;
@@ -23,6 +23,7 @@ public:
 	static Vector2i sTempCoordsOnLevel;
 	virtual void moveUpAndDown() override;
 	virtual bool moveToFourteenDotThirtyFive() override;
+	void setStartPositions();
 private:
 	/* Constants start */
 	const float CLYDESTARTX = 15.70;
@@ -33,7 +34,6 @@ private:
 	Texture targettexture;
 	CircleShape clydeCircle;
 	/* Constants end */
-	Animation* animation;
 };
 
 #endif
