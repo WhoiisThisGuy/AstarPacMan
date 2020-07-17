@@ -11,16 +11,17 @@ Pinky::Pinky() {
 	ghostBody.setSize(Vector2f(GHOSTBODYSIZE, GHOSTBODYSIZE));
 	ghostBody.setOrigin(GHOSTBODYSIZE / 2, GHOSTBODYSIZE / 2);
 	ghostBody.setPosition(Vector2f((PINKYSTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (PINKYSTARTY * CELLSIZE) + CELLSIZE / 2));
-	ghostBody.setTexture(&PinkyTexture);
+	//ghostBody.setTexture(&PinkyTexture);
 
 	activateTimer = 0.0f;
 	active = false;
 	firstcomeout = true;
 	direction.y = -1;
-
+	rowForAnimation = 1;
+	ghostHouseStartNode = { 13,18 };
 	state = new GhostHouse(this);
 	//targettexture.loadFromFile("Textures/blinkytarget.png");
-
+	startDirection = { 0,-1 };
 	//targetMark.setPosition(scatterTargetNode.x * CELLSIZE, scatterTargetNode.y);//Used to show where the target tile is atm
 	//targetMark.setTexture(&targettexture);
 	//targetMark.setSize(Vector2f{ CELLSIZE,CELLSIZE });
@@ -38,7 +39,6 @@ void Pinky::Update(const float& dt)
 
 	state->Update(dt);
 
-	ghostBody.setTextureRect(animation.uvRect);
 	//handleState();
 	//if (stateToSet) { /* Handling new states here, this is ... wierd? Try change it. */
 	//	delete state;
@@ -119,15 +119,3 @@ void Pinky::setScatterTargetNode()
 	targetNode = scatterTargetNode;
 }
 
-void Pinky::setStartPositions()
-{
-	if (state)
-		delete state;
-	ghostBody.setPosition(Vector2f((PINKYSTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (PINKYSTARTY * CELLSIZE) + CELLSIZE / 2));
-	activateTimer = 0.0f;
-	active = false;
-	firstcomeout = true;
-	direction.y = -1;
-
-	state = new GhostHouse(this);
-}

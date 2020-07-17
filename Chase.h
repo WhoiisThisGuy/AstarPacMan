@@ -13,6 +13,7 @@ public:
 	
 private:
 	Ghost* ghost;
+	uint16_t STATENUMBER; //how many times the ghost had been in this state
 private:
 	void Init() override;
 	void Exit(const ghostState& state = eScatter) override; //Clean up

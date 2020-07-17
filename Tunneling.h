@@ -1,0 +1,25 @@
+#pragma once
+#include "ActorState.h"
+#include "Ghost.h"
+
+class Tunneling:public ActorState
+{
+
+public:
+
+	Tunneling(Ghost* ghostToHandle);
+	virtual void Update(const float& dt);
+	
+private:
+	Ghost* ghost;
+	void (Tunneling::*fToUpdate)(const float& dt); //I wanted to try out a function pointer to seperate tunneling in and out.
+
+private:
+
+	void Init();
+	void Exit(const ghostState&); //Clean up
+	void TunnelingIn(const float& dt);
+	void TunnelingOut(const float& dt);
+
+};
+

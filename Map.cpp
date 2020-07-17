@@ -6,9 +6,12 @@ using std::iterator;
 
 string Map::level = "";
 
+bool paused = true;
 bool glob_powerOn = false;
 bool Game_Over = false;
-unsigned short int glob_frightenModeTimer = 6;
+unsigned short int LEVELNUMBER = 0; //0. is the first level
+bool elroy1 = false;
+bool elroy2 = false;
 
 Map::Map() {
 	
@@ -60,18 +63,27 @@ void Map::checkPelletPacmanCollision()
 			
 			if (a.getCoordinates() == Pacman::sTempCoordsOnLevel) {
 				powerPelletList.remove(a);
+				//Setup pacman normal and dot speed
 				glob_powerOn = true;
+				Pacman::normalSpeedOn = false;
 				return;
 			}
 	}
 
 	for (auto& a : pelletArray) {
 		if (a.isActive && a.getCoordinates() == Pacman::sTempCoordsOnLevel) {
+			//set up pacman dot speed here
 			a.isActive = false;
+			Pacman::normalSpeedOn = false;
 			return;
 		}
 	}
-
+	//set up pacman dot speed here
+	if (!Pacman::normalSpeedOn) {
+		Pacman::normalSpeedOn = true;
+		Pacman::speed = levelValues[LEVELNUMBER][1];
+		return;
+	}
 }
 
 char Map::GetTile(int x, int y)
@@ -97,10 +109,10 @@ void Map::LoadMap()
 	level += "#T....T##T..T##T..T##T....T#";
 	level += "######.#####.##.#####.######";
 	level += "######.#####d##d#####.######";
-	level += "######.##t  t  t  t##.######";
-	level += "######.## ######## ##.######";
+	level += "######.##t  tttt  t##.######";
+	level += "######.## ###__### ##.######";
 	level += "######.## #      # ##.######";
-	level += "######T  t#      #t  T######";
+	level += "L    sT  t#  tt  #t  Ts    R";
 	level += "######.## #      # ##.######";
 	level += "######.## ######## ##.######";
 	level += "######.##t        t##.######";
@@ -109,7 +121,7 @@ void Map::LoadMap()
 	level += "#T....T..T..T##T..T..T....T#";
 	level += "#.####.#####.##.#####.####.#";
 	level += "#.####.#####d##d#####.####.#";
-	level += "#O.T##T..T..T..T..T..T##T.O#";
+	level += "#O.T##T..T..T  T..T..T##T.O#";
 	level += "###.##.##.########.##.##.###";
 	level += "###.##.##.########.##.##.###";
 	level += "#T.T..T##T..T##T..T##T..T.T#";

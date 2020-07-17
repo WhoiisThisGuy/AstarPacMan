@@ -1,8 +1,11 @@
+
 #include "Ghost.h"
 #include <list>
 #include <cstdlib>
 
 using std::list;
+
+Texture Ghost::ghostTexture;
 
 bool Ghost::collideWithPacman()
 {
@@ -13,10 +16,13 @@ bool Ghost::collideWithPacman()
 	return false;
 }
 
-Ghost::Ghost() {
+Ghost::Ghost() :animation(this){
 	isFrightened = false;
 	previousTurningpoint = {0,0};
 	visible = true;
+	inTunnel = false;
+	ghostTexture.loadFromFile("Textures/Ghost.png");
+	ghostBody.setTexture(&ghostTexture);
 }
 
 Ghost::~Ghost()
@@ -46,6 +52,19 @@ bool Ghost::turningPointReached()
 	return false;
 }
 
+bool Ghost::tunnelPointReached()
+{
+	Vector2i tempCoords = ghostTempCorrdinate();
+	char c = Map::GetTile(tempCoords.x, tempCoords.y);
+
+	if (c == 's') {
+		inTunnel = true;
+		return inTunnel;
+	}
+
+	return false;
+}
+
 void Ghost::calculateNewDirection()
 {
 	Vector2i tempCoordinates = ghostTempCorrdinate();
@@ -58,7 +77,7 @@ void Ghost::calculateNewDirection()
 
 	}
 	//Down
-	if (direction.y != -1 && Map::GetTile(tempCoordinates.x, tempCoordinates.y + 1) != '#') {
+	if (direction.y != -1 && Map::GetTile(tempCoordinates.x, tempCoordinates.y + 1) != '#' && Map::GetTile(tempCoordinates.x, tempCoordinates.y + 1) != 'd' && Map::GetTile(tempCoordinates.x, tempCoordinates.y + 1) != '_') {
 		temp = manhattanDistance(tempCoordinates.x, tempCoordinates.y + 1, targetNode.x, targetNode.y);
 		if (temp <= shortestDistFromTargetNode) {
 			shortestDistFromTargetNode = temp;
@@ -88,6 +107,48 @@ void Ghost::calculateNewDirection()
 	setDirection();
 }
 
+void Ghost::calculateNewDirectionEatenMode()
+{
+	Vector2i tempCoordinates = ghostTempCorrdinate();
+	unsigned short int shortestDistFromTargetNode = 100, temp;
+
+	//Right
+	if (direction.x != -1 && Map::GetTile(tempCoordinates.x + 1, tempCoordinates.y) != '#') {
+		shortestDistFromTargetNode = manhattanDistance(tempCoordinates.x + 1, tempCoordinates.y, targetNode.x, targetNode.y);
+		directionNode = { tempCoordinates.x + 1, tempCoordinates.y };
+
+	}
+	//Down
+	if (direction.y != -1 && Map::GetTile(tempCoordinates.x, tempCoordinates.y + 1) != '#') {
+		temp = manhattanDistance(tempCoordinates.x, tempCoordinates.y + 1, targetNode.x, targetNode.y);
+		if (temp <= shortestDistFromTargetNode) {
+			shortestDistFromTargetNode = temp;
+			directionNode = { tempCoordinates.x, tempCoordinates.y + 1 };
+
+		}
+
+	}
+	//Left
+	if (direction.x != 1 && Map::GetTile(tempCoordinates.x - 1, tempCoordinates.y) != '#') {
+		temp = manhattanDistance(tempCoordinates.x - 1, tempCoordinates.y, targetNode.x, targetNode.y);
+		if (temp <= shortestDistFromTargetNode) {
+			shortestDistFromTargetNode = temp;
+			directionNode = { tempCoordinates.x - 1, tempCoordinates.y };
+
+		}
+	}
+	//Up
+	if (direction.y != 1 && Map::GetTile(tempCoordinates.x, tempCoordinates.y - 1) != '#') {
+		temp = manhattanDistance(tempCoordinates.x, tempCoordinates.y - 1, targetNode.x, targetNode.y);
+		if (temp <= shortestDistFromTargetNode) {
+			directionNode = { tempCoordinates.x, tempCoordinates.y - 1 };
+		}
+
+	}
+
+	setDirection();
+}
+
 void Ghost::chooseRandomDirection()
 {
 
@@ -98,16 +159,16 @@ void Ghost::chooseRandomDirection()
 	//Eliminate not allowed directions
 
 	//Right
-	if (direction.x == -1 || Map::GetTile(tempCoordinates.x + 1, tempCoordinates.y) == '#') {
+	if (direction.x == -1 || Map::GetTile(tempCoordinates.x + 1, tempCoordinates.y) == '#' || direction.x == -1 || Map::GetTile(tempCoordinates.x + 1, tempCoordinates.y) == 's') {
 		possibleDirectionsList.remove(Vector2i{ 1,0 });
 	}
 	//Down
-	if (direction.y == -1 || Map::GetTile(tempCoordinates.x, tempCoordinates.y + 1) == '#') {
+	if (direction.y == -1 || Map::GetTile(tempCoordinates.x, tempCoordinates.y + 1) == '#' || Map::GetTile(tempCoordinates.x, tempCoordinates.y + 1) == 'd' || Map::GetTile(tempCoordinates.x, tempCoordinates.y + 1) == '_') {
 		possibleDirectionsList.remove(Vector2i{ 0,1 });
 
 	}
 	//Left
-	if (direction.x == 1 || Map::GetTile(tempCoordinates.x - 1, tempCoordinates.y) == '#') {
+	if (direction.x == 1 || Map::GetTile(tempCoordinates.x - 1, tempCoordinates.y) == '#' || direction.x == 1 || Map::GetTile(tempCoordinates.x - 1, tempCoordinates.y) == 's') {
 		possibleDirectionsList.remove(Vector2i{ -1,0 });
 	}
 	//Up
@@ -123,18 +184,28 @@ void Ghost::chooseRandomDirection()
 
 }
 
-unsigned short int Ghost::rowToSetForAnimation()
+unsigned short int Ghost::getDirectionForAnimation() //Helps to select the column for the ghost
 {
-	unsigned short int row;
+	unsigned short int col;
 
+	if (currentState != eEaten) {
+		direction.x == 1 ? col = 0
+			: direction.x == -1 ? col = 2
+			: direction.y == -1 ? col = 4
+			: direction.y == 1 ? col = 6
+			: col = 0;
+	}
+	else {
 
-	direction.x == 1 ? row = 0
-		: direction.x == -1 ? row = 1
-		: direction.y == -1 ? row = 2
-		: direction.y == 1 ? row = 3
-		: row = 0;
+		direction.x == 1 ? col = 8
+			: direction.x == -1 ? col = 9
+			: direction.y == -1 ? col = 10
+			: direction.y == 1 ? col = 11
+			: col = 8;
 
-	return row;
+	}
+
+	return col;
 }
 
 void Ghost::moveOn(const float& dt)
@@ -147,12 +218,32 @@ void Ghost::moveOn(const float& dt)
 		movement.y = LIMITEDSPEED * dt * direction.y;
 	}
 	else {
-		movement.x = SPEED * dt * direction.x;
-		movement.y = SPEED * dt * direction.y;
+		movement.x = speed * dt * direction.x;
+		movement.y = speed * dt * direction.y;
 	}
 
 	ghostBody.move(movement);
 	return;
+}
+bool Ghost::tunnelTeleport()
+{
+	Vector2i tempCoords = ghostTempCorrdinate();
+	char c = Map::GetTile(tempCoords.x, tempCoords.y);
+
+	if (c == 'L' && direction.x == -1) {
+		ghostBody.setPosition((27 * CELLSIZE) + 12, (18 * CELLSIZE) + 12);
+		return true;
+	}
+	else if (c == 'R' && direction.x == 1) {
+		ghostBody.setPosition((0 * CELLSIZE) + 12, (18 * CELLSIZE) + 12);
+		return true;
+	}
+	return false;
+}
+
+void Ghost::UpdateTexture()
+{
+	ghostBody.setTextureRect(animation.uvRect);
 }
 void Ghost::turnAround()
 {
@@ -177,6 +268,11 @@ void Ghost::setDirection() /* sets the coordinate based on the top of the Path *
 	direction.y = newDirection.y;
 
 	return;
+}
+
+void Ghost::setDirection(Vector2i direction_)
+{
+	direction = direction_;
 }
 
 bool Ghost::comeOutFromHouse()

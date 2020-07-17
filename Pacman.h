@@ -16,7 +16,7 @@ public:
 	Pacman();
 	~Pacman();
 	void Draw(RenderWindow& window);
-	bool Update(const float& dTime);
+	bool Update(const float& dTime, RenderWindow& window);
 
 	//Vector2i getTempCoordsOnLevel() const;
 	Vector2f getTempPosOnLevel() const { return body.getPosition(); };
@@ -25,21 +25,25 @@ public:
 
 	Vector2i getTempCoordsOnLevel() const;
 
+
+
+public:
+	static float speed;
+	static bool normalSpeedOn;
 	static Vector2i sTempCoordsOnLevel;
 	static Vector2i sTempDirectionOnLevel;
-
 private:
 
 	bool checkCollision(const float& dTime);
 	unsigned short int rowToSetForAnimation();
-
+	void tunnelTeleport();
 private:
-
+	
 	/*
 	Constants START
 	*/
 	//All the OFFSET and the
-	const float PACMANSPEED = 170.0f;
+	
 	const float OFFSET = 10.0f; //For collision check.
 	const float TURNNZONELOWERBOUND = 0.30f;
 	const float TURNNZONEUPPERBOUND = 0.70f;
@@ -50,6 +54,7 @@ private:
 	const Vector2i STARTDIRECTION = {-1,0};
 	const Vector2u textureRowNColNumber = {2,4};
 
+	float PACMANSPEED = 142;
 	/*
 	Constants END
 	*/
@@ -58,16 +63,17 @@ private:
 	string health;
 
 	bool havebufferedmove;
-	float speed;
+	
 	unsigned int row;
 
 	Animation* animation;
 
 	Vector2i tempDirection;
 	Vector2i bufferedDirection;
-	
+	Event event;
 	Clock deathClock; //used for death animation
 	bool deathStarted;
+	
 };
 
 #endif

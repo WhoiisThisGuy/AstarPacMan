@@ -12,8 +12,7 @@ Clyde::Clyde() {
 	ghostBody.setSize(Vector2f(GHOSTBODYSIZE, GHOSTBODYSIZE));
 	ghostBody.setOrigin(GHOSTBODYSIZE / 2, GHOSTBODYSIZE / 2);
 	ghostBody.setPosition(Vector2f((CLYDESTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (CLYDESTARTY * CELLSIZE) + CELLSIZE / 2));
-	ghostBody.setTexture(&ClydeTexture);
-
+	//ghostBody.setTexture(&ClydeTexture);
 
 	//Color color(255,183,81);
 	//
@@ -24,12 +23,13 @@ Clyde::Clyde() {
 	//clydeCircle.setOutlineThickness(3.0f);
 	//clydeCircle.setOrigin(clydeCircle.getLocalBounds().width/2, clydeCircle.getLocalBounds().height / 2);
 	//clydeCircle.setPosition(ghostBody.getPosition());
-
+	ghostHouseStartNode = { 16,18 };
+	rowForAnimation = 3;
 	activateTimer = 5.0f;
 	active = false;
 	firstcomeout = true;
 	direction.y = -1;
-
+	startDirection = { 0,-1 };
 	//stateStack.push(new GhostHouse(this));
 	state = new GhostHouse(this);
 	targettexture.loadFromFile("Textures/blinkytarget.png");
@@ -52,7 +52,7 @@ void Clyde::Update(const float& dt)
 	state->Update(dt);
 	//moveOn(dt);
 
-	ghostBody.setTextureRect(animation.uvRect);
+	
 	//handleState();
 	//if (stateToSet) { /* Handling new states here, this is ... wierd? Try change it. */
 	//	//delete state;
@@ -119,22 +119,6 @@ bool Clyde::moveToFourteenDotThirtyFive()
 	return true;
 }
 
-void Clyde::setStartPositions()
-{
-
-	if (state)
-		delete state;
-	
-	ghostBody.setPosition(Vector2f((CLYDESTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (CLYDESTARTY * CELLSIZE) + CELLSIZE / 2));
-
-	activateTimer = 5.0f;
-	active = false;
-	firstcomeout = true;
-	direction.y = -1;
-
-	state = new GhostHouse(this);
-
-}
 
 void Clyde::setChaseTargetNode()
 {

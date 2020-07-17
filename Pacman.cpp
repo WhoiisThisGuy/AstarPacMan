@@ -5,10 +5,11 @@ using std::to_string;
 
 Vector2i Pacman::sTempCoordsOnLevel = { 0 ,0 };
 Vector2i Pacman::sTempDirectionOnLevel = { 0 ,0 };
+bool Pacman::normalSpeedOn = true;
+float Pacman::speed = levelValues[LEVELNUMBER][1];
 
 Pacman::Pacman() {
 
-	speed = PACMANSPEED;
 	row = 1;
 	havebufferedmove = false;
 
@@ -20,9 +21,9 @@ Pacman::Pacman() {
 	body.setPosition(Vector2f{ (PACMANSTARTPOSX * CELLSIZE) - 12.0f, (((PACMANSTARTPOSY * CELLSIZE) - 12.0f)) });
 
 	PacmanTexture.loadFromFile(PACMANTEXTUREPATH);//Have to do this at every single character... change it, do not want to use pointers
-	animation = new Animation(true);
+	animation = new Animation(this);
 	body.setTexture(&PacmanTexture);
-
+	
 
 	deathStarted = false;
 }
@@ -40,10 +41,13 @@ void Pacman::Draw(RenderWindow& window)
 
 }
 
-bool Pacman::Update(const float& dTime)
+bool Pacman::Update(const float& dTime, RenderWindow& window)
 {
-	if (Game_Over) {
-		if (!deathStarted) {
+	if (paused)
+		return false;
+
+	if (Game_Over) { /* Catastrophic, over complicated logic. Was too lazy to add another state for pacman */
+		if (!deathStarted) { //if death animation did not started yet for pacman, setup and go.
 			deathClock.restart().asSeconds();
 			animation->AimageCount = Vector2u(12, 1);
 			animation->uvRect.width = 16.0f;
@@ -52,15 +56,14 @@ bool Pacman::Update(const float& dTime)
 		}
 		else if (deathClock.getElapsedTime().asSeconds() > 2) {
 			/* animation and return; */
-			if (animation->UpdateCustomOfColumns(4, 12, dTime, 0.10f) >= 12) {
+			if (animation->UpdateCustomOfColumns(4, 12, dTime, 0.10f) >= 12) { //12th is the last image of the pacman death animation.
 				return true;
 			}
 			body.setTextureRect(animation->uvRect);
 		}
 		return false;
 	}
-
-
+	//Not so accurate solution, pollevent should handle events. 
 	if (Keyboard::isKeyPressed(Keyboard::Up)) {
 
 		bufferedDirection.y = -1;
@@ -121,16 +124,20 @@ bool Pacman::Update(const float& dTime)
 	}
 
 	if (checkCollision(dTime)) { //if checkcollision is OK then pacman can move
+
 		body.move(Vector2f(speed * dTime * tempDirection.x, speed * dTime * tempDirection.y));
+		
 		animation->Update(row, dTime, ANIMATIONSWITCHTIME);
 		body.setTextureRect(animation->uvRect);
 	}
+
+	tunnelTeleport(); //Just change position if pacman is @ the end of the tunnel
 
 	/* Pacman should update his data, so the other Ghosts can work with them trough Game and Map. */
 
 	sTempCoordsOnLevel = getTempCoordsOnLevel();
 	sTempDirectionOnLevel = tempDirection;
-	
+
 	return false;
 }
 
@@ -167,7 +174,7 @@ bool Pacman::checkCollision(const float& dTime)
 	nextPosition.x = int((tempPosition.x + moveWith.x) / CELLSIZE);
 	nextPosition.y = int((tempPosition.y + moveWith.y) / CELLSIZE);
 
-	if (Map::GetTile(nextPosition.x, nextPosition.y) != '#')
+	if (Map::GetTile(nextPosition.x, nextPosition.y) != '#' && Map::GetTile(nextPosition.x, nextPosition.y) != '_')
 		return true;
 	return false;
 }
@@ -185,6 +192,18 @@ unsigned short int Pacman::rowToSetForAnimation()
 		: row = 0;
 
 	return row;
+}
+
+void Pacman::tunnelTeleport()
+{
+
+	if (getTempCoordsOnLevel() == Vector2i{ 0,18 } && tempDirection.x == -1) {
+		body.setPosition((27 * CELLSIZE) + 12, (18 * CELLSIZE) + 12);
+	}
+	else if (getTempCoordsOnLevel() == Vector2i{ 27,18 } && tempDirection.x == 1) {
+		body.setPosition((0 * CELLSIZE) + 12, (18 * CELLSIZE) + 12);
+	}
+
 }
 
 //Found an easier solution instead of these

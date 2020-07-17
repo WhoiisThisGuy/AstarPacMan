@@ -3,8 +3,7 @@
 he gets aggressive and starts chasing until he catches PACMAN or PACMAN gets out of the range. */
 
 #include "Ghost.h"
-//#include "ActorState.h"
-//#include "Scatter.h"
+
 #ifndef H_BLINKY
 #define H_BLINKY
 #define BLINKYTEXTUREPATH "Textures/blinky.png"
@@ -24,7 +23,6 @@ public:
 	Vector2i getTempCoordsOnLevel() const;
 
 	static Vector2i sTempCoordsOnLevel;
-	void setStartPositions();
 private:
 	/* Constants start */
 	const short unsigned int BLINKYSTARTX = 13;

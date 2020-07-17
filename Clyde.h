@@ -23,13 +23,13 @@ public:
 	static Vector2i sTempCoordsOnLevel;
 	virtual void moveUpAndDown() override;
 	virtual bool moveToFourteenDotThirtyFive() override;
-	void setStartPositions();
+
 private:
 	/* Constants start */
 	const float CLYDESTARTX = 15.70;
 	const float CLYDESTARTY = 14;
 
-	const Vector2i scatterTargetNode = { 0,34 };
+	const Vector2i scatterTargetNode = { 0,0 };
 	Texture ClydeTexture;//Have to do this at every single character... change it
 	Texture targettexture;
 	CircleShape clydeCircle;

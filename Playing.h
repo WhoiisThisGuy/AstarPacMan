@@ -36,7 +36,11 @@ public:
 private:
 	void Updatedt();
 private:
+	Text readyText;
+
 	float dt;
-	bool paused;
+	/* Textures */
+	Texture ghostsTexture;
+	Texture pacmanTexture;
 };
 

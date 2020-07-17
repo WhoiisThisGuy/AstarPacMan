@@ -13,14 +13,19 @@ Inky::Inky(){
 	ghostBody.setSize(Vector2f(GHOSTBODYSIZE, GHOSTBODYSIZE));
 	ghostBody.setOrigin(GHOSTBODYSIZE / 2, GHOSTBODYSIZE / 2);
 	ghostBody.setPosition(Vector2f((INKYSTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (INKYSTARTY * CELLSIZE) + CELLSIZE / 2));
-	ghostBody.setTexture(&InkyTexture);
+	//ghostBody.setTexture(&InkyTexture);
 
 	activateTimer = 5.0f;
 	active = false;
 	firstcomeout = true;
 	direction.y = -1;
+	rowForAnimation = 2;
+	ghostHouseStartNode = {11,18};
 
+	startDirection = { 0,-1 };
 	state = new GhostHouse(this);
+
+	
 	//targettexture.loadFromFile("Textures/blinkytarget.png");
 
 	//targetMark.setPosition(scatterTargetNode.x * CELLSIZE, scatterTargetNode.y);//Used to show where the target tile is atm
@@ -42,7 +47,6 @@ void Inky::Update(const float& dt)
 
 	state->Update(dt); // Update actual state
 
-	ghostBody.setTextureRect(animation.uvRect); //Uvrect is always changed in the actual state in the Animate function.
 
 	//move
 	//moveOn(dt);
@@ -136,20 +140,3 @@ void Inky::setScatterTargetNode()
 	targetNode = scatterTargetNode;
 }
 
-void Inky::setStartPositions()
-{
-
-	if (state)
-		delete state;
-
-	ghostBody.setPosition(Vector2f((INKYSTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (INKYSTARTY * CELLSIZE) + CELLSIZE / 2));
-
-	activateTimer = 5.0f;
-	active = false;
-	firstcomeout = true;
-	direction.y = -1;
-
-
-	state = new GhostHouse(this);
-
-}

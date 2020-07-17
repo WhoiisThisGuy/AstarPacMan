@@ -12,7 +12,7 @@ void GhostGameOver::Update(const float& dt)
 		ghost->visible = false;
 	}
 
-	ghost->animation.Update(ghost->rowToSetForAnimation(), dt, ghost->ANIMATIONSWITCHTIME);
+	//ghost->animation.Update(ghost->rowToSetForAnimation(), dt, ghost->ANIMATIONSWITCHTIME);
 	
 }
 

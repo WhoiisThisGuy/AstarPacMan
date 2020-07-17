@@ -24,7 +24,7 @@ public:
 	virtual bool moveToFourteenDotThirtyFive() override;
 	void setChaseTargetNode() override;
 	void setScatterTargetNode() override;
-	void setStartPositions();
+
 
 public:
 	Vector2i pacmanTempDirection;

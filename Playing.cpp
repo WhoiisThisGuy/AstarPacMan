@@ -5,10 +5,12 @@
 
 Playing::Playing() {
 
+	
 	if (!backgroundTexture.loadFromFile("Textures/background.png"))
 		std::cout << "could not load background file";
 	backgroundSprite.setTexture(backgroundTexture);
 	backgroundSprite.setPosition(0.0f, 4*24); //4*24 is the extra 4 row
+	pacmanTexture.loadFromFile(PACMANTEXTUREPATH);
 	paused = false;
 }
 
@@ -16,7 +18,7 @@ void Playing::Updatedt()
 {
 
 	dt = deltaClock.restart().asSeconds();
-
+	//gameclock.restart().asSeconds()
 }
 
 void Playing::Render(RenderWindow& window) {
@@ -36,7 +38,6 @@ void Playing::Render(RenderWindow& window) {
 
 GameState* Playing::Update(RenderWindow& window)
 {
-
 	while (window.pollEvent(event))
 	{
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
@@ -49,21 +50,32 @@ GameState* Playing::Update(RenderWindow& window)
 		}
 	}
 
+	if (paused) { //When a ghost is eaten
+		if (deltaClock.getElapsedTime().asSeconds() > 1) {
+			paused = false;
+			Updatedt();
+		}
+		
+		return NULL;
+	}
+
 	Updatedt();
-	
-	if (pacman.Update(dt)) { //if returns true = gameover, else go on
+
+	map.Update();
+
+	if (pacman.Update(dt,window)) { //if returns true = gameover, else go on
 		Game_Over = false;
 		return new Menu();
 	} 
 
-	map.Update();
+	
 
 	blinky.Update(dt);
 	inky.Update(dt);
 	pinky.Update(dt);
 	clyde.Update(dt);
 
-	if (glob_powerOn)
+	if (glob_powerOn) /* Once all the ghosts are updated to change into frighten state -> turn off the power on mode. */
 		glob_powerOn = false;
 
 	Render(window);

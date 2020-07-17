@@ -11,12 +11,17 @@ Blinky::Blinky(){
 	ghostBody.setSize(Vector2f(GHOSTBODYSIZE, GHOSTBODYSIZE));
 	ghostBody.setOrigin(GHOSTBODYSIZE / 2, GHOSTBODYSIZE / 2);
 	ghostBody.setPosition(Vector2f((BLINKYSTARTX * CELLSIZE)+ CELLSIZE/2, MAPOFFSET+(BLINKYSTARTY * CELLSIZE)+ CELLSIZE / 2));
-	ghostBody.setTexture(&BlinkyTexture);
+	//ghostBody.setTexture(&BlinkyTexture);
 
 	firstcomeout = false;
-	direction.x = -1;
+
+	startDirection = { -1,0 };
+
+	direction = startDirection;
 	
+	ghostHouseStartNode = {13,18};
 	state = new Scatter(this);
+	rowForAnimation = 0;
 	
 	//targettexture.loadFromFile("Textures/blinkytarget.png");
 
@@ -36,10 +41,8 @@ void Blinky::Update(const float& dt)
 	pacManTempCoordsOnLevel = Pacman::sTempCoordsOnLevel;
 
 	state->Update(dt);
-	//moveOn(dt);
-	//targetMark.setPosition((targetNode.x * CELLSIZE) + CELLSIZE / 2, (targetNode.y * CELLSIZE) + CELLSIZE / 2);//Used to show where the target tile is atm
 
-	ghostBody.setTextureRect(animation.uvRect);
+	//targetMark.setPosition((targetNode.x * CELLSIZE) + CELLSIZE / 2, (targetNode.y * CELLSIZE) + CELLSIZE / 2);//Used to show where the target tile is atm
 	
 	sTempCoordsOnLevel = getTempCoordsOnLevel(); //For Inky
 }
@@ -69,17 +72,6 @@ Vector2i Blinky::getTempCoordsOnLevel() const /* Gives back the top left corners
 	return Position;
 }
 
-void Blinky::setStartPositions()
-{
-	if (state)
-		delete state;
-	
-	ghostBody.setPosition(Vector2f((BLINKYSTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (BLINKYSTARTY * CELLSIZE) + CELLSIZE / 2));
-	firstcomeout = false;
-	direction.x = -1;
-
-	state = new Scatter(this);
-}
 
 //void Blinky::FindPath() Old method
 //{

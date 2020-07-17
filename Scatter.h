@@ -12,7 +12,7 @@ public:
 	void Update(const float &dt) override; //Update
 private:
 	Ghost* ghost;
-	
+	uint16_t STATENUMBER; //how many times the ghost had been in this state
 private:
 	void Init() override;
 	

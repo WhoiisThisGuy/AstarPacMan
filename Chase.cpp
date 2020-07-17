@@ -2,6 +2,7 @@
 #include "Scatter.h"
 #include "Frighten.h"
 #include "GhostGameOver.h"
+#include "Tunneling.h"
 
 
 Chase::Chase(Ghost * pghost) {
@@ -13,6 +14,10 @@ Chase::Chase(Ghost * pghost) {
 
 void Chase::Update(const float& dt)
 {
+
+	if (paused)
+		return;
+
 	if (Game_Over) {
 		Exit(eGameOver);
 		return;
@@ -27,43 +32,56 @@ void Chase::Update(const float& dt)
 		return;
 	}
 
+	ghost->animation.Update(dt,ghost->ANIMATIONSWITCHTIME);
+	ghost->UpdateTexture();
 
-
-	ghost->animation.Update(ghost->rowToSetForAnimation(), dt, ghost->ANIMATIONSWITCHTIME);
 	if (glob_powerOn && !ghost->isFrightened) {
 	
 		Exit(eFrighten);
 		return;
 	}
 
-
-
-	if (stateTime > 13) {
+	if (LEVELNUMBER < 6 && stateTime >chaseTimings[STATENUMBER][LEVELNUMBER]) {
 		Exit();
 		return;
 	}
-	
-	if (ghost->turningPointReached()) {
+
+	if (ghost->turningPointReached() || ghost->tunnelPointReached()) {
+		if (ghost->inTunnel) {
+			Exit(eTunneling);
+			return;
+		}
 		ghost->setChaseTargetNode();
 		ghost->calculateNewDirection();
+		ghost->animation.firstImage = ghost->getDirectionForAnimation();
+		ghost->animation.imageToSet.x = ghost->animation.firstImage;
+		ghost->animation.lastImage = ghost->animation.firstImage + 1;
 	}
 	ghost->moveOn(dt);
 }
 
 void Chase::Init()
 {
+	ghost->currentState = eChase;
+	++STATENUMBER;
+	ghost->speed = elroy1 ? levelValues[LEVELNUMBER][6] : elroy2 ? levelValues[LEVELNUMBER][8] : levelValues[LEVELNUMBER][3];
+
 	stateClock.restart().asSeconds();
 	//Flip direction
-	//ghost->calculateNewDirection();
-	ghost->currentState = eChase;
+	
+	ghost->turnAround();
+	ghost->animation.firstImage = ghost->getDirectionForAnimation();
+	ghost->animation.imageToSet.x = ghost->animation.firstImage;
+	ghost->animation.imageToSet.y = ghost->rowForAnimation;
+	ghost->animation.lastImage = 2;
 }
 
 void Chase::Exit(const ghostState& state)
 {
-	ghost->turnAround();
 
 	switch (state) {
 	case eScatter:
+		ghost->turnAround();
 		ghost->setState(new Scatter(ghost));
 		break;
 	case eFrighten:
@@ -72,6 +90,9 @@ void Chase::Exit(const ghostState& state)
 		break;
 	case eGameOver:
 		ghost->setState(new GhostGameOver(ghost));
+		break;
+	case eTunneling:
+		ghost->setState(new Tunneling(ghost));
 		break;
 	}
 }

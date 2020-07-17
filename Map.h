@@ -1,12 +1,13 @@
 #include <SFML\Graphics.hpp>
 #include <string>
 #include <list>
+#include "LevelVariables.h"
+
+/* I consider Map as the bridge between playing class and the character classes pacman, ghosts etc. There are global variables*/
 
 using namespace sf;
 using std::string;
 using std::list;
-
-
 
 #ifndef MAP_H
 
@@ -14,8 +15,10 @@ using std::list;
 
 extern bool glob_powerOn; //Defined in Map.cpp, only Map and Scatter, Chase, Frighten mods are using it.
 extern bool Game_Over;
-
-extern unsigned short int glob_frightenModeTimer; //Defined in Map.cpp, Frighten mode uses it.
+extern bool paused;
+extern bool elroy1;
+extern bool elroy2;
+extern unsigned short int LEVELNUMBER;
 
 #define MAPOFFSET 4*24 //Needed this for the start positions of the characters
 #define MAPWIDTH 28
@@ -49,7 +52,7 @@ private:
 
 		pellet() {
 
-			pelletBody.setSize(Vector2f(4, 4));
+			pelletBody.setSize(Vector2f(5, 5));
 			pelletBody.setFillColor(Color(255, 183, 174));
 			pelletBody.setOrigin(2, 2);
 
@@ -94,7 +97,7 @@ private:
 	float CellSize;
 	unsigned int uCellSize;
 
-	pellet pelletArray[246];
+	pellet pelletArray[244];
 	list<powerPellet> powerPelletList;
 
 private:

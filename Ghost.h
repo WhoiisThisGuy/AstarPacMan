@@ -5,6 +5,9 @@
 #ifndef H_GHOST
 #define H_GHOST
 
+#define SCORETEXTUREROW 4
+#define EYEBALLSTEXTUREROW 1
+
 class Ghost
 {
 public:
@@ -17,15 +20,19 @@ public:
 
 	virtual void setChaseTargetNode() = 0;
 	virtual void setScatterTargetNode() = 0;
-	virtual void setStartPositions() = 0;
+	void setSpeed(float speed_) { speed = speed_; };
+	Vector2i getTargetNode() const { return targetNode; }
 
 	/* New movement version */
 	bool turningPointReached();
+	bool tunnelPointReached(); //Tunnel point is marked with the character 's' on the Map.
 	void calculateNewDirection();
+	void calculateNewDirectionEatenMode();
 	/* ******************** */
 
 	void turnAround();
 	void setDirection();
+	void setDirection(Vector2i);
 	//inline bool collideWithPacman() { //delete this if the v2 version works fine
 	//	sf::FloatRect pacmanRect = Map::getPacmanTempGlobalBounds();
 	//	sf::FloatRect ghostRect;
@@ -47,7 +54,7 @@ public:
 
 	void chooseRandomDirection();
 
-	unsigned short int rowToSetForAnimation();
+	unsigned short int getDirectionForAnimation();
 	bool comeOutFromHouse();
 	bool isActive() const { return active; }
 
@@ -59,31 +66,38 @@ public:
 		return ghostTempCoord;
 	}
 	void moveOn(const float& dt);
+	bool tunnelTeleport();
+	void UpdateTexture();
 public:
-
+	Vector2i ghostHouseStartNode;
 	/* Was too lazy to write get and sets for these. */
 
 	bool firstcomeout; //coming out first from the house?
 	bool limitspeed; //is the speed limited?
 	bool isFrightened;
 	float activateTimer; //When can the ghost come out from the house
-	const float ANIMATIONSWITCHTIME = 0.50f;
+	float ANIMATIONSWITCHTIME = 0.25f;
 	bool active; 
 	bool visible;
+	bool inTunnel;
+	unsigned short int rowForAnimation;
+	int speed;
+	Vector2i startDirection;
 
 	ghostState currentState;
 	Animation animation;
-	
+	static Texture ghostTexture;
 protected:
 
 	/* constants start */
-	const int SPEED = 150;
 	const int LIMITEDSPEED = 80;
 	const float GHOSTBODYSIZE = 40.0f;
 	const float TURNNZONELOWERBOUND = 0.40f;
 	const float TURNNZONEUPPERBOUND = 0.60f;
 	const Vector2u imageCount = {2,8};
+	
 	/* constants end */
+	
 
 	RectangleShape ghostBody; //ghostBody
 

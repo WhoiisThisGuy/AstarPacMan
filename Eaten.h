@@ -7,7 +7,7 @@ class Eaten :
 {
 
 public:
-	Eaten(Ghost* ghostToHandle, ghostState& prevState);
+	Eaten(Ghost* ghostToHandle,const ghostState& prevState, const unsigned short int&);
 	virtual void Update(const float& dt);
 private:
 	Ghost* ghost;
