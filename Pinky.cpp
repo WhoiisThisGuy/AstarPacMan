@@ -16,12 +16,14 @@ Pinky::Pinky() {
 	activateTimer = 0.0f;
 	active = false;
 	firstcomeout = true;
-	direction.y = -1;
+	//direction.y = -1;
 	rowForAnimation = 1;
 	ghostHouseStartNode = { 13,18 };
+
+	startDirection = { 0,-1 };
 	state = new GhostHouse(this);
 	//targettexture.loadFromFile("Textures/blinkytarget.png");
-	startDirection = { 0,-1 };
+	
 	//targetMark.setPosition(scatterTargetNode.x * CELLSIZE, scatterTargetNode.y);//Used to show where the target tile is atm
 	//targetMark.setTexture(&targettexture);
 	//targetMark.setSize(Vector2f{ CELLSIZE,CELLSIZE });
@@ -29,7 +31,7 @@ Pinky::Pinky() {
 
 Pinky::~Pinky()
 {
-
+	std::cout << "Pinky destroyed";
 }
 
 void Pinky::Update(const float& dt)

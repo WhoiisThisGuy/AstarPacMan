@@ -6,7 +6,8 @@ using std::to_string;
 Vector2i Pacman::sTempCoordsOnLevel = { 0 ,0 };
 Vector2i Pacman::sTempDirectionOnLevel = { 0 ,0 };
 bool Pacman::normalSpeedOn = true;
-float Pacman::speed = levelValues[LEVELNUMBER][1];
+float Pacman::speed = levelValues[LEVELNUMBER][2];
+RectangleShape Pacman::body;
 
 Pacman::Pacman() {
 
@@ -206,6 +207,7 @@ void Pacman::tunnelTeleport()
 
 }
 
+//Just left it here to see the progress
 //Found an easier solution instead of these
 
 //

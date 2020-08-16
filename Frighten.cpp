@@ -3,6 +3,7 @@
 #include "Chase.h"
 #include "Eaten.h"
 #include "Tunneling.h"
+#include "GhostGameOver.h"
 
 unsigned short int Frighten::eatenNum = 0;
 
@@ -12,7 +13,6 @@ Frighten::Frighten(Ghost* ghostToHandle, ghostState prevState) {
 	previousState = prevState;
 	//std::cout << "SCATTER\n";
 	ghost->isFrightened = true;
-	ghost->limitspeed = true;
 	ghost->currentState = eFrighten;
 	Init();
 }
@@ -23,6 +23,11 @@ void Frighten::Update(const float& dt)
 
 	if (paused)
 		return;
+
+	if (Game_Over || Game_Win) {
+		Exit(eGameOver);
+		return;
+	}
 
 	//if eaten exit here
 	if (ghost->collideWithPacman()) {
@@ -76,7 +81,7 @@ void Frighten::Animate(const float &stateTime,const float &dt)
 
 void Frighten::Init()
 {
-	ghost->speed = levelValues[LEVELNUMBER][11];
+	ghost->speed = levelValues[LEVELNUMBER][12];
 	ghost->turnAround();
 	animationCounter = 0;
 	stateClock.restart().asSeconds();
@@ -90,7 +95,6 @@ void Frighten::Init()
 
 void Frighten::Exit(const ghostState& state)
 {
-	ghost->limitspeed = false;
 	ghost->isFrightened = false;
 
 	ghost->ANIMATIONSWITCHTIME = 0.25;
@@ -118,6 +122,9 @@ void Frighten::Exit(const ghostState& state)
 			break;
 		case eTunneling:
 			ghost->setState(new Tunneling(ghost));
+			break;
+		case eGameOver:
+			ghost->setState(new GhostGameOver(ghost));
 			break;
 	}
 	

@@ -16,7 +16,7 @@ void Scatter::Update(const float &dt)
 	if (paused)
 		return;
 
-	if (Game_Over) {
+	if (Game_Over || Game_Win) {
 		Exit(eGameOver);
 		return;
 	}
@@ -65,10 +65,10 @@ void Scatter::Update(const float &dt)
 void Scatter::Init()
 {
 	ghost->currentState = eScatter;
-	++STATENUMBER;
+	
 
-	ghost->speed = elroy1 ? levelValues[LEVELNUMBER][6] : elroy2 ? levelValues[LEVELNUMBER][8] : levelValues[LEVELNUMBER][3];
-
+	ghost->speed = elroy1 ? levelValues[LEVELNUMBER][6] : elroy2 ? levelValues[LEVELNUMBER][8] : levelValues[LEVELNUMBER][4];
+	//ghost->speed = 100.0f;
 	stateClock.restart().asSeconds();
 	ghost->animation.selectBox = { 16,16 }; //default 16x16 for ghosts
 	ghost->animation.uvRect.width = 14;
@@ -87,11 +87,12 @@ void Scatter::Exit(const ghostState& state)
 	switch (state) {
 
 	case eChase:
+		++STATENUMBER;
 		ghost->turnAround();
 		ghost->setState(new Chase(ghost));
 		break;
 	case eFrighten:
-		ghost->turnAround();
+		
 		ghost->setState(new Frighten(ghost, ghost->currentState));
 		break;
 	case eGameOver:

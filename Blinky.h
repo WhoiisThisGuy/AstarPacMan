@@ -28,7 +28,7 @@ private:
 	const short unsigned int BLINKYSTARTX = 13;
 	const short unsigned int BLINKYSTARTY = 11;
 
-	const Vector2i scatterTargetNode = {27,9};
+	const Vector2i scatterTargetNode = {23,4};
 	Texture BlinkyTexture;//Have to do this at every single character... change it
 	Texture targettexture;
 	

@@ -4,6 +4,7 @@ class Menu : public GameState
 {
 public:
 	Menu();
+	~Menu();
 	GameState* Update(RenderWindow&);
 	void Render(RenderWindow& );
 	void EventsUpdate(GameState* , RenderWindow& );

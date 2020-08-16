@@ -1,6 +1,9 @@
 #include "Animation.h" //Animation includes the Grahpics.hpp
 #include "ActorState.h"
 #include "Map.h"
+#include <stack>
+
+using namespace std;
 
 #ifndef H_GHOST
 #define H_GHOST
@@ -73,14 +76,13 @@ public:
 	/* Was too lazy to write get and sets for these. */
 
 	bool firstcomeout; //coming out first from the house?
-	bool limitspeed; //is the speed limited?
 	bool isFrightened;
 	float activateTimer; //When can the ghost come out from the house
 	float ANIMATIONSWITCHTIME = 0.25f;
 	bool active; 
 	bool visible;
 	bool inTunnel;
-	unsigned short int rowForAnimation;
+	unsigned short int rowForAnimation; //Stores the row for the right colored ghost.
 	int speed;
 	Vector2i startDirection;
 
@@ -105,6 +107,8 @@ protected:
 
 	ActorState* state;
 
+	stack<Vector2i> path;
+
 	Vector2i direction;  //temporary direction
 	Vector2i targetNode; //final destination
 	Vector2i directionNode; //What is the next node to go into
@@ -123,6 +127,11 @@ protected:
 			abs(y2 - y1);
 	}
 	
+	float eucledianDistance(int x1, int y1, int x2, int y2) {
+		return sqrt(pow((x2-x1),2) + pow((y2 - y1), 2));
+	}
+
+	void findPath();
 
 private:
 	Vector2i previousTurningpoint;

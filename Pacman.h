@@ -19,7 +19,9 @@ public:
 	bool Update(const float& dTime, RenderWindow& window);
 
 	//Vector2i getTempCoordsOnLevel() const;
-	Vector2f getTempPosOnLevel() const { return body.getPosition(); };
+	static FloatRect getTempPosOnLevel() {
+		return body.getGlobalBounds();
+	}
 
 	Vector2i getTempDirection() const { return tempDirection; }
 
@@ -58,7 +60,7 @@ private:
 	/*
 	Constants END
 	*/
-	RectangleShape body;
+	static RectangleShape body;
 	Texture PacmanTexture;//Have to do this at every single character... change it
 	string health;
 

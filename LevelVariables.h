@@ -1,14 +1,20 @@
 #pragma once
 
+#include "SFML\Graphics.hpp"
+
 #ifndef H_LEVELVALUES
+using namespace sf;
 #define H_LEVELVALUES
 /* This header file contains the values for timings, scores, fruits etc. depending on the level */
 #define GAMESTARTPAUSETIME 3
 #define GHOSTCAUGHTPAUSETIME 1
 
-#define PACMANBASICSPEED 200 //100% speed
-#define GHOSTBASICSPEED 213 //100% speed
+#define PACMANBASICSPEED 240 //100% speed
+#define GHOSTBASICSPEED 237 //100% speed
 
+extern Font font;
+
+extern unsigned short int LEVELNUMBER;
 extern constexpr unsigned short int percentage(unsigned short int n, unsigned short int p); //p % of the n number
 
 /* This table contains the following informations:
@@ -31,5 +37,8 @@ extern float scatterTimings[4][5];
 /* 0 means infinite */
 
 extern unsigned short int chaseTimings[4][5];
+
+extern unsigned short int fruitAppear[22];
+extern unsigned short int FRUITNUMBER; //0. is the first fruit
 
 #endif

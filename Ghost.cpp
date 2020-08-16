@@ -27,10 +27,12 @@ Ghost::Ghost() :animation(this){
 
 Ghost::~Ghost()
 {
+	cout << "Ghost destructed" << endl;
 	if (state)
 		delete state;
 
 }
+
 
 bool Ghost::turningPointReached()
 {
@@ -68,17 +70,17 @@ bool Ghost::tunnelPointReached()
 void Ghost::calculateNewDirection()
 {
 	Vector2i tempCoordinates = ghostTempCorrdinate();
-	int shortestDistFromTargetNode = 1000, temp;
+	float shortestDistFromTargetNode = 1000, temp;
 
 	//Right
 	if (direction.x != -1 && Map::GetTile(tempCoordinates.x + 1, tempCoordinates.y) != '#') {
-		shortestDistFromTargetNode = manhattanDistance(tempCoordinates.x + 1, tempCoordinates.y, targetNode.x, targetNode.y);
+		shortestDistFromTargetNode = eucledianDistance(tempCoordinates.x + 1, tempCoordinates.y, targetNode.x, targetNode.y);
 		directionNode = { tempCoordinates.x + 1, tempCoordinates.y };
 
 	}
 	//Down
 	if (direction.y != -1 && Map::GetTile(tempCoordinates.x, tempCoordinates.y + 1) != '#' && Map::GetTile(tempCoordinates.x, tempCoordinates.y + 1) != 'd' && Map::GetTile(tempCoordinates.x, tempCoordinates.y + 1) != '_') {
-		temp = manhattanDistance(tempCoordinates.x, tempCoordinates.y + 1, targetNode.x, targetNode.y);
+		temp = eucledianDistance(tempCoordinates.x, tempCoordinates.y + 1, targetNode.x, targetNode.y);
 		if (temp <= shortestDistFromTargetNode) {
 			shortestDistFromTargetNode = temp;
 			directionNode = { tempCoordinates.x, tempCoordinates.y+1 };
@@ -88,7 +90,7 @@ void Ghost::calculateNewDirection()
 	}
 	//Left
 	if (direction.x != 1 && Map::GetTile(tempCoordinates.x - 1, tempCoordinates.y) != '#') {
-		temp = manhattanDistance(tempCoordinates.x - 1, tempCoordinates.y, targetNode.x, targetNode.y);
+		temp = eucledianDistance(tempCoordinates.x - 1, tempCoordinates.y, targetNode.x, targetNode.y);
 		if (temp <= shortestDistFromTargetNode) {
 			shortestDistFromTargetNode = temp;
 			directionNode = { tempCoordinates.x - 1, tempCoordinates.y };
@@ -97,7 +99,7 @@ void Ghost::calculateNewDirection()
 	}
 	//Up
 	if (direction.y != 1 && Map::GetTile(tempCoordinates.x, tempCoordinates.y - 1) != '#' && Map::GetTile(tempCoordinates.x, tempCoordinates.y - 1) != 'd') {
-		temp = manhattanDistance(tempCoordinates.x, tempCoordinates.y - 1, targetNode.x, targetNode.y);
+		temp = eucledianDistance(tempCoordinates.x, tempCoordinates.y - 1, targetNode.x, targetNode.y);
 		if (temp <= shortestDistFromTargetNode) {
 			directionNode = { tempCoordinates.x, tempCoordinates.y - 1 };
 		}
@@ -110,38 +112,39 @@ void Ghost::calculateNewDirection()
 void Ghost::calculateNewDirectionEatenMode()
 {
 	Vector2i tempCoordinates = ghostTempCorrdinate();
-	unsigned short int shortestDistFromTargetNode = 100, temp;
+	float shortestDistFromTargetNode = 1000, temp;
 
 	//Right
 	if (direction.x != -1 && Map::GetTile(tempCoordinates.x + 1, tempCoordinates.y) != '#') {
-		shortestDistFromTargetNode = manhattanDistance(tempCoordinates.x + 1, tempCoordinates.y, targetNode.x, targetNode.y);
+		shortestDistFromTargetNode = eucledianDistance(tempCoordinates.x + 1, tempCoordinates.y, targetNode.x, targetNode.y);
 		directionNode = { tempCoordinates.x + 1, tempCoordinates.y };
 
 	}
-	//Down
-	if (direction.y != -1 && Map::GetTile(tempCoordinates.x, tempCoordinates.y + 1) != '#') {
-		temp = manhattanDistance(tempCoordinates.x, tempCoordinates.y + 1, targetNode.x, targetNode.y);
-		if (temp <= shortestDistFromTargetNode) {
-			shortestDistFromTargetNode = temp;
-			directionNode = { tempCoordinates.x, tempCoordinates.y + 1 };
 
-		}
-
-	}
-	//Left
-	if (direction.x != 1 && Map::GetTile(tempCoordinates.x - 1, tempCoordinates.y) != '#') {
-		temp = manhattanDistance(tempCoordinates.x - 1, tempCoordinates.y, targetNode.x, targetNode.y);
-		if (temp <= shortestDistFromTargetNode) {
-			shortestDistFromTargetNode = temp;
-			directionNode = { tempCoordinates.x - 1, tempCoordinates.y };
-
-		}
-	}
 	//Up
 	if (direction.y != 1 && Map::GetTile(tempCoordinates.x, tempCoordinates.y - 1) != '#') {
-		temp = manhattanDistance(tempCoordinates.x, tempCoordinates.y - 1, targetNode.x, targetNode.y);
-		if (temp <= shortestDistFromTargetNode) {
+		temp = eucledianDistance(tempCoordinates.x, tempCoordinates.y - 1, targetNode.x, targetNode.y);
+		if (temp < shortestDistFromTargetNode) {
+			shortestDistFromTargetNode = temp;
 			directionNode = { tempCoordinates.x, tempCoordinates.y - 1 };
+		}
+
+	}
+
+	//Left
+	if (direction.x != 1 && Map::GetTile(tempCoordinates.x - 1, tempCoordinates.y) != '#') {
+		temp = eucledianDistance(tempCoordinates.x - 1, tempCoordinates.y, targetNode.x, targetNode.y);
+		if (temp < shortestDistFromTargetNode) {
+			shortestDistFromTargetNode = temp;
+			directionNode = { tempCoordinates.x - 1, tempCoordinates.y };
+		}
+	}
+		//Down
+	if (direction.y != -1 && Map::GetTile(tempCoordinates.x, tempCoordinates.y + 1) != '#') {
+		temp = eucledianDistance(tempCoordinates.x, tempCoordinates.y + 1, targetNode.x, targetNode.y);
+		if (temp < shortestDistFromTargetNode) {
+//			shortestDistFromTargetNode = temp; last one is not needed
+			directionNode = { tempCoordinates.x, tempCoordinates.y + 1 };
 		}
 
 	}
@@ -213,14 +216,8 @@ void Ghost::moveOn(const float& dt)
 
 	Vector2f movement = {0.0f,0.0f};
 
-	if (limitspeed) {
-		movement.x = LIMITEDSPEED * dt * direction.x;
-		movement.y = LIMITEDSPEED * dt * direction.y;
-	}
-	else {
-		movement.x = speed * dt * direction.x;
-		movement.y = speed * dt * direction.y;
-	}
+	movement.x = speed * dt * direction.x;
+	movement.y = speed * dt * direction.y;
 
 	ghostBody.move(movement);
 	return;
@@ -245,6 +242,50 @@ void Ghost::UpdateTexture()
 {
 	ghostBody.setTextureRect(animation.uvRect);
 }
+
+//void Ghost::findPath()
+//{
+//
+//	Vector2i tempCoordinates = ghostTempCorrdinate();
+//	int shortestDistFromTargetNode = 1000, temp;
+//
+//	//Right
+//	if (direction.x != -1 && Map::GetTile(tempCoordinates.x + 1, tempCoordinates.y) != '#') {
+//		shortestDistFromTargetNode = manhattanDistance(tempCoordinates.x + 1, tempCoordinates.y, targetNode.x, targetNode.y);
+//		directionNode = { tempCoordinates.x + 1, tempCoordinates.y };
+//
+//	}
+//	//Down
+//	if (direction.y != -1 && Map::GetTile(tempCoordinates.x, tempCoordinates.y + 1) != '#') {
+//		temp = manhattanDistance(tempCoordinates.x, tempCoordinates.y + 1, targetNode.x, targetNode.y);
+//		if (temp < shortestDistFromTargetNode) {
+//			shortestDistFromTargetNode = temp;
+//			directionNode = { tempCoordinates.x, tempCoordinates.y + 1 };
+//		}
+//
+//	}
+//	//Left
+//	if (direction.x != 1 && Map::GetTile(tempCoordinates.x - 1, tempCoordinates.y) != '#') {
+//		temp = manhattanDistance(tempCoordinates.x - 1, tempCoordinates.y, targetNode.x, targetNode.y);
+//		if (temp < shortestDistFromTargetNode) {
+//			shortestDistFromTargetNode = temp;
+//			directionNode = { tempCoordinates.x - 1, tempCoordinates.y };
+//		}
+//	}
+//	//Up
+//	if (direction.y != 1 && Map::GetTile(tempCoordinates.x, tempCoordinates.y - 1) != '#') {
+//		temp = manhattanDistance(tempCoordinates.x, tempCoordinates.y - 1, targetNode.x, targetNode.y);
+//		if (temp < shortestDistFromTargetNode) {
+//			directionNode = { tempCoordinates.x, tempCoordinates.y - 1 };
+//		}
+//
+//	}
+//
+//	path.push();
+//
+//	setDirection();
+//
+//}
 void Ghost::turnAround()
 {
 	direction.x *= -1;

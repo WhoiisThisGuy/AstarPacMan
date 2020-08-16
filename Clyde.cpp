@@ -25,23 +25,24 @@ Clyde::Clyde() {
 	//clydeCircle.setPosition(ghostBody.getPosition());
 	ghostHouseStartNode = { 16,18 };
 	rowForAnimation = 3;
-	activateTimer = 5.0f;
+	activateTimer = 0.0f; //5
 	active = false;
 	firstcomeout = true;
 	direction.y = -1;
 	startDirection = { 0,-1 };
 	//stateStack.push(new GhostHouse(this));
-	state = new GhostHouse(this);
+	
 	targettexture.loadFromFile("Textures/blinkytarget.png");
 
-	//targetMark.setPosition(scatterTargetNode.x * CELLSIZE, scatterTargetNode.y);//Used to show where the target tile is atm
-	//targetMark.setTexture(&targettexture);
-	//targetMark.setSize(Vector2f{ CELLSIZE,CELLSIZE });
+	targetMark.setPosition(scatterTargetNode.x * CELLSIZE, scatterTargetNode.y);//Used to show where the target tile is atm
+	targetMark.setTexture(&targettexture);
+	targetMark.setSize(Vector2f{ CELLSIZE,CELLSIZE });
+	state = new GhostHouse(this);
 }
 
 Clyde::~Clyde()
 {
-
+	std::cout << "Clyde destroyed";
 }
 
 void Clyde::Update(const float& dt)
@@ -72,7 +73,7 @@ void Clyde::Update(const float& dt)
 //{
 //
 //	window.draw(ghostBody);
-//	//window.draw(targetMark);
+//	window.draw(targetMark);
 //	//window.draw(clydeCircle);
 //	//window.draw(realBody); //only for debug DELETE IT
 //}

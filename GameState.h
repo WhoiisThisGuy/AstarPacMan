@@ -1,11 +1,15 @@
 #pragma once
-#include "SFML\Graphics.hpp"
+#include "LevelVariables.h"
+#include <iostream>
+
 using namespace sf;
+
 
 class GameState
 {
 public:
-	GameState() {};
+	GameState() { font.loadFromFile("Joystix.TTF"); }
+	virtual ~GameState() { std::cout << "GameState destructed" << std::endl; }
 	virtual GameState* Update(RenderWindow&) = 0;
 
 };

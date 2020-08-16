@@ -1,5 +1,6 @@
 #include "Map.h"
 #include "Pacman.h"
+#include "Fruit.h"
 #include <iostream>
 
 using std::iterator;
@@ -9,7 +10,8 @@ string Map::level = "";
 bool paused = true;
 bool glob_powerOn = false;
 bool Game_Over = false;
-unsigned short int LEVELNUMBER = 0; //0. is the first level
+bool Game_Win = false;
+
 bool elroy1 = false;
 bool elroy2 = false;
 
@@ -31,21 +33,50 @@ Map::Map() {
 	LoadMap();
 	LoadPellets();
 	//texturePowerPellet.loadFromFile("powerpellet.png");
+
+	fruitsSpawned = 0;
 }
 Map::~Map()
 {
-
+	std::cout << "map destroyed"<<std::endl;
 }
 
 void Map::Update()
 {
 
-	checkPelletPacmanCollision();
+	if (checkFruitPacmanCollision()) {
+		fruit.eaten();
+	}
+
+	handlePellets();
+
+	int numOfPellets = 0;
+
+	for (auto& a : pelletArray) {
+
+		if (a.isActive ) {
+			++numOfPellets;
+		}
+	}
+
+	if (numOfPellets == 0) {
+		Game_Win = true;
+		paused = true;
+		++LEVELNUMBER;
+		return;
+	}
+	if (fruitsSpawned < 2 && LEVELNUMBER < 22 && fruitAppear[FRUITNUMBER] >= numOfPellets) {
+		fruit.activate(levelValues[LEVELNUMBER][0]);
+		++fruitsSpawned;
+		++FRUITNUMBER;
+	}
+	fruit.Update();
+	return;
 }
 
 void Map::Draw(RenderWindow& window)
 {
-
+	fruit.Draw(window);
 	for (auto& a : pelletArray)
 		if (a.isActive) {
 			window.draw(a.pelletBody);
@@ -54,9 +85,9 @@ void Map::Draw(RenderWindow& window)
 		window.draw(a.powerPelletBody);
 }
 
-void Map::checkPelletPacmanCollision()
+void Map::handlePellets() //This makes the fruit appear aswell
 {
-
+	
 	Vector2i pelletTempCoords;
 
 	for (auto& a : powerPelletList) {
@@ -71,6 +102,7 @@ void Map::checkPelletPacmanCollision()
 	}
 
 	for (auto& a : pelletArray) {
+
 		if (a.isActive && a.getCoordinates() == Pacman::sTempCoordsOnLevel) {
 			//set up pacman dot speed here
 			a.isActive = false;
@@ -78,10 +110,11 @@ void Map::checkPelletPacmanCollision()
 			return;
 		}
 	}
+
 	//set up pacman dot speed here
 	if (!Pacman::normalSpeedOn) {
 		Pacman::normalSpeedOn = true;
-		Pacman::speed = levelValues[LEVELNUMBER][1];
+		Pacman::speed = levelValues[LEVELNUMBER][3];
 		return;
 	}
 }
@@ -91,9 +124,95 @@ char Map::GetTile(int x, int y)
 	return level[y * MAPWIDTH + x];
 }
 
+bool Map::checkFruitPacmanCollision()
+{
+	//Pacmancoords: megvan
+	//fruitcoords: megvan
+
+	return fruit.checkCollision(Pacman::getTempPosOnLevel());
+}
+
 void Map::LoadMap()
 {
 	//35*28
+	level += "############################"; //Define as big off set as the plus rows, see in the Map h
+	level += "############################"; // plus row
+	level += "############################"; // plus row
+	level += "############################"; // plus row
+	level += "############################"; // change the position se instead of these plus rows
+	level += "#            ##            #";
+	level += "# #### ##### ## ##### #### #";
+	level += "#O#### ##### ## ##### ####O#";
+	level += "# #### ##### ## ##### #### #";
+	level += "#                          #";
+	level += "# #### ## ######## ## #### #";
+	level += "# #### ## ######## ## #### #";
+	level += "#      ##    ##    ##      #";
+	level += "###### ##### ## ##### ######";
+	level += "###### #####d##d##### ######";
+	level += "###### ##t  tttt  t## ######";
+	level += "###### ## ###__### ## ######";
+	level += "###### ## #      # ## ######";
+	level += "L    s   t#  tt  #t   s    R";
+	level += "###### ## #      # ## ######";
+	level += "###### ## ######## ## ######";
+	level += "###### ##t        t## ######";
+	level += "###### ## ######## ## ######";
+	level += "###### ## ######## ## ######";
+	level += "#            ##            #";
+	level += "# #### ##### ## ##### #### #";
+	level += "# #### #####d##d##### #### #";
+	level += "#O  ##.               ##  O#";
+	level += "### ## ## ######## ## ## ###";
+	level += "### ## ## ######## ## ## ###";
+	level += "#      ##    ##    ##      #";
+	level += "# ########## ## ########## #";
+	level += "# ########## ## ########## #";
+	level += "#                          #";
+	level += "############################";
+
+}
+
+void Map::LoadPellets()
+{
+
+	//Idea is that I can directly index the level array and here I can set the pelletArray elements directly aswell by using the index variable to help counting.
+	//I only increase index if I passed a pellet (power or not).
+	//I should get the reversed version of this so I could directly access the actual pellet with pacmans actual coordinates.
+
+	int index = 0;
+	for (int i = 5; i < MAPROWS; ++i) {
+		for (int j = 1; j < MAPCOLUMNS - 1; ++j) {
+
+			if (level[i * MAPWIDTH + j] == '.' || level[i * MAPWIDTH + j] == 'T') {
+				pelletArray[index].isActive = true;
+				pelletArray[index].pelletBody.setPosition((j * CELLSIZE)+9, (i * CELLSIZE)+9);
+				pelletArray[index].setCoordinates(j,i);
+				++index;
+			}
+		}
+
+	}
+	//for (int i = 5; i < MAPROWS;++i) {
+	//	for (int j = 1; j < MAPCOLUMNS; ++j) {
+	//		asd = "";
+	//		if (level[i * MAPWIDTH + j] == '.' || level[i * MAPWIDTH + j] == 'T') {
+	//				
+	//			asd = to_string(j)+"x"+ to_string(i); // The +x is a funny thing... Longstory short, the map datastructure cannot hold the same keys.
+	//												//Since I am storing coordinates in strings as keys, the x = 12 + y = 5 coordinates concatenated together is "125", the x = 1 and y = 25 is guess what... "125". Now you get it.
+	//												//I had no idea why some pellets just wont appear on the screen. It was a funny moment when I found out this so I leave it here. Should be changed to a better logic later on.
+	//			pelletmap.insert({ asd , new pellet(i,j) });
+
+	//		}
+	//		else if (level[i * MAPWIDTH + j] == 'O') {
+	//			asd = to_string(j)+"x" + to_string(i);
+	//			pelletmap.insert({ asd , new pellet(8,i,j) });
+	//		}
+	//	}
+
+	//}
+
+	/*	//35*28
 	level += "############################"; //Define as big off set as the plus rows, see in the Map.h
 	level += "############################"; // plus row
 	level += "############################"; // plus row
@@ -129,47 +248,7 @@ void Map::LoadMap()
 	level += "#.##########.##.##########.#";
 	level += "#T..........T..T..........T#";
 	level += "############################";
-
-}
-
-void Map::LoadPellets()
-{
-
-	//Idea is that I can directly index the level array and here I can set the pelletArray elements directly aswell by using the index variable to help counting.
-	//I only increase index if I passed a pellet (power or not).
-	//I should get the reversed version of this so I could directly access the actual pellet with pacmans actual coordinates.
-
-	int index = 0;
-	for (int i = 5; i < MAPROWS; ++i) {
-		for (int j = 1; j < MAPCOLUMNS - 1; ++j) {
-
-			if (level[i * MAPWIDTH + j] == '.' || level[i * MAPWIDTH + j] == 'T') {
-
-				pelletArray[index].pelletBody.setPosition((j * CELLSIZE)+9, (i * CELLSIZE)+9);
-				pelletArray[index].setCoordinates(j,i);
-				++index;
-			}
-		}
-
-	}
-
-	//for (int i = 5; i < MAPROWS;++i) {
-	//	for (int j = 1; j < MAPCOLUMNS; ++j) {
-	//		asd = "";
-	//		if (level[i * MAPWIDTH + j] == '.' || level[i * MAPWIDTH + j] == 'T') {
-	//				
-	//			asd = to_string(j)+"x"+ to_string(i); // The +x is a funny thing... Longstory short, the map datastructure cannot hold the same keys.
-	//												//Since I am storing coordinates in strings as keys, the x = 12 + y = 5 coordinates concatenated together is "125", the x = 1 and y = 25 is guess what... "125". Now you get it.
-	//												//I had no idea why some pellets just wont appear on the screen. It was a funny moment when I found out this so I leave it here. Should be changed to a better logic later on.
-	//			pelletmap.insert({ asd , new pellet(i,j) });
-
-	//		}
-	//		else if (level[i * MAPWIDTH + j] == 'O') {
-	//			asd = to_string(j)+"x" + to_string(i);
-	//			pelletmap.insert({ asd , new pellet(8,i,j) });
-	//		}
-	//	}
-
-	//}
+	
+	*/
 
 }

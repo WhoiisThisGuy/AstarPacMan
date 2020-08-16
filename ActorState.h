@@ -15,7 +15,7 @@ class ActorState
 {
 public:
 	ActorState() { stateClock.restart().asSeconds(); }
-	virtual ~ActorState() {};
+	virtual ~ActorState() { std::cout << "ActorState destructed" << std::endl; }
 	virtual void Update(const float& dt) = 0; //Update
 	//ghostState getcurrentState() { return ghost->currentState; };
 protected:

@@ -11,6 +11,7 @@ class Playing : public GameState
 
 public:
 	Playing();
+	~Playing();
 	GameState* Update(RenderWindow&);
 	void Render(RenderWindow& window);
 	
@@ -38,6 +39,10 @@ private:
 private:
 	Text readyText;
 
+	float time_passed = 0;
+	float startWinAnimationAfter = 1.0f;
+	bool whiteorblue = false; //blue or white for the animation
+	IntRect backgroundAnimation[2] = {IntRect(0,0,672,744),IntRect(694,0,672,744)};
 	float dt;
 	/* Textures */
 	Texture ghostsTexture;

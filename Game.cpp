@@ -21,7 +21,7 @@ Game::Game()
 Game::~Game() {
 
 	if(gameState) {
-
+		cout << "Game destructor"<<endl;
 		delete gameState;
 	}
 
@@ -34,6 +34,7 @@ void Game::run()
 	{
 
 		newStateToSet = gameState->Update(window);
+		
 		if (newStateToSet) {
 			delete gameState;
 			gameState = newStateToSet;

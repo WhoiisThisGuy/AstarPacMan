@@ -12,7 +12,7 @@ public:
 	
 private:
 	Ghost* ghost;
-	void (Tunneling::*fToUpdate)(const float& dt); //I wanted to try out a function pointer to seperate tunneling in and out.
+	void (Tunneling::*fToUpdate)(const float& dt); //I wanted to try out a function pointer for practicing. It is used seperate tunneling in and out.
 
 private:
 

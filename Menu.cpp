@@ -2,7 +2,7 @@
 #include "Playing.h"
 
 Menu::Menu() : play(false),quit(false),  menuElemPlay(0, &menuElemQuit, &menuElemQuit), menuElemQuit(1, &menuElemPlay, &menuElemPlay){
-	
+	cout << "Menu consted" << endl;
 	font.loadFromFile("arial.ttf");
 	menuElemPlay.text.setFont(font);
 	menuElemPlay.text.setString("Play");
@@ -20,6 +20,11 @@ Menu::Menu() : play(false),quit(false),  menuElemPlay(0, &menuElemQuit, &menuEle
 	menuElemQuit.text.setPosition(300, 500);
 
 	temp = &menuElemPlay;
+}
+
+Menu::~Menu()
+{
+	cout << "Menu deleted"<<endl;
 }
 
 

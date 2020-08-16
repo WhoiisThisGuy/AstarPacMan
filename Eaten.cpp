@@ -15,6 +15,14 @@ void Eaten::Update(const float& dt)
 {
 	float stateTime = stateClock.getElapsedTime().asSeconds();
 
+	if (paused)
+		return;
+
+	if (Game_Over || Game_Win) {
+		Exit(eGameOver);
+		return;
+	}
+
 	if (ghost->ghostTempCorrdinate() == ghost->getTargetNode()) {
 		ghost->setTargetNode(ghost->ghostHouseStartNode);
 		//return;
@@ -27,19 +35,20 @@ void Eaten::Update(const float& dt)
 	if (ghost->turningPointReached()) {
 
 		ghost->calculateNewDirectionEatenMode();
+
 		ghost->animation.imageToSet.x = ghost->getDirectionForAnimation();
 	}
 	ghost->animation.UpdateSingleImage();
 	ghost->UpdateTexture();
 	ghost->moveOn(dt);
-
+	
 }
 
 void Eaten::Init()
 {
 
 	ghost->currentState = eEaten;
-	ghost->setSpeed(200); //Eyes move faster
+	ghost->speed = GHOSTBASICSPEED; //Eyes move faster
 	ghost->animation.imageToSet.y = EYEBALLSTEXTUREROW; //For the animation
 	ghost->animation.imageToSet.x = ghost->getDirectionForAnimation(); //get direction immediatley
 	//ghost->setTargetNode(Vector2i(13, 19));

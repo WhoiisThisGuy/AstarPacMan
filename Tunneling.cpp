@@ -6,7 +6,6 @@
 Tunneling::Tunneling(Ghost* ghostToHandle) {
 
 	ghost = ghostToHandle;
-	ghost->limitspeed = true;
 	ghost->currentState = eFrighten;
 	Init();
 }
@@ -18,7 +17,7 @@ void Tunneling::Update(const float& dt)
 
 	if (paused)
 		return;
-	if (Game_Over) {
+	if (Game_Over || Game_Win) {
 		Exit(eGameOver);
 		return;
 	}
@@ -31,7 +30,7 @@ void Tunneling::Update(const float& dt)
 	
 	ghost->animation.Update(dt, ghost->ANIMATIONSWITCHTIME);
 	ghost->UpdateTexture();
-	(this->*fToUpdate)(dt);
+	(this->*fToUpdate)(dt); //Function pointers FIGHTIN'!
 	return; //Return immediatley
 }
 
@@ -47,7 +46,7 @@ void Tunneling::TunnelingOut(const float& dt)
 {
 	if (ghost->turningPointReached())
 	{
-		ghost->inTunnel = false;
+		
 		Exit(eChase);
 		return;
 	}
@@ -60,21 +59,20 @@ void Tunneling::Init()
 	fToUpdate = &Tunneling::TunnelingIn;
 	
 	stateClock.restart().asSeconds();
-	ghost->speed = 120;
+	ghost->speed = levelValues[LEVELNUMBER][5];
 	ghost->currentState = eTunneling;
 	ghost->animation.firstImage = ghost->getDirectionForAnimation();
 	ghost->animation.imageToSet.x = ghost->animation.firstImage;
 	ghost->animation.imageToSet.y = ghost->rowForAnimation;
-	ghost->animation.lastImage = 2;
+	ghost->animation.lastImage = ghost->animation.firstImage+1;
 }
 
 
 void Tunneling::Exit(const ghostState& state)
 {
-
+	ghost->inTunnel = false;
 	switch (state) {
 	case eChase:
-
 		ghost->setState(new Chase(ghost));
 		break;
 	case eGameOver:

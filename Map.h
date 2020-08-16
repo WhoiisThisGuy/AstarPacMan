@@ -2,6 +2,7 @@
 #include <string>
 #include <list>
 #include "LevelVariables.h"
+#include "Fruit.h"
 
 /* I consider Map as the bridge between playing class and the character classes pacman, ghosts etc. There are global variables*/
 
@@ -15,10 +16,11 @@ using std::list;
 
 extern bool glob_powerOn; //Defined in Map.cpp, only Map and Scatter, Chase, Frighten mods are using it.
 extern bool Game_Over;
+extern bool Game_Win;
 extern bool paused;
 extern bool elroy1;
 extern bool elroy2;
-extern unsigned short int LEVELNUMBER;
+
 
 #define MAPOFFSET 4*24 //Needed this for the start positions of the characters
 #define MAPWIDTH 28
@@ -34,12 +36,16 @@ public:
 	~Map();
 	void Update();
 	void Draw(RenderWindow& window);
-	void checkPelletPacmanCollision();
+	void handlePellets();
 	static char GetTile(int x, int y);
+	bool checkFruitPacmanCollision();
 
 private:
 
 	 /////////////////Simple pellets
+
+	Fruit fruit;
+	unsigned short int fruitsSpawned;
 
 	typedef struct pellet {
 
@@ -47,7 +53,7 @@ private:
 		Vector2i coordinates;
 
 	public:
-		bool isActive = true;
+		bool isActive = false;
 		RectangleShape pelletBody;
 
 		pellet() {

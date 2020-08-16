@@ -35,7 +35,7 @@ Inky::Inky(){
 
 Inky::~Inky()
 {
-
+	std::cout << "Inky destroyed";
 }
 
 void Inky::Update(const float& dt)

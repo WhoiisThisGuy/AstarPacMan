@@ -19,8 +19,8 @@ Blinky::Blinky(){
 
 	direction = startDirection;
 	
-	ghostHouseStartNode = {13,18};
-	state = new Scatter(this);
+	ghostHouseStartNode = { 13,18 };
+	
 	rowForAnimation = 0;
 	
 	//targettexture.loadFromFile("Textures/blinkytarget.png");
@@ -29,11 +29,12 @@ Blinky::Blinky(){
 	//targetMark.setPosition(scatterTargetNode.x*CELLSIZE, scatterTargetNode.y);//Used to show where the target tile is atm
 	//targetMark.setTexture(&targettexture);
 	//targetMark.setSize(Vector2f{ CELLSIZE,CELLSIZE });
+	state = new Scatter(this);
 }
 
 Blinky::~Blinky()
 {
-
+	std::cout << "Blinky destroyed";
 }
 
 void Blinky::Update(const float& dt)

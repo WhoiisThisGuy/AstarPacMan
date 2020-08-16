@@ -3,15 +3,15 @@
 
 constexpr unsigned short int percentage(unsigned short int n, unsigned short int p) //p % of the n number
 {
-	return n * (p/100);
+	return n * ((float)p/100);
 }
 
 /* This table contains the following informations:
 
 The row number equals to the number of the level. The 12 columns contains the following inormations:
 
-------0-------------1---------------2----------------3-----------4-----------------5-----------------6---------------7---------------8-----------------9---------------------10---------------------11-----------
-|Bonus Points|Pac-Man Speed|Pac-Man Dots Speed|Ghost Speed|GhostTunnel Speed|Elroy 1 Dots Left|Elroy 1 Speed|Elroy 2 Dots Left|Elroy 2 Speed| Fright. Pac-Man Speed| Fright Pac-Man Dots Speed|Fright Ghost Speed|
+----------0------------------1-------------2----------------3--------------4--------------5-----------------6---------------7---------------8-----------------9---------------------10---------------------11------------------12------------------13------------------14----------
+BonusFruitPictureNumber|Bonus Points|Pac-Man Speed|Pac-Man Dots Speed|Ghost Speed|GhostTunnel Speed|Elroy 1 Dots Left|Elroy 1 Speed|Elroy 2 Dots Left|Elroy 2 Speed| Fright. Pac-Man Speed| Fright Pac-Man Dots Speed|Fright Ghost Speed|Fright Time in Sec.|Number of flashes
 
 percentage does a % calculation
 every speed is calculated from the basic speed value of the characters
@@ -58,3 +58,10 @@ unsigned short int chaseTimings[4][5]{
 	{20,1033,1033,1033,1037},
 	{0,0,0,0,0}
 };
+
+unsigned short int fruitAppear[22] = { 170 ,75,170 ,75, 170 ,75, 170 ,75, 165, 75,165, 75, 165, 75, 165, 75, 165, 75, 165, 75, 165, 75 };
+
+unsigned short int LEVELNUMBER = 0; //0. is the first level
+unsigned short int FRUITNUMBER = 0; //0. is the first fruit
+
+Font font;

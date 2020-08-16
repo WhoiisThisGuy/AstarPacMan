@@ -29,7 +29,7 @@ private:
 	const float CLYDESTARTX = 15.70;
 	const float CLYDESTARTY = 14;
 
-	const Vector2i scatterTargetNode = { 0,0 };
+	const Vector2i scatterTargetNode = { 0,34 };
 	Texture ClydeTexture;//Have to do this at every single character... change it
 	Texture targettexture;
 	CircleShape clydeCircle;

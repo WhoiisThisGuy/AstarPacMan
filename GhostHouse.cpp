@@ -17,7 +17,7 @@ void GhostHouse::Update(const float &dt)
 	if (paused)
 		return;
 
-	if (Game_Over) { // && stateTime > 2
+	if (Game_Over || Game_Win) { // && stateTime > 2
 		Exit(eGameOver);
 		return;
 	}
@@ -29,23 +29,25 @@ void GhostHouse::Update(const float &dt)
 			ghost->firstcomeout = false;
 		}
 		else {
+
+
 			ghost->moveUpAndDown();
-			ghost->animation.firstImage = ghost->getDirectionForAnimation();
-			//ghost->animation.imageToSet.x = ghost->animation.firstImage;
-			ghost->animation.lastImage = ghost->animation.firstImage + 1;
+			
 		}
 		
 	}
 	else if (!ghost->isActive()) {	
+
 		ghost->comeOutFromHouse();
-		ghost->animation.firstImage = ghost->getDirectionForAnimation();
-		//ghost->animation.imageToSet.x = ghost->animation.firstImage;
-		ghost->animation.lastImage = ghost->animation.firstImage + 1;
+
 	}
 	else {
 		Exit();
 		return;
 	}
+	ghost->animation.firstImage = ghost->getDirectionForAnimation();
+	ghost->animation.imageToSet.x = ghost->animation.firstImage;
+	ghost->animation.lastImage = ghost->animation.firstImage + 1;
 	ghost->animation.Update(dt, ghost->ANIMATIONSWITCHTIME);
 	ghost->UpdateTexture();
 	ghost->moveOn(dt);
@@ -53,27 +55,27 @@ void GhostHouse::Update(const float &dt)
 
 void GhostHouse::Init()
 {
-	ghost->speed = 135;
+	
+	ghost->speed = levelValues[LEVELNUMBER][5];
 	ghost->setDirection(ghost->startDirection);
 	ghost->firstcomeout = true;
 	ghost->active = false;
 	ghost->currentState = eGhostHouse;
 	stateClock.restart().asSeconds();
-	ghost->limitspeed = true;
 
-	ghost->animation.selectBox = { 16,16 }; //default is 16x16 pixel for ghosts
+	ghost->animation.selectBox = { 16,16 }; //default 16x16 for ghosts
 	ghost->animation.uvRect.width = 14;
 	ghost->animation.uvRect.height = 14;
-	ghost->animation.imageToSet.y = ghost->rowForAnimation;
+
 	ghost->animation.firstImage = ghost->getDirectionForAnimation();
 	ghost->animation.imageToSet.x = ghost->animation.firstImage;
+	ghost->animation.imageToSet.y = ghost->rowForAnimation;
 	ghost->animation.lastImage = ghost->animation.firstImage + 1;
 
 }
 
 void GhostHouse::Exit(const ghostState& state){
 
-	ghost->limitspeed = false;
 	ghost->calculateNewDirection();
 	ghost->setState(new Scatter(ghost));
 }

@@ -18,8 +18,8 @@ void Chase::Update(const float& dt)
 	if (paused)
 		return;
 
-	if (Game_Over) {
-		Exit(eGameOver);
+	if (Game_Over || Game_Win) {
+		Exit(eGameOver );
 		return;
 	}
 
@@ -41,10 +41,10 @@ void Chase::Update(const float& dt)
 		return;
 	}
 
-	if (LEVELNUMBER < 6 && stateTime >chaseTimings[STATENUMBER][LEVELNUMBER]) {
-		Exit();
-		return;
-	}
+	//if (LEVELNUMBER < 6 && stateTime >chaseTimings[STATENUMBER][LEVELNUMBER]) {
+	//	Exit();
+	//	return;
+	//}
 
 	if (ghost->turningPointReached() || ghost->tunnelPointReached()) {
 		if (ghost->inTunnel) {
@@ -63,8 +63,8 @@ void Chase::Update(const float& dt)
 void Chase::Init()
 {
 	ghost->currentState = eChase;
-	++STATENUMBER;
-	ghost->speed = elroy1 ? levelValues[LEVELNUMBER][6] : elroy2 ? levelValues[LEVELNUMBER][8] : levelValues[LEVELNUMBER][3];
+	
+	ghost->speed = elroy1 ? levelValues[LEVELNUMBER][6] : elroy2 ? levelValues[LEVELNUMBER][8] : levelValues[LEVELNUMBER][4];
 
 	stateClock.restart().asSeconds();
 	//Flip direction
@@ -81,11 +81,12 @@ void Chase::Exit(const ghostState& state)
 
 	switch (state) {
 	case eScatter:
+		++STATENUMBER;
 		ghost->turnAround();
 		ghost->setState(new Scatter(ghost));
 		break;
 	case eFrighten:
-		ghost->turnAround();
+		
 		ghost->setState(new Frighten(ghost, ghost->currentState));
 		break;
 	case eGameOver:
