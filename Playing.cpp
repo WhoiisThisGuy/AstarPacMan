@@ -31,8 +31,8 @@ Playing::Playing() {
 	clyde.SetStartParams();
 
 	//map.GhostHousePriority.push(pinky.GetGhostPriorityNumber());
-	map.GhostHousePriority.push(inky.GetGhostPriorityNumber());
-	map.GhostHousePriority.push(clyde.GetGhostPriorityNumber());
+	//map.GhostHousePriority.push(inky.GetGhostPriorityNumber());
+	//map.GhostHousePriority.push(clyde.GetGhostPriorityNumber());
 	
 }
 
@@ -202,7 +202,8 @@ void Playing::UpdateGameStart()
 		inky.SetStartState();
 		pinky.SetStartState();
 		clyde.SetStartState();
-		
+		map.GhostHousePriority.push(inky.GetGhostPriorityNumber());
+		map.GhostHousePriority.push(clyde.GetGhostPriorityNumber());
 		fToUpdate = &Playing::UpdateGamePlay;
 		readyText.setString("");
 		return;

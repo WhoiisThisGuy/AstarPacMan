@@ -66,7 +66,7 @@ void GhostHouse::Init()
 	ghost->currentState = eGhostHouse;
 	
 
-
+	ghost->ActivateGhost = false;
 	DotCounterActive = false;
 	DotCounter = 0;
 
