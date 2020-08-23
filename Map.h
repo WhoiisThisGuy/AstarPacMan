@@ -1,6 +1,8 @@
 #include <SFML\Graphics.hpp>
 #include <string>
 #include <list>
+#include <stack>
+#include <queue>
 #include "LevelVariables.h"
 #include "Fruit.h"
 
@@ -9,14 +11,15 @@
 using namespace sf;
 using std::string;
 using std::list;
+using std::stack;
+using std::priority_queue;
 
 #ifndef MAP_H
 
 #define MAP_H
 
 extern bool glob_powerOn; //Defined in Map.cpp, only Map and Scatter, Chase, Frighten mods are using it.
-extern bool Game_Over;
-extern bool Game_Win;
+
 extern bool paused;
 extern bool elroy1;
 extern bool elroy2;
@@ -37,13 +40,24 @@ public:
 	void Update();
 	void Draw(RenderWindow& window);
 	void handlePellets();
+	void TurnOnPellets();
 	static char GetTile(int x, int y);
 	bool checkFruitPacmanCollision();
-
+public:
+	static unsigned int score;
+	static unsigned short int pauseTime;
+	unsigned short int FRUITNUMBER;
+	void ClearGhostHousePriorityQueue();
+	static unsigned short int* DotCounterForGhosts;
+	static Clock ClockSinceLastDotEaten;
+	static priority_queue<unsigned short int,std::vector<unsigned short int>, std::greater<unsigned short int>> GhostHousePriority;
 private:
 
-	 /////////////////Simple pellets
+	Text scoreText; //for current score
 
+	 /////////////////Simple pellets
+	
+	
 	Fruit fruit;
 	unsigned short int fruitsSpawned;
 
@@ -61,7 +75,6 @@ private:
 			pelletBody.setSize(Vector2f(5, 5));
 			pelletBody.setFillColor(Color(255, 183, 174));
 			pelletBody.setOrigin(2, 2);
-
 
 		}
 
@@ -102,9 +115,11 @@ private:
 	static string level;
 	float CellSize;
 	unsigned int uCellSize;
-
+	
 	pellet pelletArray[244];
 	list<powerPellet> powerPelletList;
+
+	
 
 private:
 	void LoadMap();

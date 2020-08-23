@@ -11,9 +11,8 @@ Clyde::Clyde() {
 
 	ghostBody.setSize(Vector2f(GHOSTBODYSIZE, GHOSTBODYSIZE));
 	ghostBody.setOrigin(GHOSTBODYSIZE / 2, GHOSTBODYSIZE / 2);
-	ghostBody.setPosition(Vector2f((CLYDESTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (CLYDESTARTY * CELLSIZE) + CELLSIZE / 2));
 	//ghostBody.setTexture(&ClydeTexture);
-
+	
 	//Color color(255,183,81);
 	//
 	//
@@ -25,19 +24,11 @@ Clyde::Clyde() {
 	//clydeCircle.setPosition(ghostBody.getPosition());
 	ghostHouseStartNode = { 16,18 };
 	rowForAnimation = 3;
-	activateTimer = 0.0f; //5
-	active = false;
-	firstcomeout = true;
-	direction.y = -1;
-	startDirection = { 0,-1 };
-	//stateStack.push(new GhostHouse(this));
-	
-	targettexture.loadFromFile("Textures/blinkytarget.png");
+	activateTimer = 5.0f; //5
 
-	targetMark.setPosition(scatterTargetNode.x * CELLSIZE, scatterTargetNode.y);//Used to show where the target tile is atm
-	targetMark.setTexture(&targettexture);
-	targetMark.setSize(Vector2f{ CELLSIZE,CELLSIZE });
-	state = new GhostHouse(this);
+	PriorityNumber = 3;
+	SetStartState();
+
 }
 
 Clyde::~Clyde()
@@ -52,7 +43,7 @@ void Clyde::Update(const float& dt)
 	
 	state->Update(dt);
 	//moveOn(dt);
-
+	active = false;
 	
 	//handleState();
 	//if (stateToSet) { /* Handling new states here, this is ... wierd? Try change it. */
@@ -65,8 +56,8 @@ void Clyde::Update(const float& dt)
 	//	//state = stateToSet;
 	//	stateToSet = NULL;
 	//}
-	targetMark.setPosition((targetNode.x * CELLSIZE) + CELLSIZE / 2, (targetNode.y * CELLSIZE) + CELLSIZE / 2);//Used to show where the target tile is atm
-	clydeCircle.setPosition(ghostBody.getPosition());
+	//targetMark.setPosition((targetNode.x * CELLSIZE) + CELLSIZE / 2, (targetNode.y * CELLSIZE) + CELLSIZE / 2);//Used to show where the target tile is atm
+	//clydeCircle.setPosition(ghostBody.getPosition());
 }
 
 //void Clyde::Draw(RenderWindow& window)
@@ -135,6 +126,30 @@ void Clyde::setScatterTargetNode()
 	targetNode = scatterTargetNode;
 }
 
+void Clyde::SetStartState()
+{
+	state = new GhostHouse(this);
+}
+
+void Clyde::SetStartParams()
+{
+	active = false;
+	rowForAnimation = 3;
+	firstcomeout = true;
+	direction.y = -1;
+	startDirection = { 0,-1 };
+	ghostBody.setPosition(Vector2f((CLYDESTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (CLYDESTARTY * CELLSIZE) + CELLSIZE / 2));
+	currentState = eGhostHouse;
+	animation.firstImage = getDirectionForAnimation();
+	animation.imageToSet.x = animation.firstImage;
+	animation.imageToSet.y = rowForAnimation;
+
+	animation.Update(0, ANIMATIONSWITCHTIME);
+	UpdateTexture();
+	ActivateGhost = false;
+}
+
+
 Vector2i Clyde::getTempCoordsOnLevel()
 {
 	Vector2i Position;
@@ -143,4 +158,15 @@ Vector2i Clyde::getTempCoordsOnLevel()
 	Position.y = (int)(ghostBody.getPosition().y / CELLSIZE);
 
 	return Position;
+}
+
+unsigned short int Clyde::GetActivationDotLimit()
+{
+	if (SpecialCounter) {
+		if (GlobalCounter >= 32)
+			SpecialCounter = false;
+		return 50;
+	}
+	else
+		return LEVELNUMBER == 0 ? 60 : 50;
 }

@@ -14,9 +14,10 @@ class Animation
 {
 
 public:
+	Animation();
 	Animation (Pacman*); //This is the constructor for pacman.
 	Animation(Ghost*); //This is the constructor for the Ghosts.
-
+	~Animation();
 	void Update(const float&, const float& ); //New version, Only ghosts using these for now
 	void UpdateFrightenAnimation(const float&, const float&, unsigned short int&); //New version, Only ghosts using these for now
 	 

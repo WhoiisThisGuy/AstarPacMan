@@ -12,22 +12,15 @@ Inky::Inky(){
 
 	ghostBody.setSize(Vector2f(GHOSTBODYSIZE, GHOSTBODYSIZE));
 	ghostBody.setOrigin(GHOSTBODYSIZE / 2, GHOSTBODYSIZE / 2);
-	ghostBody.setPosition(Vector2f((INKYSTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (INKYSTARTY * CELLSIZE) + CELLSIZE / 2));
-	//ghostBody.setTexture(&InkyTexture);
-
-	activateTimer = 5.0f;
-	active = false;
-	firstcomeout = true;
-	direction.y = -1;
-	rowForAnimation = 2;
-	ghostHouseStartNode = {11,18};
-
-	startDirection = { 0,-1 };
-	state = new GhostHouse(this);
-
 	
+	//ghostBody.setTexture(&InkyTexture);
+	Map::DotCounterForGhosts = &DotCounter;
+	ghostHouseStartNode = { 11,18 };
+	rowForAnimation = 2;
+	activateTimer = 5.0f;
 	//targettexture.loadFromFile("Textures/blinkytarget.png");
-
+	PriorityNumber = 2;
+	SetStartState();
 	//targetMark.setPosition(scatterTargetNode.x * CELLSIZE, scatterTargetNode.y);//Used to show where the target tile is atm
 	//targetMark.setTexture(&targettexture);
 	//targetMark.setSize(Vector2f{ CELLSIZE,CELLSIZE });
@@ -44,7 +37,7 @@ void Inky::Update(const float& dt)
 	pacManTempCoordsOnLevel = Pacman::sTempCoordsOnLevel;
 	pacmanTempDirection = Pacman::sTempDirectionOnLevel;
 	blinkyTempCoordsOnLevel = Blinky::sTempCoordsOnLevel;
-
+	
 	state->Update(dt); // Update actual state
 
 
@@ -66,6 +59,13 @@ void Inky::setTargetNode(Vector2i target)
 {
 	targetNode = target;
 }
+
+void Inky::SetStartState()
+{
+
+	state = new GhostHouse(this);
+}
+
 
 void Inky::moveUpAndDown()
 {
@@ -138,5 +138,33 @@ void Inky::setChaseTargetNode()
 void Inky::setScatterTargetNode()
 {
 	targetNode = scatterTargetNode;
+}
+
+void Inky::SetStartParams()
+{
+	rowForAnimation = 2;
+	firstcomeout = true;
+	direction.y = -1;
+	
+	startDirection = { 0,-1 };
+
+	currentState = eGhostHouse;
+	animation.firstImage = getDirectionForAnimation();
+	animation.imageToSet.x = animation.firstImage;
+	animation.imageToSet.y = rowForAnimation;
+
+	animation.Update(0, ANIMATIONSWITCHTIME);
+	ghostBody.setPosition(Vector2f((INKYSTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (INKYSTARTY * CELLSIZE) + CELLSIZE / 2));
+	UpdateTexture();
+	ActivateGhost = false;
+}
+
+unsigned short int Inky::GetActivationDotLimit()
+{
+	if (SpecialCounter)
+		return 17;
+	else
+		return LEVELNUMBER == 0 ? 30 : 0;
+	
 }
 

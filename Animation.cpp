@@ -22,6 +22,10 @@ Animation::Animation(Ghost*)
 	uvRect.height = 14;
 }
 
+Animation::~Animation()
+{
+}
+
 void Animation::Update(const float& deltaTime,const float& switchTime) { //which row = imageToSet.y
 
 	totalTime += deltaTime;

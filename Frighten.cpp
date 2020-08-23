@@ -21,21 +21,22 @@ void Frighten::Update(const float& dt)
 {
 	float stateTime = stateClock.getElapsedTime().asSeconds();
 
-	if (paused)
-		return;
-
 	if (Game_Over || Game_Win) {
 		Exit(eGameOver);
 		return;
 	}
 
+	if (paused)
+		return;
+
 	//if eaten exit here
 	if (ghost->collideWithPacman()) {
 		paused = true;
+		Map::pauseTime = 1;
 		ghost->animation.setScoreImage(eatenNum);
 		ghost->UpdateTexture();
-
 		++eatenNum;
+		Map::score += (eatenNum == 0 ? 200 : eatenNum == 1 ? 400 : eatenNum == 2 ? 800 : 1600); //update score
 		if (eatenNum > 3)
 			eatenNum = 0;
 		Exit(eEaten);
@@ -81,6 +82,7 @@ void Frighten::Animate(const float &stateTime,const float &dt)
 
 void Frighten::Init()
 {
+	eatenNum = 0;
 	ghost->speed = levelValues[LEVELNUMBER][12];
 	ghost->turnAround();
 	animationCounter = 0;

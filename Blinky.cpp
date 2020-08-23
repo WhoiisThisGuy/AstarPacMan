@@ -10,26 +10,14 @@ Blinky::Blinky(){
 
 	ghostBody.setSize(Vector2f(GHOSTBODYSIZE, GHOSTBODYSIZE));
 	ghostBody.setOrigin(GHOSTBODYSIZE / 2, GHOSTBODYSIZE / 2);
-	ghostBody.setPosition(Vector2f((BLINKYSTARTX * CELLSIZE)+ CELLSIZE/2, MAPOFFSET+(BLINKYSTARTY * CELLSIZE)+ CELLSIZE / 2));
-	//ghostBody.setTexture(&BlinkyTexture);
-
-	firstcomeout = false;
-
-	startDirection = { -1,0 };
-
-	direction = startDirection;
+	PriorityNumber = 0;
+	SetStartState();
 	
 	ghostHouseStartNode = { 13,18 };
 	
-	rowForAnimation = 0;
-	
-	//targettexture.loadFromFile("Textures/blinkytarget.png");
-
-
 	//targetMark.setPosition(scatterTargetNode.x*CELLSIZE, scatterTargetNode.y);//Used to show where the target tile is atm
 	//targetMark.setTexture(&targettexture);
 	//targetMark.setSize(Vector2f{ CELLSIZE,CELLSIZE });
-	state = new Scatter(this);
 }
 
 Blinky::~Blinky()
@@ -48,6 +36,8 @@ void Blinky::Update(const float& dt)
 	sTempCoordsOnLevel = getTempCoordsOnLevel(); //For Inky
 }
 
+bool Blinky::IsMyGhostIsActive() { return true; }
+
 void Blinky::setTargetNode(Vector2i target)
 {
 	targetNode = target;
@@ -63,6 +53,7 @@ void Blinky::setScatterTargetNode()
 	targetNode = scatterTargetNode;
 }
 
+
 Vector2i Blinky::getTempCoordsOnLevel() const /* Gives back the top left corners coordinates (1,1), (2,1) etc.. */
 {
 	Vector2i Position;
@@ -71,6 +62,40 @@ Vector2i Blinky::getTempCoordsOnLevel() const /* Gives back the top left corners
 	Position.y = (int)(ghostBody.getPosition().y / CELLSIZE);
 
 	return Position;
+}
+
+unsigned short int Blinky::GetActivationDotLimit()
+{
+	return 0;
+}
+
+void Blinky::SetStartState()
+{
+	setState(new Scatter(this));
+}
+
+void Blinky::SetStartParams()
+{
+
+	rowForAnimation = 0;
+
+	startDirection = { -1,0 };
+	active = true;
+	direction = startDirection;
+	currentState = eScatter;
+	animation.selectBox = { 16,16 }; //default 16x16 for ghosts
+	animation.uvRect.width = 14;
+	animation.uvRect.height = 14;
+	animation.firstImage = getDirectionForAnimation();
+	animation.imageToSet.x = animation.firstImage;
+	animation.imageToSet.y = rowForAnimation;
+	animation.Update(0, ANIMATIONSWITCHTIME);
+	UpdateTexture();
+	//ghostBody.setTexture(&BlinkyTexture);
+
+	firstcomeout = false;
+
+	ghostBody.setPosition(Vector2f((BLINKYSTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (BLINKYSTARTY * CELLSIZE) + CELLSIZE / 2));
 }
 
 

@@ -10,20 +10,16 @@ Pinky::Pinky() {
 
 	ghostBody.setSize(Vector2f(GHOSTBODYSIZE, GHOSTBODYSIZE));
 	ghostBody.setOrigin(GHOSTBODYSIZE / 2, GHOSTBODYSIZE / 2);
-	ghostBody.setPosition(Vector2f((PINKYSTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (PINKYSTARTY * CELLSIZE) + CELLSIZE / 2));
+
 	//ghostBody.setTexture(&PinkyTexture);
 
-	activateTimer = 0.0f;
-	active = false;
-	firstcomeout = true;
-	//direction.y = -1;
-	rowForAnimation = 1;
 	ghostHouseStartNode = { 13,18 };
 
-	startDirection = { 0,-1 };
-	state = new GhostHouse(this);
+	activateTimer = 0.0f;
+	PriorityNumber = 1;
+	SetStartState();
 	//targettexture.loadFromFile("Textures/blinkytarget.png");
-	
+	//Map::DotCounterForGhosts = &DotCounter;
 	//targetMark.setPosition(scatterTargetNode.x * CELLSIZE, scatterTargetNode.y);//Used to show where the target tile is atm
 	//targetMark.setTexture(&targettexture);
 	//targetMark.setSize(Vector2f{ CELLSIZE,CELLSIZE });
@@ -36,6 +32,7 @@ Pinky::~Pinky()
 
 void Pinky::Update(const float& dt)
 {
+
 	pacmanTempDirection = Pacman::sTempDirectionOnLevel;
 	pacManTempCoordsOnLevel = Pacman::sTempCoordsOnLevel;
 
@@ -64,6 +61,12 @@ void Pinky::setTargetNode(Vector2i target)
 {
 	targetNode = target;
 }
+
+void Pinky::SetStartState()
+{
+	state = new GhostHouse(this);
+}
+
 
 void Pinky::moveUpAndDown()
 {
@@ -121,3 +124,34 @@ void Pinky::setScatterTargetNode()
 	targetNode = scatterTargetNode;
 }
 
+void Pinky::SetStartParams()
+{
+	ActivateGhost = true;
+	active = false;
+	firstcomeout = true;
+	rowForAnimation = 1;
+	startDirection = { 0,-1 };
+	direction = startDirection;
+	ghostBody.setPosition(Vector2f((PINKYSTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (PINKYSTARTY * CELLSIZE) + CELLSIZE / 2));
+	animation.selectBox = { 16,16 }; //default 16x16 for ghosts
+	animation.uvRect.width = 14;
+	animation.uvRect.height = 14;
+
+	currentState = eGhostHouse;
+
+	animation.firstImage = getDirectionForAnimation();
+	animation.imageToSet.x = animation.firstImage;
+	animation.imageToSet.y = rowForAnimation;
+	animation.lastImage = animation.firstImage + 1;
+
+	animation.Update(0, ANIMATIONSWITCHTIME);
+	UpdateTexture();
+}
+
+unsigned short int Pinky::GetActivationDotLimit()
+{
+	if (SpecialCounter)
+		return 7;
+	else
+		return 0;
+}

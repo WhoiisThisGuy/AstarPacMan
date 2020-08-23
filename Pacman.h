@@ -16,7 +16,10 @@ public:
 	Pacman();
 	~Pacman();
 	void Draw(RenderWindow& window);
-	bool Update(const float& dTime, RenderWindow& window);
+	bool Update(const float& dTime);
+
+	//Copy constructor
+	Pacman(const Pacman& p2) { body = p2.body; PacmanTexture = p2.PacmanTexture; }
 
 	//Vector2i getTempCoordsOnLevel() const;
 	static FloatRect getTempPosOnLevel() {
@@ -27,7 +30,13 @@ public:
 
 	Vector2i getTempCoordsOnLevel() const;
 
+	void InitDeathAnimation();
+	bool UpdateDeathAnimation(const float&);
 
+	void SetStartState();
+	void IncreaseHealth();
+	void DecreaseHealth();
+	unsigned short int GetHealthValue() { return health; }
 
 public:
 	static float speed;
@@ -61,20 +70,19 @@ private:
 	Constants END
 	*/
 	static RectangleShape body;
-	Texture PacmanTexture;//Have to do this at every single character... change it
-	string health;
+	Texture PacmanTexture;
 
 	bool havebufferedmove;
 	
 	unsigned int row;
+
+	unsigned short int health = 2;
 
 	Animation* animation;
 
 	Vector2i tempDirection;
 	Vector2i bufferedDirection;
 	Event event;
-	Clock deathClock; //used for death animation
-	bool deathStarted;
 	
 };
 

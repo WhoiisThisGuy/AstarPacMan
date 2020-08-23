@@ -15,13 +15,13 @@ void Eaten::Update(const float& dt)
 {
 	float stateTime = stateClock.getElapsedTime().asSeconds();
 
-	if (paused)
-		return;
-
 	if (Game_Over || Game_Win) {
 		Exit(eGameOver);
 		return;
 	}
+
+	if (paused)
+		return;
 
 	if (ghost->ghostTempCorrdinate() == ghost->getTargetNode()) {
 		ghost->setTargetNode(ghost->ghostHouseStartNode);
@@ -46,14 +46,16 @@ void Eaten::Update(const float& dt)
 
 void Eaten::Init()
 {
-
+	ghost->active = false;
 	ghost->currentState = eEaten;
 	ghost->speed = GHOSTBASICSPEED; //Eyes move faster
 	ghost->animation.imageToSet.y = EYEBALLSTEXTUREROW; //For the animation
 	ghost->animation.imageToSet.x = ghost->getDirectionForAnimation(); //get direction immediatley
 	//ghost->setTargetNode(Vector2i(13, 19));
 	ghost->setTargetNode(Vector2i{ 13,18 });
+	Map::GhostHousePriority.push(ghost->GetGhostPriorityNumber());
 	stateClock.restart().asSeconds();
+	
 	
 }
 

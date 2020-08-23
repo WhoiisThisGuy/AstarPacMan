@@ -9,8 +9,10 @@ using namespace sf;
 #define GAMESTARTPAUSETIME 3
 #define GHOSTCAUGHTPAUSETIME 1
 
-#define PACMANBASICSPEED 240 //100% speed
-#define GHOSTBASICSPEED 237 //100% speed
+#define PACMANBASICSPEED 259 //100% speed
+#define GHOSTBASICSPEED 223 //100% speed
+#define ON 1
+#define OFF 0
 
 extern Font font;
 
@@ -39,6 +41,14 @@ extern float scatterTimings[4][5];
 extern unsigned short int chaseTimings[4][5];
 
 extern unsigned short int fruitAppear[22];
-extern unsigned short int FRUITNUMBER; //0. is the first fruit
+//extern unsigned short int FRUITNUMBER; //0. is the first fruit
 
+extern bool Game_Over;
+extern bool Game_Win;
+extern bool paused;
+extern bool elroy1;
+extern bool elroy2;
+extern bool SpecialCounter;
+
+extern unsigned short int GlobalCounter;
 #endif

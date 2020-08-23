@@ -1,6 +1,5 @@
 #pragma once
 #include "ActorState.h"
-#include "Ghost.h"
 
 class Frighten :
 	public ActorState

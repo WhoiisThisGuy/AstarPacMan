@@ -18,12 +18,14 @@ public:
 	void setTargetNode(Vector2i) override;
 	void setChaseTargetNode() override;
 	void setScatterTargetNode() override;
+	void SetStartState() override;
+	void SetStartParams() override;
 	Vector2i getTempCoordsOnLevel();
 
 	static Vector2i sTempCoordsOnLevel;
-	virtual void moveUpAndDown() override;
-	virtual bool moveToFourteenDotThirtyFive() override;
-
+	void moveUpAndDown() override;
+	bool moveToFourteenDotThirtyFive() override;
+	unsigned short int GetActivationDotLimit() override;
 private:
 	/* Constants start */
 	const float CLYDESTARTX = 15.70;

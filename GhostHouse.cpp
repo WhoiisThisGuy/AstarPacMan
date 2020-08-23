@@ -14,37 +14,45 @@ GhostHouse::GhostHouse(Ghost* p_ghost)
 
 void GhostHouse::Update(const float &dt)
 {
-	if (paused)
-		return;
 
-	if (Game_Over || Game_Win) { // && stateTime > 2
+	if (Game_Over || Game_Win) {
 		Exit(eGameOver);
 		return;
 	}
 
-	float stateTime = stateClock.getElapsedTime().asSeconds();
-	
-	if (ghost->firstcomeout) {
-		if (stateTime > ghost->activateTimer && ghost->moveToFourteenDotThirtyFive()) {
-			ghost->firstcomeout = false;
-		}
-		else {
+	if (paused)
+		return;
 
 
-			ghost->moveUpAndDown();
-			
-		}
+	if (!ghost->ActivateGhost && (!Map::GhostHousePriority.empty() && ghost->GetGhostPriorityNumber() == Map::GhostHousePriority.top())) { //am I topPriority
 		
+		if (!DotCounterActive) {
+			Map::DotCounterForGhosts = &DotCounter; //Turn on counting dots in map
+			DotCounterActive = true;
+		}
+		if (DotCounter >= 5)
+			cout<<"okgeci"<<endl;
+		if (DotCounter >= ghost->GetActivationDotLimit() || Map::ClockSinceLastDotEaten.getElapsedTime().asSeconds() >= (LEVELNUMBER >= 5 ? 3 : 4)) {//
+
+			ghost->ActivateGhost = true;
+			Map::GhostHousePriority.pop();
+		}
 	}
-	else if (!ghost->isActive()) {	
 
-		ghost->comeOutFromHouse();
-
+	if (ghost->ActivateGhost) {
+		if (ghost->moveToFourteenDotThirtyFive()) {
+			if (ghost->comeOutFromHouse()) {
+				Exit(eScatter);
+				return;
+			}
+		}
+				
 	}
 	else {
-		Exit();
-		return;
+		ghost->moveUpAndDown();
+
 	}
+
 	ghost->animation.firstImage = ghost->getDirectionForAnimation();
 	ghost->animation.imageToSet.x = ghost->animation.firstImage;
 	ghost->animation.lastImage = ghost->animation.firstImage + 1;
@@ -55,12 +63,19 @@ void GhostHouse::Update(const float &dt)
 
 void GhostHouse::Init()
 {
+	ghost->currentState = eGhostHouse;
+	
+
+
+	DotCounterActive = false;
+	DotCounter = 0;
+
 	
 	ghost->speed = levelValues[LEVELNUMBER][5];
 	ghost->setDirection(ghost->startDirection);
 	ghost->firstcomeout = true;
 	ghost->active = false;
-	ghost->currentState = eGhostHouse;
+	
 	stateClock.restart().asSeconds();
 
 	ghost->animation.selectBox = { 16,16 }; //default 16x16 for ghosts
@@ -75,9 +90,11 @@ void GhostHouse::Init()
 }
 
 void GhostHouse::Exit(const ghostState& state){
-
+	ghost->active = true;
 	ghost->calculateNewDirection();
+	//Map::DotCounterForGhosts = NULL; //Turn off counting in map
 	ghost->setState(new Scatter(ghost));
+	
 }
 
 //void GhostHouse::Animate(const float& stateTime, const float& dt)

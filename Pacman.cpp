@@ -25,8 +25,9 @@ Pacman::Pacman() {
 	animation = new Animation(this);
 	body.setTexture(&PacmanTexture);
 	
+	animation->Update(row, 0, ANIMATIONSWITCHTIME);
+	body.setTextureRect(animation->uvRect);
 
-	deathStarted = false;
 }
 
 Pacman::~Pacman()
@@ -42,28 +43,11 @@ void Pacman::Draw(RenderWindow& window)
 
 }
 
-bool Pacman::Update(const float& dTime, RenderWindow& window)
+bool Pacman::Update(const float& dTime)
 {
 	if (paused)
 		return false;
 
-	if (Game_Over) { /* Catastrophic, over complicated logic. Was too lazy to add another state for pacman */
-		if (!deathStarted) { //if death animation did not started yet for pacman, setup and go.
-			deathClock.restart().asSeconds();
-			animation->AimageCount = Vector2u(12, 1);
-			animation->uvRect.width = 16.0f;
-			animation->uvRect.height = 14.0f;
-			deathStarted = true;
-		}
-		else if (deathClock.getElapsedTime().asSeconds() > 2) {
-			/* animation and return; */
-			if (animation->UpdateCustomOfColumns(4, 12, dTime, 0.10f) >= 12) { //12th is the last image of the pacman death animation.
-				return true;
-			}
-			body.setTextureRect(animation->uvRect);
-		}
-		return false;
-	}
 	//Not so accurate solution, pollevent should handle events. 
 	if (Keyboard::isKeyPressed(Keyboard::Up)) {
 
@@ -150,6 +134,54 @@ Vector2i Pacman::getTempCoordsOnLevel() const/* Gives back the coordinates (1,1)
 	Position.y = (int)(body.getPosition().y / CELLSIZE);
 
 	return Position;
+}
+
+void Pacman::InitDeathAnimation()
+{
+	animation->AimageCount = Vector2u(12, 1);
+	animation->uvRect.width = 16.0f;
+	animation->uvRect.height = 14.0f;
+}
+
+bool Pacman::UpdateDeathAnimation(const float& dt)
+{
+	if (animation->UpdateCustomOfColumns(4, 12, dt, 0.10f) >= 12) {
+	
+		//
+		return true;
+	}
+	body.setTextureRect(animation->uvRect);
+	return false;
+}
+
+void Pacman::SetStartState()
+{
+	row = 1;
+	tempDirection = STARTDIRECTION;
+	bufferedDirection = tempDirection;
+
+	animation->AimageCount = { 2, 4 };
+
+	animation->uvRect.width = 14.0f;
+	animation->uvRect.height = 14.0f;
+
+	body.setPosition(Vector2f{ (PACMANSTARTPOSX * CELLSIZE) - 12.0f, (((PACMANSTARTPOSY * CELLSIZE) - 12.0f)) });
+
+	sTempCoordsOnLevel = getTempCoordsOnLevel();
+
+	animation->Update(row, 0, ANIMATIONSWITCHTIME);
+	body.setTextureRect(animation->uvRect);
+
+}
+
+void Pacman::IncreaseHealth()
+{
+	++health;
+}
+
+void Pacman::DecreaseHealth()
+{
+	--health;
 }
 
 bool Pacman::checkCollision(const float& dTime)

@@ -7,7 +7,7 @@
 
 #define FRUITX 337
 #define FRUITY 515
-#define FRUITSIZE 35
+#define FRUITSIZE 33
 
 using namespace sf;
 
@@ -22,6 +22,7 @@ public:
 	bool checkCollision(FloatRect);
 	void eaten();
 	void activate(unsigned short int);
+	void deactivate();
 private:
 
 private:
@@ -29,7 +30,7 @@ private:
 	Texture fruitTexture;
 	RectangleShape fruitShape;
 	unsigned short int fruitNum; //0-7 means the different fruits
-	IntRect pictureSizes[8] = { {0,0,12,12},{13,0,11,12},{24,0,12,12},{36,0,12,12},{48,0,11,14},{59,0,11,12},{70,0,12,13},{82,0,7,14} };  //{left,top,with,height}
+	IntRect pictureSizes[8] = { {0,0,12,12},{12,0,11,12},{23,0,12,12},{35,0,12,12},{47,0,11,13},{58,0,11,12},{69,0,12,13},{81,0,7,13} };  //{left,top,with,height}
 	Text scoreText;
 	Clock fruitClock;
 };

@@ -20,9 +20,12 @@ public:
 	void setTargetNode(Vector2i) override;
 	void setChaseTargetNode() override;
 	void setScatterTargetNode() override;
+	void SetStartState() override;
+	void SetStartParams() override;
 	Vector2i getTempCoordsOnLevel() const;
-
 	static Vector2i sTempCoordsOnLevel;
+	bool IsMyGhostIsActive() override;
+	unsigned short int GetActivationDotLimit() override;
 private:
 	/* Constants start */
 	const short unsigned int BLINKYSTARTX = 13;

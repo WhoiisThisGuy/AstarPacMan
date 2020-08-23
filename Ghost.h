@@ -1,9 +1,11 @@
 #include "Animation.h" //Animation includes the Grahpics.hpp
-#include "ActorState.h"
+//#include "ActorState.h"
 #include "Map.h"
 #include <stack>
 
 using namespace std;
+enum ghostState;
+class ActorState;
 
 #ifndef H_GHOST
 #define H_GHOST
@@ -23,7 +25,13 @@ public:
 
 	virtual void setChaseTargetNode() = 0;
 	virtual void setScatterTargetNode() = 0;
-	void setSpeed(float speed_) { speed = speed_; };
+	virtual void SetStartState() = 0;
+	virtual void SetStartParams() = 0;
+	virtual unsigned short int GetActivationDotLimit() = 0; //VISSZAIRNI NULL FUNCTIONRE
+	unsigned short int GetGhostPriorityNumber() const{ return PriorityNumber; }
+	virtual bool IsMyGhostIsActive() { return *MyGhostIsActive; }
+
+	void setSpeed(float speed_) { speed = speed_; }
 	Vector2i getTargetNode() const { return targetNode; }
 
 	/* New movement version */
@@ -36,24 +44,14 @@ public:
 	void turnAround();
 	void setDirection();
 	void setDirection(Vector2i);
-	//inline bool collideWithPacman() { //delete this if the v2 version works fine
-	//	sf::FloatRect pacmanRect = Map::getPacmanTempGlobalBounds();
-	//	sf::FloatRect ghostRect;
-	//	ghostRect = ghostBody.getGlobalBounds();
 
-	//	if (ghostRect.intersects(pacmanRect))
-	//		return true;
-
-	//	return false;
-	//};
-	//bool collideWithPacmanV2();
 	void setState(ActorState* pstateToSet) { //params: 1. The state you want to set
 		delete state;
 		state = pstateToSet;
 	}
 
 	virtual void moveUpAndDown() {}; //really amateur solution to move up and down in the ghost house
-	virtual bool moveToFourteenDotThirtyFive() { return true; }; //really amateur solution to get the ghost into the middle of the ghost house
+	virtual bool moveToFourteenDotThirtyFive() { return true; } //really amateur solution to get the ghost into the middle of the ghost house
 
 	void chooseRandomDirection();
 
@@ -79,20 +77,22 @@ public:
 	bool isFrightened;
 	float activateTimer; //When can the ghost come out from the house
 	float ANIMATIONSWITCHTIME = 0.25f;
-	bool active; 
+	bool active;
+	bool ActivateGhost;
 	bool visible;
 	bool inTunnel;
 	unsigned short int rowForAnimation; //Stores the row for the right colored ghost.
 	int speed;
+	unsigned short int counterLimit;
+	unsigned short int PriorityNumber;
 	Vector2i startDirection;
 
 	ghostState currentState;
 	Animation animation;
 	static Texture ghostTexture;
+	bool* MyGhostIsActive;
 protected:
-
 	/* constants start */
-	const int LIMITEDSPEED = 80;
 	const float GHOSTBODYSIZE = 40.0f;
 	const float TURNNZONELOWERBOUND = 0.40f;
 	const float TURNNZONEUPPERBOUND = 0.60f;
@@ -118,8 +118,6 @@ protected:
 
 protected:
 
-
-
 	int manhattanDistance(int x1, int y1, int x2, int y2)
 	{
 		// Calculating distance 
@@ -131,7 +129,6 @@ protected:
 		return sqrt(pow((x2-x1),2) + pow((y2 - y1), 2));
 	}
 
-	void findPath();
 
 private:
 	Vector2i previousTurningpoint;

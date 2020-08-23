@@ -13,13 +13,13 @@ Scatter::Scatter(Ghost* ghostToHandle) {
 
 void Scatter::Update(const float &dt)
 {
-	if (paused)
-		return;
-
 	if (Game_Over || Game_Win) {
 		Exit(eGameOver);
 		return;
 	}
+
+	if (paused)
+		return;
 
 	float stateTime = stateClock.getElapsedTime().asSeconds();
 
@@ -30,7 +30,8 @@ void Scatter::Update(const float &dt)
 	if (!Game_Over && ghost->collideWithPacman())
 	{
 		Game_Over = true;
-
+		paused = true;
+		Map::pauseTime = 2;
 		Exit(eGameOver);
 		return;
 	}
@@ -41,8 +42,8 @@ void Scatter::Update(const float &dt)
 		return;
 	}
 
-	if (stateTime > scatterTimings[STATENUMBER][LEVELNUMBER]) { //
-		Exit();
+	if (LEVELNUMBER < 4 && STATENUMBER < 5 && stateTime > scatterTimings[LEVELNUMBER][STATENUMBER]) {
+		Exit(eChase);
 		return;
 	}
 
@@ -67,8 +68,7 @@ void Scatter::Init()
 	ghost->currentState = eScatter;
 	
 
-	ghost->speed = elroy1 ? levelValues[LEVELNUMBER][6] : elroy2 ? levelValues[LEVELNUMBER][8] : levelValues[LEVELNUMBER][4];
-	//ghost->speed = 100.0f;
+	ghost->speed = elroy1 ? levelValues[LEVELNUMBER][7] : elroy2 ? levelValues[LEVELNUMBER][9] : levelValues[LEVELNUMBER][4];
 	stateClock.restart().asSeconds();
 	ghost->animation.selectBox = { 16,16 }; //default 16x16 for ghosts
 	ghost->animation.uvRect.width = 14;

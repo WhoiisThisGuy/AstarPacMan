@@ -15,15 +15,19 @@ void Tunneling::Update(const float& dt)
 
 	float stateTime = stateClock.getElapsedTime().asSeconds();
 
-	if (paused)
-		return;
 	if (Game_Over || Game_Win) {
 		Exit(eGameOver);
 		return;
 	}
+
+	if (paused)
+		return;
+
 	//if eaten exit here
 	if (ghost->collideWithPacman()) {
 		Game_Over = true;
+		paused = true;
+		Map::pauseTime = 2;
 		Exit(eGameOver);
 		return;
 	}

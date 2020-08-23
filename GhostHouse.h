@@ -12,10 +12,9 @@ public:
 	void Update(const float& dt) override; //Update
 private:
 	Ghost* ghost;
-
-
+	unsigned short int DotCounter;
+	bool DotCounterActive;
 private:
-	void Animate(const float& stateTime,const float& dt);
 	void Init() override;
 	void Exit(const ghostState& state = eScatter) override; //Clean up
 

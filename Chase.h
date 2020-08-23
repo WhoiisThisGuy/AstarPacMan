@@ -1,6 +1,6 @@
 #pragma once
 #include "ActorState.h"
-#include "Ghost.h"
+
 
 class Chase :
 	public ActorState

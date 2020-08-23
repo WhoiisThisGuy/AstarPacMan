@@ -1,7 +1,5 @@
 #pragma once
 #include "ActorState.h"
-#include "Ghost.h"
-
 class Eaten :
 	public ActorState
 {

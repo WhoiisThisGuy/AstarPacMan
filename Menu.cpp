@@ -3,11 +3,11 @@
 
 Menu::Menu() : play(false),quit(false),  menuElemPlay(0, &menuElemQuit, &menuElemQuit), menuElemQuit(1, &menuElemPlay, &menuElemPlay){
 	cout << "Menu consted" << endl;
-	font.loadFromFile("arial.ttf");
+
 	menuElemPlay.text.setFont(font);
 	menuElemPlay.text.setString("Play");
 	menuElemPlay.text.setFillColor(Color::White);
-	menuElemPlay.text.setOutlineColor(Color::Green);
+	menuElemPlay.text.setOutlineColor(Color::Yellow);
 	menuElemPlay.text.setOutlineThickness(3);
 	menuElemPlay.text.setCharacterSize(24);
 	menuElemPlay.text.setPosition(300,200);
@@ -15,7 +15,7 @@ Menu::Menu() : play(false),quit(false),  menuElemPlay(0, &menuElemQuit, &menuEle
 	menuElemQuit.text.setFont(font);
 	menuElemQuit.text.setString("Quit");
 	menuElemQuit.text.setFillColor(Color::White);
-	menuElemQuit.text.setOutlineColor(Color::Green);
+	menuElemQuit.text.setOutlineColor(Color::Yellow);
 	menuElemQuit.text.setCharacterSize(24);
 	menuElemQuit.text.setPosition(300, 500);
 
@@ -39,7 +39,7 @@ GameState* Menu::Update(RenderWindow& window)
 			temp->text.setOutlineThickness(0);
 			temp = temp->next;
 
-			temp->text.setOutlineThickness(30);
+			temp->text.setOutlineThickness(13);
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
@@ -47,7 +47,7 @@ GameState* Menu::Update(RenderWindow& window)
 			temp->text.setOutlineThickness(0);
 			temp = temp->previous;
 
-			temp->text.setOutlineThickness(30);
+			temp->text.setOutlineThickness(13);
 
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) { // 2 many if's Q_Q

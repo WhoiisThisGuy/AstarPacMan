@@ -26,8 +26,6 @@ public:
 
 private:
 
-	Font font;
-
 
 	MenuElem menuElemPlay;
 	MenuElem menuElemQuit;

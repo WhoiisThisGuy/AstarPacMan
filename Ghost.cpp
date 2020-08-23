@@ -2,8 +2,9 @@
 #include "Ghost.h"
 #include <list>
 #include <cstdlib>
+#include <iostream>
 
-using std::list;
+using namespace std;
 
 Texture Ghost::ghostTexture;
 
@@ -190,8 +191,8 @@ void Ghost::chooseRandomDirection()
 unsigned short int Ghost::getDirectionForAnimation() //Helps to select the column for the ghost
 {
 	unsigned short int col;
-
-	if (currentState != eEaten) {
+	
+	if (currentState != 5) { //eEaten = 5
 		direction.x == 1 ? col = 0
 			: direction.x == -1 ? col = 2
 			: direction.y == -1 ? col = 4
@@ -329,10 +330,6 @@ bool Ghost::comeOutFromHouse()
 		return false;
 	}
 
-	//ghostBody.setPosition((14 * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (11 * CELLSIZE) + CELLSIZE / 2);// This is really a wierd solution.
-	//ghostBody.setPosition((14 * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (11 * CELLSIZE) + CELLSIZE / 2);//
-
-	active = true;
 	direction = {0,0};
 	return true;
 }
@@ -344,4 +341,5 @@ void Ghost::Draw(sf::RenderWindow& window)
 	//window.draw(targetMark);
 
 }
+
 

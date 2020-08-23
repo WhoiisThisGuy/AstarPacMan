@@ -19,12 +19,13 @@ public:
 	void Update(const float& dt);
 	//void Draw(RenderWindow& window);
 	void setTargetNode(Vector2i) override;
-
-	virtual void moveUpAndDown() override;
-	virtual bool moveToFourteenDotThirtyFive() override;
+	void SetStartState() override;
+	void moveUpAndDown() override;
+	bool moveToFourteenDotThirtyFive() override;
 	void setChaseTargetNode() override;
 	void setScatterTargetNode() override;
-
+	void SetStartParams() override;
+	unsigned short int GetActivationDotLimit() override;
 	
 public:
 	Vector2i pacmanTempDirection;
@@ -35,10 +36,14 @@ private:
 	const float PINKYSTARTY = 14.0f;
 
 	const Vector2i scatterTargetNode = { 0,0 };
+
+	/* Constants end */
+
 	Texture PinkyTexture;
 	Texture targettexture;
 
-	/* Constants end */
+
+	unsigned short int DotCounter;
 };
 
 #endif

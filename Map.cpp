@@ -7,13 +7,11 @@ using std::iterator;
 
 string Map::level = "";
 
-bool paused = true;
-bool glob_powerOn = false;
-bool Game_Over = false;
-bool Game_Win = false;
-
-bool elroy1 = false;
-bool elroy2 = false;
+unsigned short int Map::pauseTime = 0;
+unsigned int Map::score = 0;
+unsigned short int* Map::DotCounterForGhosts = NULL;
+Clock Map::ClockSinceLastDotEaten;
+priority_queue<unsigned short int, std::vector<unsigned short int>, std::greater<unsigned short int>>Map::GhostHousePriority;
 
 Map::Map() {
 	
@@ -31,10 +29,17 @@ Map::Map() {
 	uCellSize = static_cast<unsigned int>(CellSize);
 
 	LoadMap();
-	LoadPellets();
-	//texturePowerPellet.loadFromFile("powerpellet.png");
+	
+	LoadPellets(); //TAKE THIS BACK
 
 	fruitsSpawned = 0;
+	FRUITNUMBER = 0;
+	scoreText.setFillColor(Color::White);
+	scoreText.setFont(font);
+	scoreText.setCharacterSize(37);
+	scoreText.setPosition(2 * CELLSIZE, 2 * CELLSIZE);
+	score = 0;
+	ClockSinceLastDotEaten.restart().asSeconds();
 }
 Map::~Map()
 {
@@ -43,9 +48,13 @@ Map::~Map()
 
 void Map::Update()
 {
+	
+	if (Game_Win || Game_Over)
+		return;
 
 	if (checkFruitPacmanCollision()) {
 		fruit.eaten();
+		score += levelValues[LEVELNUMBER][1];
 	}
 
 	handlePellets();
@@ -58,24 +67,39 @@ void Map::Update()
 			++numOfPellets;
 		}
 	}
-
-	if (numOfPellets == 0) {
+	scoreText.setString(std::to_string(score));
+	if (numOfPellets <= 0 && !Game_Win) {
 		Game_Win = true;
 		paused = true;
-		++LEVELNUMBER;
+		pauseTime = 2;
+		fruitsSpawned = 0;
+		fruit.deactivate();
 		return;
 	}
+
+	if (!elroy2 && !elroy1 && numOfPellets <= levelValues[LEVELNUMBER][6]){//Elroy 1
+		std::cout << "elroy1 is true" << std::endl;
+		elroy1 = true;
+	}
+	if (!elroy2 && numOfPellets <= levelValues[LEVELNUMBER][8]) {//Elroy 1
+		elroy1 = false;
+		elroy2 = true;
+		std::cout << "elroy2 is true" << std::endl;
+	}
+
 	if (fruitsSpawned < 2 && LEVELNUMBER < 22 && fruitAppear[FRUITNUMBER] >= numOfPellets) {
 		fruit.activate(levelValues[LEVELNUMBER][0]);
-		++fruitsSpawned;
 		++FRUITNUMBER;
+		++fruitsSpawned;
 	}
 	fruit.Update();
+	
 	return;
 }
 
 void Map::Draw(RenderWindow& window)
 {
+	window.draw(scoreText);
 	fruit.Draw(window);
 	for (auto& a : pelletArray)
 		if (a.isActive) {
@@ -97,6 +121,7 @@ void Map::handlePellets() //This makes the fruit appear aswell
 				//Setup pacman normal and dot speed
 				glob_powerOn = true;
 				Pacman::normalSpeedOn = false;
+				score += 50;
 				return;
 			}
 	}
@@ -105,8 +130,14 @@ void Map::handlePellets() //This makes the fruit appear aswell
 
 		if (a.isActive && a.getCoordinates() == Pacman::sTempCoordsOnLevel) {
 			//set up pacman dot speed here
+			score += 10;
 			a.isActive = false;
 			Pacman::normalSpeedOn = false;
+			if (!GhostHousePriority.empty())
+				++(* DotCounterForGhosts);
+			//else if (SpecialCounter)
+			//	++GlobalCounter;
+			ClockSinceLastDotEaten.restart().asSeconds();
 			return;
 		}
 	}
@@ -119,6 +150,43 @@ void Map::handlePellets() //This makes the fruit appear aswell
 	}
 }
 
+void Map::TurnOnPellets()
+{
+	//LoadPellets();
+
+	for (auto& a : pelletArray) {
+		a.isActive = true;
+	}
+
+	powerPelletList.clear();
+
+	powerPellet p1(7, 1);
+	powerPellet p2(7, 26);
+	powerPellet p3(27, 1);
+	powerPellet p4(27, 26);
+
+	powerPelletList.push_back(p1);
+	powerPelletList.push_back(p2);
+	powerPelletList.push_back(p3);
+	powerPelletList.push_back(p4);
+	//for debug
+	//pelletArray[0].isActive = true;
+	//pelletArray[0].pelletBody.setPosition((6 * CELLSIZE) + 9, (27 * CELLSIZE) + 9);
+	//pelletArray[0].setCoordinates(6, 27);
+
+
+	//powerPellet p1(7, 1);
+	//powerPellet p2(7, 26);
+	//powerPellet p3(27, 1);
+	//powerPellet p4(27, 26);
+
+	//powerPelletList.push_back(p1);
+	//powerPelletList.push_back(p2);
+	//powerPelletList.push_back(p3);
+	//powerPelletList.push_back(p4);
+		
+}
+
 char Map::GetTile(int x, int y)
 {
 	return level[y * MAPWIDTH + x];
@@ -126,49 +194,53 @@ char Map::GetTile(int x, int y)
 
 bool Map::checkFruitPacmanCollision()
 {
-	//Pacmancoords: megvan
-	//fruitcoords: megvan
 
 	return fruit.checkCollision(Pacman::getTempPosOnLevel());
+}
+
+void Map::ClearGhostHousePriorityQueue()
+{
+	while (!GhostHousePriority.empty()) GhostHousePriority.pop();
 }
 
 void Map::LoadMap()
 {
 	//35*28
-	level += "############################"; //Define as big off set as the plus rows, see in the Map h
+
+	level += "############################"; //Define as big off set as the plus rows, see in the Map.h
 	level += "############################"; // plus row
 	level += "############################"; // plus row
 	level += "############################"; // plus row
 	level += "############################"; // change the position se instead of these plus rows
-	level += "#            ##            #";
-	level += "# #### ##### ## ##### #### #";
-	level += "#O#### ##### ## ##### ####O#";
-	level += "# #### ##### ## ##### #### #";
-	level += "#                          #";
-	level += "# #### ## ######## ## #### #";
-	level += "# #### ## ######## ## #### #";
-	level += "#      ##    ##    ##      #";
-	level += "###### ##### ## ##### ######";
-	level += "###### #####d##d##### ######";
-	level += "###### ##t  tttt  t## ######";
-	level += "###### ## ###__### ## ######";
-	level += "###### ## #      # ## ######";
-	level += "L    s   t#  tt  #t   s    R";
-	level += "###### ## #      # ## ######";
-	level += "###### ## ######## ## ######";
-	level += "###### ##t        t## ######";
-	level += "###### ## ######## ## ######";
-	level += "###### ## ######## ## ######";
-	level += "#            ##            #";
-	level += "# #### ##### ## ##### #### #";
-	level += "# #### #####d##d##### #### #";
-	level += "#O  ##.               ##  O#";
-	level += "### ## ## ######## ## ## ###";
-	level += "### ## ## ######## ## ## ###";
-	level += "#      ##    ##    ##      #";
-	level += "# ########## ## ########## #";
-	level += "# ########## ## ########## #";
-	level += "#                          #";
+	level += "#T....T.....T##T.....T....T#";
+	level += "#.####.#####.##.#####.####.#";
+	level += "#O####.#####.##.#####.####O#";
+	level += "#.####.#####.##.#####.####.#";
+	level += "#T....T..T..T..T..T..T....T#";
+	level += "#.####.##.########.##.####.#";
+	level += "#.####.##.########.##.####.#";
+	level += "#T....T##T..T##T..T##T....T#";
+	level += "######.#####.##.#####.######";
+	level += "######.#####d##d#####.######";
+	level += "######.##t  tttt  t##.######";
+	level += "######.## ###__### ##.######";
+	level += "######.## #      # ##.######";
+	level += "L    sT  t#  tt  #t  Ts    R";
+	level += "######.## #      # ##.######";
+	level += "######.## ######## ##.######";
+	level += "######.##t        t##.######";
+	level += "######.## ######## ##.######";
+	level += "######.## ######## ##.######";
+	level += "#T....T..T..T##T..T..T....T#";
+	level += "#.####.#####.##.#####.####.#";
+	level += "#.####.#####d##d#####.####.#";
+	level += "#O.T##T..T..T  T..T..T##T.O#";
+	level += "###.##.##.########.##.##.###";
+	level += "###.##.##.########.##.##.###";
+	level += "#T.T..T##T..T##T..T##T..T.T#";
+	level += "#.##########.##.##########.#";
+	level += "#.##########.##.##########.#";
+	level += "#T..........T..T..........T#";
 	level += "############################";
 
 }
