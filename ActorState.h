@@ -1,5 +1,5 @@
 #pragma once
-#include <math.h>
+
 #include "SFML/Graphics.hpp"
 #include <iostream>
 #include "LevelVariables.h"
@@ -10,22 +10,24 @@ using namespace sf;
 #ifndef H_ACTSTATE
 #define H_ACTSTATE
 
-enum ghostState {eGhostHouse,eScatter,eChase,eFrighten,eGameOver,eEaten,eTunneling}; //e-enum
+enum GhostState { eGhostHouse, eScatter, eChase, eFrighten, eGameOver, eEaten, eTunneling }; //Possible states for a ghost, enum class should be used in the future!
 
 class ActorState
 {
 public:
+	
+public:
 	ActorState() { stateClock.restart().asSeconds(); }
-	virtual ~ActorState() { std::cout << "ActorState destructed" << std::endl; }
-	virtual void Update(const float& dt) = 0; //Update
+	virtual ~ActorState() {  }
+	virtual void Update(const float& dt) = 0; //Update state
 	
 protected:
 	
 	Clock stateClock;
-	uint16_t STATENUMBER; //how many times the ghost had been in this state
 private:
-	virtual void Init() = 0;
-	virtual void Exit(const ghostState&) = 0; //Set up next to next state
+	virtual void Init() = 0; //Initialize variables
+	virtual void Exit(const GhostState&) = 0; //preparing for exiting the state
+
 };
 
 #endif

@@ -9,7 +9,7 @@ using namespace sf;
 #define GAMESTARTPAUSETIME 3
 #define GHOSTCAUGHTPAUSETIME 1
 
-#define PACMANBASICSPEED 259 //100% speed
+#define PACMANBASICSPEED 233 //100% speed
 #define GHOSTBASICSPEED 223 //100% speed
 #define ON 1
 #define OFF 0
@@ -23,8 +23,8 @@ extern constexpr unsigned short int percentage(unsigned short int n, unsigned sh
 
 The row number equals to the number of the level. The 12 columns contains the following inormations:
 
-------0-------------1---------------2----------------3-----------4-----------------5-----------------6---------------7---------------8-----------------9---------------------10---------------------11-----------
-|Bonus Points|Pac-Man Speed|Pac-Man Dots Speed|Ghost Speed|GhostTunnel Speed|Elroy 1 Dots Left|Elroy 1 Speed|Elroy 2 Dots Left|Elroy 2 Speed| Fright. Pac-Man Speed| Fright Pac-Man Dots Speed|Fright Ghost Speed|
+|----------0------------------1-------------2----------------3--------------4--------------5-----------------6---------------7---------------8-----------------9---------------------10---------------------11------------------12------------------13------------------14----------
+|BonusFruitPictureNumber|Bonus Points|Pac-Man Speed|Pac-Man Dots Speed|Ghost Speed|GhostTunnel Speed|Elroy 1 Dots Left|Elroy 1 Speed|Elroy 2 Dots Left|Elroy 2 Speed| Fright. Pac-Man Speed| Fright Pac-Man Dots Speed|Fright Ghost Speed|Fright Time in Sec.|Number of flashes
 
 percentage does a % calculation
 every speed is calculated from the basic speed value of the characters
@@ -36,12 +36,9 @@ extern unsigned short int levelValues[][15];
 
 extern float scatterTimings[4][5];
 
-/* 0 means infinite */
-
 extern unsigned short int chaseTimings[4][5];
 
 extern unsigned short int fruitAppear[22];
-//extern unsigned short int FRUITNUMBER; //0. is the first fruit
 
 extern bool Game_Over;
 extern bool Game_Win;

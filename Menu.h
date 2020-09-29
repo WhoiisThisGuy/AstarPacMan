@@ -7,12 +7,7 @@ public:
 	~Menu();
 	GameState* Update(RenderWindow&);
 	void Render(RenderWindow& );
-	void EventsUpdate(GameState* , RenderWindow& );
-	bool getPlay() { return play; }
-	bool getQuit() { return quit; }
 public:
-
-
 	typedef struct MenuElem {
 	
 	public:
@@ -26,12 +21,13 @@ public:
 
 private:
 
-
-	MenuElem menuElemPlay;
+	MenuElem menuElemPlayClassic;
+	MenuElem menuElemPlayNearVersion;
 	MenuElem menuElemQuit;
 	MenuElem* temp;
+
+	Text DescriptionText;
+
 	Event event;
-	bool play;
-	bool quit;
 };
 

@@ -16,7 +16,7 @@ private:
 private:
 
 	void Init();
-	void Exit(const ghostState&); //Clean up
+	void Exit(const GhostState&); //Clean up
 	void TunnelingIn(const float& dt);
 	void TunnelingOut(const float& dt);
 

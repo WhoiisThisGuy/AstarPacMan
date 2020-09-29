@@ -3,22 +3,24 @@
 he gets aggressive and starts chasing until he catches PACMAN or PACMAN gets out of the range. */
 
 #include "Ghost.h"
-//#include "ActorState.h"
-//#include "Scatter.h"
 #ifndef H_PINKY
 #define H_PINKY
 #define PINKYTEXTUREPATH "Textures/pinky.png"
+
+
+#define PINKYSTARTXCLASS 13.60f //13.60
+#define PINKYSTARTYCLASS 14.0f //13.60
+#define PINKYSTARTX 11.40f //13.60
+#define PINKYSTARTY 14.0f //13.60
 
 class Pinky :public Ghost
 {
 
 public:
 
-	Pinky();
+	Pinky(const bool& classic);
 	~Pinky();
 	void Update(const float& dt);
-	//void Draw(RenderWindow& window);
-	void setTargetNode(Vector2i) override;
 	void SetStartState() override;
 	void moveUpAndDown() override;
 	bool moveToFourteenDotThirtyFive() override;
@@ -32,8 +34,6 @@ public:
 
 private:
 	/* Constants start */
-	const float PINKYSTARTX = 13.60f; //13.60
-	const float PINKYSTARTY = 14.0f;
 
 	const Vector2i scatterTargetNode = { 0,0 };
 

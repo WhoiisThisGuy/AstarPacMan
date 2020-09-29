@@ -12,6 +12,6 @@ private:
 	Ghost* ghost;
 private:
 	void Init();
-	void Exit(const ghostState&); //Clean up
+	void Exit(const GhostState&); //Clean up
 };
 

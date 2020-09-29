@@ -1,33 +1,44 @@
 #include "Menu.h"
 #include "Playing.h"
 
-Menu::Menu() : play(false),quit(false),  menuElemPlay(0, &menuElemQuit, &menuElemQuit), menuElemQuit(1, &menuElemPlay, &menuElemPlay){
+Menu::Menu() : menuElemPlayClassic(0, &menuElemPlayNearVersion, &menuElemQuit), menuElemPlayNearVersion(1, &menuElemQuit, &menuElemPlayClassic),menuElemQuit(2, &menuElemPlayClassic, &menuElemPlayNearVersion){
 	cout << "Menu consted" << endl;
 
-	menuElemPlay.text.setFont(font);
-	menuElemPlay.text.setString("Play");
-	menuElemPlay.text.setFillColor(Color::White);
-	menuElemPlay.text.setOutlineColor(Color::Yellow);
-	menuElemPlay.text.setOutlineThickness(3);
-	menuElemPlay.text.setCharacterSize(24);
-	menuElemPlay.text.setPosition(300,200);
+	menuElemPlayClassic.text.setFont(font);
+	menuElemPlayClassic.text.setString("1. Play with Blinky & Inky");
+	menuElemPlayClassic.text.setFillColor(Color::Yellow);
+	menuElemPlayClassic.text.setCharacterSize(24);
+	menuElemPlayClassic.text.setPosition(100,200);
+	menuElemPlayClassic.text.setLetterSpacing(2);
+
+	menuElemPlayNearVersion.text.setFont(font);
+	menuElemPlayNearVersion.text.setString("2. Play with Luxy & Darky");
+	menuElemPlayNearVersion.text.setFillColor(Color::White);
+	menuElemPlayNearVersion.text.setCharacterSize(24);
+	menuElemPlayNearVersion.text.setPosition(110, 270);
+	menuElemPlayNearVersion.text.setLetterSpacing(2);
 
 	menuElemQuit.text.setFont(font);
-	menuElemQuit.text.setString("Quit");
+	menuElemQuit.text.setString("3. Quit");
 	menuElemQuit.text.setFillColor(Color::White);
-	menuElemQuit.text.setOutlineColor(Color::Yellow);
 	menuElemQuit.text.setCharacterSize(24);
-	menuElemQuit.text.setPosition(300, 500);
+	menuElemQuit.text.setPosition(280, 340);
+	menuElemQuit.text.setLetterSpacing(2);
 
-	temp = &menuElemPlay;
+	DescriptionText.setFont(font);
+	DescriptionText.setCharacterSize(17);
+	DescriptionText.setPosition(2, 500);
+	DescriptionText.setFillColor(Color::White);
+	DescriptionText.setString("                                Short description:\n\n      Pac-Man 1980 PC videogame fan recreation by Near.\n                        Play the original Pac-Man game\n            with the original characters 1st menu point.\n                Or you could get to know two new ghosts\n                         Luxy and Darky 2nd menu point.\n                  You control pacman with the cursors.\n                                         Have fun.");
+
+	temp = &menuElemPlayClassic;
+	
 }
 
 Menu::~Menu()
 {
 	cout << "Menu deleted"<<endl;
 }
-
-
 
 GameState* Menu::Update(RenderWindow& window)
 {
@@ -36,32 +47,37 @@ GameState* Menu::Update(RenderWindow& window)
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
 
-			temp->text.setOutlineThickness(0);
+			temp->text.setFillColor(Color::White);
 			temp = temp->next;
+			temp->text.setFillColor(Color::Yellow);
 
-			temp->text.setOutlineThickness(13);
 		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
 
-			temp->text.setOutlineThickness(0);
-			temp = temp->previous;
 
-			temp->text.setOutlineThickness(13);
+			temp->text.setFillColor(Color::White);
+			temp = temp->previous;
+			temp->text.setFillColor(Color::Yellow);
+
 
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) { // 2 many if's Q_Q
-			if (temp->num == 0)
-				return new Playing();
-			else {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
+
+			switch (temp->num) {
+			case 0:
+				return new Playing(true);
+				break;
+			case 1:
+				return new Playing(false);
+				break;
+			case 2:
 				window.close();
 				return NULL;
+				break;
+
 			}
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
-			window.close();
-			return NULL;
-			}
 		if (event.type == sf::Event::Closed) {
 			window.close();
 			return NULL;
@@ -77,48 +93,9 @@ GameState* Menu::Update(RenderWindow& window)
 void Menu::Render(RenderWindow& window) {
 
 	window.clear();
+	window.draw(menuElemPlayClassic.text);
+	window.draw(menuElemPlayNearVersion.text);
 	window.draw(menuElemQuit.text);
-	window.draw(menuElemPlay.text);
+	window.draw(DescriptionText);
 	window.display();
-}
-
-void Menu::EventsUpdate(GameState* tempstate, RenderWindow& window)
-{
-	while (window.pollEvent(event))
-	{
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-
-			temp->text.setOutlineThickness(0);
-			temp = temp->next;
-			
-			temp->text.setOutlineThickness(30);
-		}
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-
-			temp->text.setOutlineThickness(0);
-			temp = temp->previous;
-			
-			temp->text.setOutlineThickness(30);
-			
-
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
-			switch (temp->num)
-			{
-			case 0:
-				delete tempstate;
-				tempstate = new Playing();
-				return;
-			case 1:
-				window.close();
-				return;
-			}
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
-			window.close();
-		}
-		if (event.type == sf::Event::Closed)
-			window.close();
-	}
 }

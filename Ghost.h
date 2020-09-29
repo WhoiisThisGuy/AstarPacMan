@@ -1,14 +1,22 @@
 #include "Animation.h" //Animation includes the Grahpics.hpp
 //#include "ActorState.h"
-#include "Map.h"
+
 #include <stack>
+#include "ActorState.h"
+#include "SFML\Audio.hpp"
 
 using namespace std;
-enum ghostState;
+
+//enum GhostState; //Ghost is constructed earlier, forward declaration needed
 class ActorState;
+enum GhostState;
 
 #ifndef H_GHOST
 #define H_GHOST
+
+#ifndef CELLSIZE
+#define CELLSIZE 24
+#endif
 
 #define SCORETEXTUREROW 4
 #define EYEBALLSTEXTUREROW 1
@@ -21,15 +29,14 @@ public:
 	virtual ~Ghost();
 	virtual void Update(const float&) = 0;
 	void Draw(RenderWindow&);
-	virtual void setTargetNode(Vector2i) = 0; //Maybe not needed
+	void setTargetNode(const Vector2i& target); //Maybe not needed
 
 	virtual void setChaseTargetNode() = 0;
 	virtual void setScatterTargetNode() = 0;
 	virtual void SetStartState() = 0;
 	virtual void SetStartParams() = 0;
-	virtual unsigned short int GetActivationDotLimit() = 0; //VISSZAIRNI NULL FUNCTIONRE
+	virtual unsigned short int GetActivationDotLimit() = 0;
 	unsigned short int GetGhostPriorityNumber() const{ return PriorityNumber; }
-	virtual bool IsMyGhostIsActive() { return *MyGhostIsActive; }
 
 	void setSpeed(float speed_) { speed = speed_; }
 	Vector2i getTargetNode() const { return targetNode; }
@@ -37,7 +44,7 @@ public:
 	/* New movement version */
 	bool turningPointReached();
 	bool tunnelPointReached(); //Tunnel point is marked with the character 's' on the Map.
-	void calculateNewDirection();
+	virtual void calculateNewDirection();
 	void calculateNewDirectionEatenMode();
 	/* ******************** */
 
@@ -50,15 +57,20 @@ public:
 		state = pstateToSet;
 	}
 
-	virtual void moveUpAndDown() {}; //really amateur solution to move up and down in the ghost house
-	virtual bool moveToFourteenDotThirtyFive() { return true; } //really amateur solution to get the ghost into the middle of the ghost house
+	void SetFrightenMode() {
+		isFrightened ? frightenedAgain = true : isFrightened = true;
+	}
 
+	virtual void moveUpAndDown() { return; } //really amateur solution to move up and down in the ghost house, returns true if there was a direction change.
+	virtual bool moveToFourteenDotThirtyFive() { return true; } //really amateur solution to get the ghost into the middle of the ghost house
+	bool comeOutFromHouse();
 	void chooseRandomDirection();
 
-	unsigned short int getDirectionForAnimation();
-	bool comeOutFromHouse();
-	bool isActive() const { return active; }
+	void playEatenSound();
 
+	unsigned short int getDirectionForAnimation();
+	
+	Vector2f ghostTempPosition() const;
 	sf::Vector2i ghostTempCorrdinate() const {
 
 		sf::Vector2i ghostTempCoord;
@@ -69,28 +81,42 @@ public:
 	void moveOn(const float& dt);
 	bool tunnelTeleport();
 	void UpdateTexture();
+	void setStartPosition();
+
+
+
 public:
 	Vector2i ghostHouseStartNode;
-	/* Was too lazy to write get and sets for these. */
 
-	bool firstcomeout; //coming out first from the house?
 	bool isFrightened;
-	float activateTimer; //When can the ghost come out from the house
-	float ANIMATIONSWITCHTIME = 0.25f;
-	bool active;
+	bool frightenedAgain;
+
+	
 	bool ActivateGhost;
 	bool visible;
 	bool inTunnel;
-	unsigned short int rowForAnimation; //Stores the row for the right colored ghost.
+
+	float ANIMATIONSWITCHTIME = 0.25f;
+
+	unsigned short int rowForAnimation; //Which row on the Texture.
+	unsigned short int ChaseStateCounter; //How many times have been in this state
+	unsigned short int ScatterStateCounter;//How many times have been in this state
+	unsigned short int counterLimit;//After how many dots to come out
+	unsigned short int PriorityNumber;//GhostHouse
+
 	int speed;
-	unsigned short int counterLimit;
-	unsigned short int PriorityNumber;
+
 	Vector2i startDirection;
 
-	ghostState currentState;
+	Vector2f startPoints;
+
+	GhostState currentState;
 	Animation animation;
 	static Texture ghostTexture;
-	bool* MyGhostIsActive;
+
+	static Text scoreText;
+
+
 protected:
 	/* constants start */
 	const float GHOSTBODYSIZE = 40.0f;
@@ -101,7 +127,7 @@ protected:
 	/* constants end */
 	
 
-	RectangleShape ghostBody; //ghostBody
+	RectangleShape ghostBody;
 
 	RectangleShape targetMark;
 
@@ -110,8 +136,8 @@ protected:
 	stack<Vector2i> path;
 
 	Vector2i direction;  //temporary direction
-	Vector2i targetNode; //final destination
-	Vector2i directionNode; //What is the next node to go into
+	Vector2i targetNode;
+	Vector2i directionNode;
 	
 	Vector2i pacManTempCoordsOnLevel; //needed for chasing
 
@@ -128,11 +154,13 @@ protected:
 	float eucledianDistance(int x1, int y1, int x2, int y2) {
 		return sqrt(pow((x2-x1),2) + pow((y2 - y1), 2));
 	}
-
+	
 
 private:
 	Vector2i previousTurningpoint;
 
+	static SoundBuffer eaten_soundbuffer;
+	static Sound eaten_sound;
 };
 
 

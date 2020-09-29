@@ -16,6 +16,6 @@ private:
 private:
 	void Init() override;
 	
-	void Exit(const ghostState& state = eChase) override; //Clean up
+	void Exit(const GhostState& state = eChase) override; //Clean up
 };
 

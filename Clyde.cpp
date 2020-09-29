@@ -7,24 +7,11 @@
 
 Clyde::Clyde() {
 
-	ClydeTexture.loadFromFile(CLYDETEXTUREPATH);//Have to do this at every single character... change it
-
-	ghostBody.setSize(Vector2f(GHOSTBODYSIZE, GHOSTBODYSIZE));
-	ghostBody.setOrigin(GHOSTBODYSIZE / 2, GHOSTBODYSIZE / 2);
-	//ghostBody.setTexture(&ClydeTexture);
-	
-	//Color color(255,183,81);
-	//
-	//
-	//clydeCircle.setRadius(8.0f* CELLSIZE);
-	//clydeCircle.setFillColor(Color::Transparent);
-	//clydeCircle.setOutlineColor(color);
-	//clydeCircle.setOutlineThickness(3.0f);
-	//clydeCircle.setOrigin(clydeCircle.getLocalBounds().width/2, clydeCircle.getLocalBounds().height / 2);
-	//clydeCircle.setPosition(ghostBody.getPosition());
 	ghostHouseStartNode = { 16,18 };
 	rowForAnimation = 3;
-	activateTimer = 5.0f; //5
+
+	startPoints.x = CLYDESTARTX;
+	startPoints.y = CLYDESTARTY;
 
 	PriorityNumber = 3;
 	SetStartState();
@@ -43,7 +30,7 @@ void Clyde::Update(const float& dt)
 	
 	state->Update(dt);
 	//moveOn(dt);
-	active = false;
+	//active = false;
 	
 	//handleState();
 	//if (stateToSet) { /* Handling new states here, this is ... wierd? Try change it. */
@@ -70,11 +57,6 @@ void Clyde::Update(const float& dt)
 //}
 
 
-void Clyde::setTargetNode(Vector2i target)
-{
-	targetNode = target;
-}
-
 void Clyde::moveUpAndDown()
 {
 	//Starts up by default.
@@ -85,6 +67,7 @@ void Clyde::moveUpAndDown()
 		if ((tempCoords) <= 17.50f
 			) {
 			turnAround();
+
 		}
 	}
 	else if (direction.y == 1) {
@@ -92,6 +75,7 @@ void Clyde::moveUpAndDown()
 		if ((tempCoords) >= 19.50f
 			) {
 			turnAround();
+
 		}
 	}
 
@@ -100,10 +84,11 @@ void Clyde::moveUpAndDown()
 bool Clyde::moveToFourteenDotThirtyFive()
 {
 	if (direction.x != -1) {
+
 		direction.x = -1;
 		direction.y = 0;
 	}
-	ghostBody.setPosition(ghostBody.getPosition());
+	//ghostBody.setPosition(ghostBody.getPosition());
 	if (13.75f < (ghostBody.getPosition().x - 10.0f) / CELLSIZE) {
 		return false;
 	}
@@ -133,12 +118,11 @@ void Clyde::SetStartState()
 
 void Clyde::SetStartParams()
 {
-	active = false;
 	rowForAnimation = 3;
-	firstcomeout = true;
 	direction.y = -1;
 	startDirection = { 0,-1 };
-	ghostBody.setPosition(Vector2f((CLYDESTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (CLYDESTARTY * CELLSIZE) + CELLSIZE / 2));
+	setStartPosition();
+
 	currentState = eGhostHouse;
 	animation.firstImage = getDirectionForAnimation();
 	animation.imageToSet.x = animation.firstImage;
@@ -146,7 +130,7 @@ void Clyde::SetStartParams()
 
 	animation.Update(0, ANIMATIONSWITCHTIME);
 	UpdateTexture();
-	ActivateGhost = false;
+	
 }
 
 

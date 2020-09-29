@@ -2,27 +2,24 @@
 #include "Scatter.h"
 #include "GhostHouse.h"
 #include "Pacman.h"
-//#include "Chase.h"
 
-Pinky::Pinky() {
+Pinky::Pinky(const bool& classic) {
 
-	PinkyTexture.loadFromFile(PINKYTEXTUREPATH);
-
-	ghostBody.setSize(Vector2f(GHOSTBODYSIZE, GHOSTBODYSIZE));
-	ghostBody.setOrigin(GHOSTBODYSIZE / 2, GHOSTBODYSIZE / 2);
-
-	//ghostBody.setTexture(&PinkyTexture);
 
 	ghostHouseStartNode = { 13,18 };
 
-	activateTimer = 0.0f;
-	PriorityNumber = 1;
+	PriorityNumber = 2;
+	
+	if (classic) {
+		startPoints.x = PINKYSTARTXCLASS;
+		startPoints.y = PINKYSTARTYCLASS;
+	}
+	else {
+		startPoints.x = PINKYSTARTX;
+		startPoints.y = PINKYSTARTY;
+	}
+
 	SetStartState();
-	//targettexture.loadFromFile("Textures/blinkytarget.png");
-	//Map::DotCounterForGhosts = &DotCounter;
-	//targetMark.setPosition(scatterTargetNode.x * CELLSIZE, scatterTargetNode.y);//Used to show where the target tile is atm
-	//targetMark.setTexture(&targettexture);
-	//targetMark.setSize(Vector2f{ CELLSIZE,CELLSIZE });
 }
 
 Pinky::~Pinky()
@@ -38,29 +35,9 @@ void Pinky::Update(const float& dt)
 
 	state->Update(dt);
 
-	//handleState();
-	//if (stateToSet) { /* Handling new states here, this is ... wierd? Try change it. */
-	//	delete state;
-	//	state = stateToSet;
-	//	stateToSet = NULL;
-	//}
-	//targetMark.setPosition((targetNode.x * CELLSIZE) + CELLSIZE / 2, (targetNode.y * CELLSIZE) + CELLSIZE / 2);//Used to show where the target tile is atm
 
 }
 
-//void Pinky::Draw(RenderWindow& window)
-//{
-//
-//	window.draw(ghostBody);
-//	//window.draw(targetMark);
-//	
-//}
-
-
-void Pinky::setTargetNode(Vector2i target)
-{
-	targetNode = target;
-}
 
 void Pinky::SetStartState()
 {
@@ -70,7 +47,6 @@ void Pinky::SetStartState()
 
 void Pinky::moveUpAndDown()
 {
-	//Starts up by default.
 
 	float tempCoords;
 
@@ -79,6 +55,7 @@ void Pinky::moveUpAndDown()
 		if ((tempCoords) <= 17.50f
 			) {
 			turnAround();
+
 		}
 	}
 	else if (direction.y == 1) {
@@ -86,6 +63,7 @@ void Pinky::moveUpAndDown()
 		if ((tempCoords) >= 19.50f
 			) {
 			turnAround();
+
 		}
 	}
 
@@ -93,9 +71,16 @@ void Pinky::moveUpAndDown()
 
 bool Pinky::moveToFourteenDotThirtyFive()
 {
+	Image asd;
+	if (direction.x != 1) {
+		direction.x = 1;
+		direction.y = 0;
+	}
 
-//She is already at moveToFourteenDotThirtyFive coordinate
-	
+	if (14.35 > (ghostBody.getPosition().x + 10.0f) / CELLSIZE) {
+		return false;
+	}
+
 	return true;
 }
 
@@ -126,13 +111,11 @@ void Pinky::setScatterTargetNode()
 
 void Pinky::SetStartParams()
 {
-	ActivateGhost = true;
-	active = false;
-	firstcomeout = true;
 	rowForAnimation = 1;
 	startDirection = { 0,-1 };
 	direction = startDirection;
-	ghostBody.setPosition(Vector2f((PINKYSTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (PINKYSTARTY * CELLSIZE) + CELLSIZE / 2));
+
+
 	animation.selectBox = { 16,16 }; //default 16x16 for ghosts
 	animation.uvRect.width = 14;
 	animation.uvRect.height = 14;
@@ -143,15 +126,16 @@ void Pinky::SetStartParams()
 	animation.imageToSet.x = animation.firstImage;
 	animation.imageToSet.y = rowForAnimation;
 	animation.lastImage = animation.firstImage + 1;
-
+	setStartPosition();
 	animation.Update(0, ANIMATIONSWITCHTIME);
 	UpdateTexture();
 }
 
 unsigned short int Pinky::GetActivationDotLimit()
 {
+
 	if (SpecialCounter)
-		return 7;
+		return 17;
 	else
-		return 0;
+		return LEVELNUMBER == 0 ? 30 : 0;
 }

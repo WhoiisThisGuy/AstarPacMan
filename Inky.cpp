@@ -4,26 +4,13 @@
 #include "GhostHouse.h"
 #include "Pacman.h"
 
-//#include "Chase.h"
-
 Inky::Inky(){
-
-	InkyTexture.loadFromFile(INKYTEXTUREPATH);//Have to do this at every single character... change it
-
-	ghostBody.setSize(Vector2f(GHOSTBODYSIZE, GHOSTBODYSIZE));
-	ghostBody.setOrigin(GHOSTBODYSIZE / 2, GHOSTBODYSIZE / 2);
 	
-	//ghostBody.setTexture(&InkyTexture);
-	Map::DotCounterForGhosts = &DotCounter;
+	startPoints.x = INKYSTARTX;
+	startPoints.y = INKYSTARTY;
 	ghostHouseStartNode = { 11,18 };
-	rowForAnimation = 2;
-	activateTimer = 5.0f;
-	//targettexture.loadFromFile("Textures/blinkytarget.png");
 	PriorityNumber = 2;
 	SetStartState();
-	//targetMark.setPosition(scatterTargetNode.x * CELLSIZE, scatterTargetNode.y);//Used to show where the target tile is atm
-	//targetMark.setTexture(&targettexture);
-	//targetMark.setSize(Vector2f{ CELLSIZE,CELLSIZE });
 }
 
 Inky::~Inky()
@@ -39,26 +26,11 @@ void Inky::Update(const float& dt)
 	blinkyTempCoordsOnLevel = Blinky::sTempCoordsOnLevel;
 	
 	state->Update(dt); // Update actual state
-
-
-	//move
-	//moveOn(dt);
 	
-	//targetMark.setPosition((targetNode.x * CELLSIZE) + CELLSIZE / 2, (targetNode.y * CELLSIZE) + CELLSIZE / 2);//Used to show where the target tile is atm
 
 }
 
-//void Inky::Draw(RenderWindow& window)
-//{
-//	window.draw(ghostBody);
-//	//window.draw(targetMark);
-//}
 
-
-void Inky::setTargetNode(Vector2i target)
-{
-	targetNode = target;
-}
 
 void Inky::SetStartState()
 {
@@ -78,6 +50,7 @@ void Inky::moveUpAndDown()
 		if ((tempCoords) <= 17.50f
 			) {
 			turnAround();
+
 		}
 	}
 	else if (direction.y == 1) {
@@ -85,6 +58,7 @@ void Inky::moveUpAndDown()
 		if ((tempCoords) >= 19.50f
 			) {
 			turnAround();
+
 		}
 	}
 
@@ -96,7 +70,6 @@ bool Inky::moveToFourteenDotThirtyFive()
 		direction.x = 1;
 		direction.y = 0;
 	}
-	ghostBody.setPosition(ghostBody.getPosition());
 	if (14.35 > (ghostBody.getPosition().x + 10.0f) / CELLSIZE) {
 		return false;
 	}
@@ -143,7 +116,6 @@ void Inky::setScatterTargetNode()
 void Inky::SetStartParams()
 {
 	rowForAnimation = 2;
-	firstcomeout = true;
 	direction.y = -1;
 	
 	startDirection = { 0,-1 };
@@ -154,9 +126,9 @@ void Inky::SetStartParams()
 	animation.imageToSet.y = rowForAnimation;
 
 	animation.Update(0, ANIMATIONSWITCHTIME);
-	ghostBody.setPosition(Vector2f((INKYSTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (INKYSTARTY * CELLSIZE) + CELLSIZE / 2));
+	setStartPosition();
 	UpdateTexture();
-	ActivateGhost = false;
+	
 }
 
 unsigned short int Inky::GetActivationDotLimit()

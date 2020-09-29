@@ -21,7 +21,6 @@ Game::Game()
 Game::~Game() {
 
 	if(gameState) {
-		cout << "Game destructor"<<endl;
 		delete gameState;
 	}
 
@@ -39,22 +38,9 @@ void Game::run()
 			delete gameState;
 			gameState = newStateToSet;
 			newStateToSet = NULL;
+		
 		}
 
-	}
-
-}
-
-void Game::UpdateSfmlEvents()
-{
-	
-	while (window.pollEvent(event))
-	{
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
-			window.close();
-		}
-		if (event.type == sf::Event::Closed)
-			window.close();
 	}
 
 }

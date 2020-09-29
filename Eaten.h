@@ -5,14 +5,15 @@ class Eaten :
 {
 
 public:
-	Eaten(Ghost* ghostToHandle,const ghostState& prevState, const unsigned short int&);
+	Eaten(Ghost* ghostToHandle,const GhostState& prevState);
 	virtual void Update(const float& dt);
 private:
 	Ghost* ghost;
-	ghostState previousState;
+	GhostState previousState;
+	static unsigned short int NumberOfGhostInEatenMode;
 private:
 	void Init();
-	void Exit(const ghostState&); //Clean up
+	void Exit(const GhostState&); //Clean up
 
 };
 

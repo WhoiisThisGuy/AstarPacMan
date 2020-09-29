@@ -1,6 +1,8 @@
 #include "Tunneling.h"
 #include "Chase.h"
 #include "GhostGameOver.h"
+#include "Map.h"
+#include "Frighten.h"
 
 
 Tunneling::Tunneling(Ghost* ghostToHandle) {
@@ -27,7 +29,6 @@ void Tunneling::Update(const float& dt)
 	if (ghost->collideWithPacman()) {
 		Game_Over = true;
 		paused = true;
-		Map::pauseTime = 2;
 		Exit(eGameOver);
 		return;
 	}
@@ -72,7 +73,7 @@ void Tunneling::Init()
 }
 
 
-void Tunneling::Exit(const ghostState& state)
+void Tunneling::Exit(const GhostState& state)
 {
 	ghost->inTunnel = false;
 	switch (state) {
@@ -83,4 +84,5 @@ void Tunneling::Exit(const ghostState& state)
 		ghost->setState(new GhostGameOver(ghost));
 		break;
 	}
+
 }

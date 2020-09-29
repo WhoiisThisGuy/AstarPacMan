@@ -6,15 +6,16 @@
 Vector2i Blinky::sTempCoordsOnLevel = { 0 ,0}; //Not accurate...
 
 Blinky::Blinky(){
-	BlinkyTexture.loadFromFile(BLINKYTEXTUREPATH);//Have to do this at every single character... change it
 
-	ghostBody.setSize(Vector2f(GHOSTBODYSIZE, GHOSTBODYSIZE));
-	ghostBody.setOrigin(GHOSTBODYSIZE / 2, GHOSTBODYSIZE / 2);
 	PriorityNumber = 0;
 	SetStartState();
 	
+	startPoints.x = BLINKYSTARTX;
+	startPoints.y = BLINKYSTARTY;
+
 	ghostHouseStartNode = { 13,18 };
 	
+	//SetStartParams();
 	//targetMark.setPosition(scatterTargetNode.x*CELLSIZE, scatterTargetNode.y);//Used to show where the target tile is atm
 	//targetMark.setTexture(&targettexture);
 	//targetMark.setSize(Vector2f{ CELLSIZE,CELLSIZE });
@@ -36,12 +37,7 @@ void Blinky::Update(const float& dt)
 	sTempCoordsOnLevel = getTempCoordsOnLevel(); //For Inky
 }
 
-bool Blinky::IsMyGhostIsActive() { return true; }
-
-void Blinky::setTargetNode(Vector2i target)
-{
-	targetNode = target;
-}
+//bool Blinky::IsMyGhostIsActive() { return true; }
 
 void Blinky::setChaseTargetNode()
 {
@@ -71,7 +67,10 @@ unsigned short int Blinky::GetActivationDotLimit()
 
 void Blinky::SetStartState()
 {
-	setState(new Scatter(this));
+	if (LEVELNUMBER < 3)
+		setState(new Scatter(this));
+	else
+		setState(new Chase(this));
 }
 
 void Blinky::SetStartParams()
@@ -80,9 +79,9 @@ void Blinky::SetStartParams()
 	rowForAnimation = 0;
 
 	startDirection = { -1,0 };
-	active = true;
+
 	direction = startDirection;
-	currentState = eScatter;
+	setStartPosition();
 	animation.selectBox = { 16,16 }; //default 16x16 for ghosts
 	animation.uvRect.width = 14;
 	animation.uvRect.height = 14;
@@ -93,9 +92,9 @@ void Blinky::SetStartParams()
 	UpdateTexture();
 	//ghostBody.setTexture(&BlinkyTexture);
 
-	firstcomeout = false;
-
-	ghostBody.setPosition(Vector2f((BLINKYSTARTX * CELLSIZE) + CELLSIZE / 2, MAPOFFSET + (BLINKYSTARTY * CELLSIZE) + CELLSIZE / 2));
+	//constexpr float startx = (BLINKYSTARTX * CELLSIZE) + CELLSIZE / 2;
+	//constexpr float starty = MAPOFFSET + (BLINKYSTARTY * CELLSIZE) + CELLSIZE / 2;
+	//ghostBody.setPosition(Vector2f(startx,starty));
 }
 
 

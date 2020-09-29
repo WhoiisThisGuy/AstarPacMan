@@ -5,72 +5,111 @@
 #include "Inky.h"
 #include "Clyde.h"
 #include "Pacman.h"
+#include "Darky.h"
+#include "Luxy.h"
+#include "SFML\Audio.hpp"
+
+#define HIGHSCOREFILENAME "highscores.txt"
+#define PACMANTEXTUREPATH "Textures/pacman.png"
 
 class Playing : public GameState
 {
 
 public:
-	Playing();
+	Playing(bool classic);
 	~Playing();
 	GameState* Update(RenderWindow&);
 	void Render(RenderWindow& window);
-	
+
 public:
 	Clock deltaClock;
-	//Game futáshoz
+
 	Sprite backgroundSprite;
 
 	Event event;
+
 	Texture backgroundTexture; //This is for the Game class.
 
-	Map map;
-	//pálya
+	Map map; //the map
+	
+	Pacman pacman; //The hero
 
-	Pacman pacman;
-	//The hero
+	/* Ghosts start */
+	Ghost* one;
+	Ghost* two;
+	Ghost* three;
+	Ghost* four;
+	/* Ghosts end */
 
-	Blinky blinky;
-	Pinky pinky;
-	Inky inky;
-	Clyde clyde;
-	//Chasers
+	/* Sounds start */
+
+	SoundBuffer intro_soundbuffer;
+	Sound intro_sound;
+	
+	/* Sounds end */
+
 private:
+
+	int Setnewhighscore();
+
 	void Updatedt();
 	void UpdateGameWinAnimation(const float& );
-
+	
 	void GhostsVisible(bool);
 
-	void(Playing::* fToUpdate)();
+	
 	void UpdateGamePlay();
 	void UpdateGameWin();
 	void UpdateGameWinAnimation();
 	void UpdateGameOver();
 	void UpdateGameStart();
 
-private:
-	Text readyText;
+	void UpdateHighScore();
 	
+	void SetNextFruitLevelTexture();
+	void InitFruitTextures();
 
-	//pausing game
+	int GetCurrentHighScore();
+
+private:
+
+	//This function pointer updates the different states, gamewin, gameover etc.
+	void (Playing::* fToUpdate)(); //Reasons for using: none, I just wanted to try out function pointers.
+	
+	Text readyText;
+	Text highScoreText;
+
+	/* clocks using this to store how much time passed */
 	float pauseTimePassed = 0;
-
-	//win animation
-	unsigned short int StartGameWinAnimationAfter = 2;
+	float TimePassedFromWinAnimationStart;
+	float TimePassedFromGameStartAnimation;
 	float TimePassedWinAnimation = 0;
+
 	const float SwitchWinAnimationAfter = 0.3f;
 	const float FinishWinAnimationAfter = 3;
-	float TimePassedFromWinAnimationStart;
-	bool whiteorblue = false; //blue or white for the animation
+
+	unsigned short int StartGameWinAnimationAfter = 2;
+
+	unsigned short int FruitLevelNumber = 0; //Which cell to use in FruitLevelTextures array, there can be 8
+
+	Fruit FruitLevelTextures[8];
+
+	bool whiteorblue = false; //blue or white background flashing
 	IntRect backgroundAnimation[2] = {IntRect(0,0,672,744),IntRect(694,0,672,744)};
 
+	int currenthighscore;
+	int score;
 
 	//deltatime
 	float dt;
+
 	/* Textures */
 	Texture ghostsTexture;
 	Texture pacmanTexture;
-
-	//Return this to game object, every Update function will set it in properly.
+	
+	
+	//Return this to game object, every Update function sets this at the end of the function.
 	GameState* returnState;
+	
 };
 

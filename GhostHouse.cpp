@@ -1,6 +1,8 @@
 #include "GhostHouse.h"
 #include "Scatter.h"
 #include "Frighten.h"
+#include "Chase.h"
+#include "Map.h"
 
 GhostHouse::GhostHouse(Ghost* p_ghost)
 {
@@ -8,9 +10,6 @@ GhostHouse::GhostHouse(Ghost* p_ghost)
 	ghost = p_ghost;
 	Init();
 }
-
-
-/* This is a really wierd solution to come out from ghost house. */
 
 void GhostHouse::Update(const float &dt)
 {
@@ -23,6 +22,19 @@ void GhostHouse::Update(const float &dt)
 	if (paused)
 		return;
 
+	if (ghost->isFrightened && Map::ClockFrightenMode.getElapsedTime().asSeconds() >= levelValues[LEVELNUMBER][13]) {
+		ghost->isFrightened = false;
+		ghost->ANIMATIONSWITCHTIME = 0.25;
+		SetUpAnimation();
+	}
+
+	if (ghost->isFrightened) { /* Setup Frighten mode animation, and frighten state variables */
+		ghost->animation.imageToSet.y = 0;
+		ghost->animation.firstImage = 8;
+		ghost->animation.imageToSet.x = ghost->animation.firstImage;
+		ghost->animation.lastImage = ghost->animation.firstImage + 1;
+
+	}
 
 	if (!ghost->ActivateGhost && (!Map::GhostHousePriority.empty() && ghost->GetGhostPriorityNumber() == Map::GhostHousePriority.top())) { //am I topPriority
 		
@@ -30,8 +42,7 @@ void GhostHouse::Update(const float &dt)
 			Map::DotCounterForGhosts = &DotCounter; //Turn on counting dots in map
 			DotCounterActive = true;
 		}
-		if (DotCounter >= 5)
-			cout<<"okgeci"<<endl;
+
 		if (DotCounter >= ghost->GetActivationDotLimit() || Map::ClockSinceLastDotEaten.getElapsedTime().asSeconds() >= (LEVELNUMBER >= 5 ? 3 : 4)) {//
 
 			ghost->ActivateGhost = true;
@@ -40,23 +51,22 @@ void GhostHouse::Update(const float &dt)
 	}
 
 	if (ghost->ActivateGhost) {
+		
 		if (ghost->moveToFourteenDotThirtyFive()) {
+			
 			if (ghost->comeOutFromHouse()) {
-				Exit(eScatter);
+				Exit();
 				return;
 			}
 		}
-				
+		
 	}
 	else {
 		ghost->moveUpAndDown();
-
 	}
 
-	ghost->animation.firstImage = ghost->getDirectionForAnimation();
-	ghost->animation.imageToSet.x = ghost->animation.firstImage;
-	ghost->animation.lastImage = ghost->animation.firstImage + 1;
-	ghost->animation.Update(dt, ghost->ANIMATIONSWITCHTIME);
+	Animate(dt);
+	
 	ghost->UpdateTexture();
 	ghost->moveOn(dt);
 }
@@ -65,49 +75,69 @@ void GhostHouse::Init()
 {
 	ghost->currentState = eGhostHouse;
 	
+	animationCounter = 0;
 
 	ghost->ActivateGhost = false;
 	DotCounterActive = false;
 	DotCounter = 0;
 
-	
 	ghost->speed = levelValues[LEVELNUMBER][5];
 	ghost->setDirection(ghost->startDirection);
-	ghost->firstcomeout = true;
-	ghost->active = false;
-	
 	stateClock.restart().asSeconds();
+	SetUpAnimation();
+	
+}
 
+void GhostHouse::Exit(const GhostState& state){
+
+	ghost->calculateNewDirection();
+	
+	if (ghost->isFrightened)
+		ghost->setState(new Frighten(ghost,eScatter));
+	else if(LEVELNUMBER < 3)
+		ghost->setState(new Scatter(ghost));
+	else
+		ghost->setState(new Chase(ghost));
+	return;
+}
+
+
+void GhostHouse::SetUpAnimation()
+{
+	
 	ghost->animation.selectBox = { 16,16 }; //default 16x16 for ghosts
 	ghost->animation.uvRect.width = 14;
 	ghost->animation.uvRect.height = 14;
-
-	ghost->animation.firstImage = ghost->getDirectionForAnimation();
-	ghost->animation.imageToSet.x = ghost->animation.firstImage;
 	ghost->animation.imageToSet.y = ghost->rowForAnimation;
+	prevDirection = ghost->getDirectionForAnimation();
+	ghost->animation.firstImage = prevDirection;
+	ghost->animation.imageToSet.x = ghost->animation.firstImage;
 	ghost->animation.lastImage = ghost->animation.firstImage + 1;
-
-}
-
-void GhostHouse::Exit(const ghostState& state){
-	ghost->active = true;
-	ghost->calculateNewDirection();
-	//Map::DotCounterForGhosts = NULL; //Turn off counting in map
-	ghost->setState(new Scatter(ghost));
 	
 }
 
-//void GhostHouse::Animate(const float& stateTime, const float& dt)
-//{
-//	if (ghost->isFrightened) {
-//		if (stateTime < 5) {
-//			ghost->animation.Update(4, dt, ghost->ANIMATIONSWITCHTIME);
-//		}
-//		else {
-//			ghost->animation.UpdateCustomOfColumns(5, 4, dt, 0.25f); //This row of the texture consists of 4 columns to easily update the animation.
-//		}
-//	}
-//	else
-//		ghost->animation.Update(ghost->rowToSetForAnimation(), dt, ghost->ANIMATIONSWITCHTIME);
-//
-//}
+void GhostHouse::Animate(const float& dt)
+{
+	if (ghost->isFrightened) {
+		float stateTime = Map::ClockFrightenMode.getElapsedTime().asSeconds();
+
+		if (stateTime > levelValues[LEVELNUMBER][13]-2) { //start to flash before 2 seconds of the state end
+			if (ghost->ANIMATIONSWITCHTIME != 0.08)
+				ghost->ANIMATIONSWITCHTIME = 0.08;
+			ghost->animation.lastImage = ghost->animation.firstImage + 3;
+			ghost->animation.UpdateFrightenAnimation(dt, ghost->ANIMATIONSWITCHTIME, animationCounter); //Increments animation counter
+		}
+		else {
+			ghost->animation.Update(dt, ghost->ANIMATIONSWITCHTIME);
+		}
+	}
+	else {
+		if (prevDirection != ghost->getDirectionForAnimation()) {
+			prevDirection = ghost->getDirectionForAnimation();
+			ghost->animation.firstImage = prevDirection;
+			ghost->animation.imageToSet.x = ghost->animation.firstImage;
+			ghost->animation.lastImage = ghost->animation.firstImage + 1;
+		}
+		ghost->animation.Update(dt, ghost->ANIMATIONSWITCHTIME);
+	}
+}

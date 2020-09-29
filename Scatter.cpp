@@ -31,18 +31,17 @@ void Scatter::Update(const float &dt)
 	{
 		Game_Over = true;
 		paused = true;
-		Map::pauseTime = 2;
 		Exit(eGameOver);
 		return;
 	}
 
-	if (glob_powerOn && !ghost->isFrightened) {
+	if (ghost->isFrightened) {
 
 		Exit(eFrighten);
 		return;
 	}
 
-	if (LEVELNUMBER < 4 && STATENUMBER < 5 && stateTime > scatterTimings[LEVELNUMBER][STATENUMBER]) {
+	if (LEVELNUMBER < 3 && stateTime > scatterTimings[LEVELNUMBER][ghost->ScatterStateCounter]) {
 		Exit(eChase);
 		return;
 	}
@@ -82,12 +81,14 @@ void Scatter::Init()
 
 }
 
-void Scatter::Exit(const ghostState& state)
+void Scatter::Exit(const GhostState& state)
 {
+	if (ghost->ScatterStateCounter < 4)
+		++ghost->ScatterStateCounter;
 	switch (state) {
 
 	case eChase:
-		++STATENUMBER;
+		
 		ghost->turnAround();
 		ghost->setState(new Chase(ghost));
 		break;

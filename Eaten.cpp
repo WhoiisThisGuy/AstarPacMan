@@ -2,12 +2,15 @@
 #include "Chase.h"
 #include "Scatter.h"
 #include "GhostHouse.h"
+#include "Map.h"
 
-Eaten::Eaten(Ghost* ghostToHandle,const ghostState& prevState,const unsigned short int& eatenNum_)
+unsigned short int Eaten::NumberOfGhostInEatenMode = 0;
+
+Eaten::Eaten(Ghost* ghostToHandle,const GhostState& prevState)
 {
 	ghost = ghostToHandle;
-	previousState = prevState; //maybe I need this later
-	ghost->animation.imageToSet.x = eatenNum_;
+	previousState = prevState;
+	
 	Init();
 }
 
@@ -24,10 +27,12 @@ void Eaten::Update(const float& dt)
 		return;
 
 	if (ghost->ghostTempCorrdinate() == ghost->getTargetNode()) {
-		ghost->setTargetNode(ghost->ghostHouseStartNode);
-		//return;
+		ghost->setTargetNode(Vector2i(ghost->ghostHouseStartNode));
 	}
-	if (ghost->ghostTempCorrdinate() == ghost->ghostHouseStartNode) {
+	if (!ghost->visible)
+		ghost->visible = true;
+
+	if (ghost->ghostTempCorrdinate() == Vector2i(ghost->ghostHouseStartNode)) {
 		Exit(eGhostHouse);
 		return;
 	}
@@ -46,21 +51,32 @@ void Eaten::Update(const float& dt)
 
 void Eaten::Init()
 {
-	ghost->active = false;
+	Map::EatenMode = ON;
+	++NumberOfGhostInEatenMode;
+	Map::SetHomeRunningBackGroundSound();
+	ghost->playEatenSound();
 	ghost->currentState = eEaten;
-	ghost->speed = GHOSTBASICSPEED; //Eyes move faster
-	ghost->animation.imageToSet.y = EYEBALLSTEXTUREROW; //For the animation
-	ghost->animation.imageToSet.x = ghost->getDirectionForAnimation(); //get direction immediatley
-	//ghost->setTargetNode(Vector2i(13, 19));
+	ghost->speed = GHOSTBASICSPEED;
+	ghost->animation.imageToSet.y = EYEBALLSTEXTUREROW;
+	ghost->animation.imageToSet.x = ghost->getDirectionForAnimation();
 	ghost->setTargetNode(Vector2i{ 13,18 });
 	Map::GhostHousePriority.push(ghost->GetGhostPriorityNumber());
 	stateClock.restart().asSeconds();
 	
-	
 }
 
-void Eaten::Exit(const ghostState& state)
+void Eaten::Exit(const GhostState& state)
 {
+	--NumberOfGhostInEatenMode;
+	if (NumberOfGhostInEatenMode <= 0) {
+		Map::EatenMode = OFF;
+		if (Map::FrightenMode == ON)
+			Map::SetFirghtenSound();
+		else
+			Map::SetBackGroundSound();
+	}
+		
+	
 
 	ghost->setSpeed(150); //Back to normal speed
 

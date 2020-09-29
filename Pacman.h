@@ -4,8 +4,8 @@
 #ifndef H_PACMAN
 #define H_PACMAN
 
-#define PACMANTEXTUREPATH "Textures/pacman.png"
-#define PACMANSTARTPOSX 13
+
+#define PACMANSTARTPOSX 14
 #define PACMANSTARTPOSY 28
 
 class Pacman
@@ -18,10 +18,6 @@ public:
 	void Draw(RenderWindow& window);
 	bool Update(const float& dTime);
 
-	//Copy constructor
-	Pacman(const Pacman& p2) { body = p2.body; PacmanTexture = p2.PacmanTexture; }
-
-	//Vector2i getTempCoordsOnLevel() const;
 	static FloatRect getTempPosOnLevel() {
 		return body.getGlobalBounds();
 	}
@@ -34,13 +30,13 @@ public:
 	bool UpdateDeathAnimation(const float&);
 
 	void SetStartState();
-	void IncreaseHealth();
+	static void IncreaseHealth();
 	void DecreaseHealth();
 	unsigned short int GetHealthValue() { return health; }
 
 public:
 	static float speed;
-	static bool normalSpeedOn;
+	static bool DotSpeed;
 	static Vector2i sTempCoordsOnLevel;
 	static Vector2i sTempDirectionOnLevel;
 private:
@@ -48,12 +44,10 @@ private:
 	bool checkCollision(const float& dTime);
 	unsigned short int rowToSetForAnimation();
 	void tunnelTeleport();
+	void SetUpSpeed(); //Handle speed
 private:
 	
-	/*
-	Constants START
-	*/
-	//All the OFFSET and the
+	/* Constants START */
 	
 	const float OFFSET = 10.0f; //For collision check.
 	const float TURNNZONELOWERBOUND = 0.30f;
@@ -66,17 +60,18 @@ private:
 	const Vector2u textureRowNColNumber = {2,4};
 
 	float PACMANSPEED = 142;
-	/*
-	Constants END
-	*/
+	/* Constants END */
 	static RectangleShape body;
-	Texture PacmanTexture;
+	static Text pacman_hp_text;
+	
+	Texture pacman_hp_texture;
+	Sprite pacman_hp_sprite;
 
 	bool havebufferedmove;
 	
 	unsigned int row;
 
-	unsigned short int health = 2;
+	static unsigned short int health;
 
 	Animation* animation;
 

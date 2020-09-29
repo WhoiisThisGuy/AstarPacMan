@@ -4,22 +4,24 @@
 #include "Eaten.h"
 #include "Tunneling.h"
 #include "GhostGameOver.h"
+#include "Map.h"
 
-unsigned short int Frighten::eatenNum = 0;
+unsigned short int Frighten::eatenNum = 200;
+unsigned short int Frighten::NumberOfGhostInFrightenMode = 0;
 
-Frighten::Frighten(Ghost* ghostToHandle, ghostState prevState) {
+Frighten::Frighten(Ghost* ghostToHandle, GhostState prevState) {
 	
 	ghost = ghostToHandle;
 	previousState = prevState;
-	//std::cout << "SCATTER\n";
 	ghost->isFrightened = true;
 	ghost->currentState = eFrighten;
 	Init();
 }
 
+
 void Frighten::Update(const float& dt)
 {
-	float stateTime = stateClock.getElapsedTime().asSeconds();
+	float stateTime = Map::ClockFrightenMode.getElapsedTime().asSeconds();
 
 	if (Game_Over || Game_Win) {
 		Exit(eGameOver);
@@ -29,24 +31,41 @@ void Frighten::Update(const float& dt)
 	if (paused)
 		return;
 
-	//if eaten exit here
+	if (ghost->frightenedAgain) {
+		ghost->frightenedAgain = false;
+		Init();
+		return;
+	}
+
+	if (stateTime >= levelValues[LEVELNUMBER][13] || animationCounter >= levelValues[LEVELNUMBER][14]) {
+		if (LEVELNUMBER > 3)
+			Exit(eChase);
+		else
+			Exit(eChase);
+		return;
+	}
+
+	
 	if (ghost->collideWithPacman()) {
 		paused = true;
 		Map::pauseTime = 1;
-		ghost->animation.setScoreImage(eatenNum);
-		ghost->UpdateTexture();
-		++eatenNum;
-		Map::score += (eatenNum == 0 ? 200 : eatenNum == 1 ? 400 : eatenNum == 2 ? 800 : 1600); //update score
-		if (eatenNum > 3)
-			eatenNum = 0;
+		Ghost::scoreText.setPosition(ghost->ghostTempPosition());
+		
+		ghost->visible = false;
+
+		eatenNum*=2;
+		Ghost::scoreText.setString(std::to_string(eatenNum));
+		Map::score += (eatenNum == 0 ? 200 : eatenNum == 1 ? 400 : eatenNum == 2 ? 800 : 1600);
+		Map::LifeScoreCounter += (eatenNum == 0 ? 200 : eatenNum == 1 ? 400 : eatenNum == 2 ? 800 : 1600);
+
+		if (eatenNum == 1600)
+			eatenNum = 200;
+
 		Exit(eEaten);
 		return;
 	}
 
-	if (animationCounter > 4) {
-		Exit(previousState);
-		return;
-	}
+
 	if (ghost->turningPointReached() || ghost->tunnelPointReached()) {
 		if (ghost->inTunnel) {
 			Exit(eTunneling);
@@ -59,20 +78,18 @@ void Frighten::Update(const float& dt)
 
 	Animate(stateTime, dt);
 	ghost->UpdateTexture();
-	if (glob_powerOn) {
-
-		Init();
-	}
 
 	ghost->moveOn(dt);
 }
 
 void Frighten::Animate(const float &stateTime,const float &dt)
 {
-	if (stateTime > 4) { 
-		ghost->animation.lastImage = ghost->animation.firstImage + 3;
-		ghost->ANIMATIONSWITCHTIME = 0.08;
-		ghost->animation.UpdateFrightenAnimation(dt, ghost->ANIMATIONSWITCHTIME,animationCounter);
+	if (stateTime > levelValues[LEVELNUMBER][13] - 2) { //start to flash before 2 seconds of the state end
+		if (ghost->ANIMATIONSWITCHTIME != 0.08) {
+			ghost->ANIMATIONSWITCHTIME = 0.08;
+			ghost->animation.lastImage = ghost->animation.firstImage + 3;
+		}
+		ghost->animation.UpdateFrightenAnimation(dt, ghost->ANIMATIONSWITCHTIME,animationCounter); //Increments animation counter for flashing
 	}
 	else {
 		ghost->animation.Update(dt, ghost->ANIMATIONSWITCHTIME);
@@ -82,12 +99,14 @@ void Frighten::Animate(const float &stateTime,const float &dt)
 
 void Frighten::Init()
 {
-	eatenNum = 0;
+	++NumberOfGhostInFrightenMode;
+	Map::SetFirghtenSound();
+	eatenNum = 100;
 	ghost->speed = levelValues[LEVELNUMBER][12];
 	ghost->turnAround();
 	animationCounter = 0;
 	stateClock.restart().asSeconds();
-	//Flip direction if can
+
 	ghost->animation.imageToSet.y = 0;
 	ghost->animation.firstImage = 8;
 	ghost->animation.imageToSet.x = ghost->animation.firstImage;
@@ -95,32 +114,40 @@ void Frighten::Init()
 	
 }
 
-void Frighten::Exit(const ghostState& state)
+void Frighten::Exit(const GhostState& state)
 {
 	ghost->isFrightened = false;
 
 	ghost->ANIMATIONSWITCHTIME = 0.25;
 
+	--NumberOfGhostInFrightenMode;
+	if (NumberOfGhostInFrightenMode <= 0) {
+		if (Map::EatenMode == ON)
+			Map::SetHomeRunningBackGroundSound();
+		else
+			Map::SetBackGroundSound();
+	}
+
 	switch (state) {
 
 		case eChase:
 			ghost->turnAround();
-			ghost->setState(new Chase(ghost));
-			if(eatenNum > 0)
+			if (eatenNum > 0)
 				eatenNum = 0;
+			ghost->setState(new Chase(ghost));
 			break;
 		case eScatter:
 			ghost->turnAround();
-			ghost->setState(new Scatter(ghost));
 			if (eatenNum > 0)
 				eatenNum = 0;
+			ghost->setState(new Scatter(ghost));
 			break;
 		case eFrighten:
 			ghost->turnAround();
 			ghost->setState(new Frighten(ghost, state));
 			break;
 		case eEaten:
-			ghost->setState(new Eaten(ghost, state, eatenNum));
+			ghost->setState(new Eaten(ghost, state));
 			break;
 		case eTunneling:
 			ghost->setState(new Tunneling(ghost));

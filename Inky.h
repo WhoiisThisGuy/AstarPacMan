@@ -3,22 +3,20 @@
 he gets aggressive and starts chasing until he catches PACMAN or PACMAN gets out of the range. */
 
 #include "Ghost.h"
-//#include "ActorState.h"
-//#include "Scatter.h"
 #ifndef H_INKY
 #define H_INKY
-#define INKYTEXTUREPATH "Textures/inky.png"
+
+#define INKYSTARTX 11.40f //13.60
+#define INKYSTARTY 14.0f //13.60
 
 class Inky :public Ghost
 {
 
 public:
 
-	Inky();//Have to do this at every single character... change it);
+	Inky();
 	~Inky();
 	void Update(const float& dt);
-	//void Draw(RenderWindow& window);
-	void setTargetNode(Vector2i) override;
 	void SetStartState() override;
 	void moveUpAndDown() override;
 	bool moveToFourteenDotThirtyFive() override;
@@ -37,12 +35,10 @@ public:
 
 private:
 	/* Constants start */
-	const float INKYSTARTX = 11.40f; //13.60
-	const float INKYSTARTY = 14.0f;
+	//const float INKYSTARTX = 11.40f; //13.60
+	//const float INKYSTARTY = 14.0f;
 
 	const Vector2i scatterTargetNode = { 27,34 };
-	
-
 
 	Texture targettexture;
 	Texture InkyTexture;

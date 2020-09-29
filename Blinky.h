@@ -6,7 +6,11 @@ he gets aggressive and starts chasing until he catches PACMAN or PACMAN gets out
 
 #ifndef H_BLINKY
 #define H_BLINKY
-#define BLINKYTEXTUREPATH "Textures/blinky.png"
+
+#define BLINKYSTARTX 13
+#define BLINKYSTARTY 11
+#define BLINKYSTARTXCLASS 13.60f //13.60
+#define BLINKYSTARTYCLASS 14.0f //13.60
 
 class Blinky:public Ghost
 {
@@ -16,24 +20,17 @@ public:
 	Blinky();
 	~Blinky();
 	void Update(const float& dt);
-	//void Draw(RenderWindow& window);
-	void setTargetNode(Vector2i) override;
 	void setChaseTargetNode() override;
 	void setScatterTargetNode() override;
 	void SetStartState() override;
 	void SetStartParams() override;
 	Vector2i getTempCoordsOnLevel() const;
 	static Vector2i sTempCoordsOnLevel;
-	bool IsMyGhostIsActive() override;
 	unsigned short int GetActivationDotLimit() override;
 private:
 	/* Constants start */
-	const short unsigned int BLINKYSTARTX = 13;
-	const short unsigned int BLINKYSTARTY = 11;
 
 	const Vector2i scatterTargetNode = {23,4};
-	Texture BlinkyTexture;//Have to do this at every single character... change it
-	Texture targettexture;
 	
 	/* Constants end */
 };

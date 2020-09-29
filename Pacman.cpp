@@ -2,12 +2,15 @@
 #include <Windows.h>
 
 using std::to_string;
+using namespace std; //cout
 
 Vector2i Pacman::sTempCoordsOnLevel = { 0 ,0 };
 Vector2i Pacman::sTempDirectionOnLevel = { 0 ,0 };
-bool Pacman::normalSpeedOn = true;
-float Pacman::speed = levelValues[LEVELNUMBER][2];
+bool Pacman::DotSpeed = true;
+float Pacman::speed = levelValues[LEVELNUMBER][1];
 RectangleShape Pacman::body;
+unsigned short int  Pacman::health = 2;
+Text Pacman::pacman_hp_text;
 
 Pacman::Pacman() {
 
@@ -21,13 +24,27 @@ Pacman::Pacman() {
 	body.setOrigin(PACMANSIZEX / 2, PACMANSIZEY / 2);
 	body.setPosition(Vector2f{ (PACMANSTARTPOSX * CELLSIZE) - 12.0f, (((PACMANSTARTPOSY * CELLSIZE) - 12.0f)) });
 
-	PacmanTexture.loadFromFile(PACMANTEXTUREPATH);//Have to do this at every single character... change it, do not want to use pointers
+	if (!pacman_hp_texture.loadFromFile("Textures/pacman.png"))
+		cout << "could not load pacmanTexture file for hp";
+	pacman_hp_sprite.setTexture(pacman_hp_texture);
+
 	animation = new Animation(this);
-	body.setTexture(&PacmanTexture);
+	
+	pacman_hp_sprite.setScale(3,3);
+	pacman_hp_sprite.setTextureRect(IntRect(14, 0, 14, 14));
+	pacman_hp_sprite.setPosition(1 * CELLSIZE, 35 * CELLSIZE+12);
+
+	body.setTexture(&pacman_hp_texture);
 	
 	animation->Update(row, 0, ANIMATIONSWITCHTIME);
 	body.setTextureRect(animation->uvRect);
 
+	pacman_hp_text.setFillColor(Color::Yellow);
+	pacman_hp_text.setFont(font);
+	pacman_hp_text.setCharacterSize(37);
+	pacman_hp_text.setPosition(1 * CELLSIZE+40, 35 * CELLSIZE+5);
+	pacman_hp_text.setString("x2");
+	health = 2;
 }
 
 Pacman::~Pacman()
@@ -40,7 +57,8 @@ void Pacman::Draw(RenderWindow& window)
 {
 
 	window.draw(body);
-
+	window.draw(pacman_hp_text);
+	window.draw(pacman_hp_sprite);
 }
 
 bool Pacman::Update(const float& dTime)
@@ -48,26 +66,25 @@ bool Pacman::Update(const float& dTime)
 	if (paused)
 		return false;
 
-	//Not so accurate solution, pollevent should handle events. 
-	if (Keyboard::isKeyPressed(Keyboard::Up)) {
+	if (Keyboard::isKeyPressed(Keyboard::Up)) { //Should not be used like this. while(window.pollevent()) should be used, but since no other event used than keypressed I use it like this
 
 		bufferedDirection.y = -1;
 		bufferedDirection.x = 0;
 		havebufferedmove = true;
 	}
-	if (Keyboard::isKeyPressed(Keyboard::Down)) {
+	else if (Keyboard::isKeyPressed(Keyboard::Down)) {
 		bufferedDirection.y = 1;
 		bufferedDirection.x = 0;
 		havebufferedmove = true;
 	}
-	if (Keyboard::isKeyPressed(Keyboard::Left)) {
+	else if (Keyboard::isKeyPressed(Keyboard::Left)) {
 
 
 		bufferedDirection.x = -1;
 		bufferedDirection.y = 0;
 		havebufferedmove = true;
 	}
-	if (Keyboard::isKeyPressed(Keyboard::Right)) {
+	else if (Keyboard::isKeyPressed(Keyboard::Right)) {
 
 		bufferedDirection.x = 1;
 		bufferedDirection.y = 0;
@@ -110,6 +127,8 @@ bool Pacman::Update(const float& dTime)
 
 	if (checkCollision(dTime)) { //if checkcollision is OK then pacman can move
 
+		SetUpSpeed();
+
 		body.move(Vector2f(speed * dTime * tempDirection.x, speed * dTime * tempDirection.y));
 		
 		animation->Update(row, dTime, ANIMATIONSWITCHTIME);
@@ -118,15 +137,17 @@ bool Pacman::Update(const float& dTime)
 
 	tunnelTeleport(); //Just change position if pacman is @ the end of the tunnel
 
-	/* Pacman should update his data, so the other Ghosts can work with them trough Game and Map. */
+	/* Pacman should update his data, so the other Ghosts can work with them trough Map Class. */
 
 	sTempCoordsOnLevel = getTempCoordsOnLevel();
 	sTempDirectionOnLevel = tempDirection;
 
+
+
 	return false;
 }
 
-Vector2i Pacman::getTempCoordsOnLevel() const/* Gives back the coordinates (1,1), (2,1) etc.. */
+Vector2i Pacman::getTempCoordsOnLevel() const /* Gives back the coordinates (1,1), (2,1) etc.. */
 {
 	Vector2i Position;
 
@@ -146,8 +167,7 @@ void Pacman::InitDeathAnimation()
 bool Pacman::UpdateDeathAnimation(const float& dt)
 {
 	if (animation->UpdateCustomOfColumns(4, 12, dt, 0.10f) >= 12) {
-	
-		//
+
 		return true;
 	}
 	body.setTextureRect(animation->uvRect);
@@ -177,12 +197,18 @@ void Pacman::SetStartState()
 void Pacman::IncreaseHealth()
 {
 	++health;
+	pacman_hp_text.setString("x"+std::to_string(health));
+	
 }
 
 void Pacman::DecreaseHealth()
 {
-	--health;
+	if(health > 0)
+		--health;
+	
+	pacman_hp_text.setString("x" + std::to_string(health));
 }
+
 
 bool Pacman::checkCollision(const float& dTime)
 {
@@ -206,8 +232,8 @@ bool Pacman::checkCollision(const float& dTime)
 
 	nextPosition.x = int((tempPosition.x + moveWith.x) / CELLSIZE);
 	nextPosition.y = int((tempPosition.y + moveWith.y) / CELLSIZE);
-
-	if (Map::GetTile(nextPosition.x, nextPosition.y) != '#' && Map::GetTile(nextPosition.x, nextPosition.y) != '_')
+	char c = Map::GetTile(nextPosition.x, nextPosition.y);
+	if (c != '#' && c != '_' && c != -1)
 		return true;
 	return false;
 }
@@ -239,117 +265,19 @@ void Pacman::tunnelTeleport()
 
 }
 
-//Just left it here to see the progress
-//Found an easier solution instead of these
+void Pacman::SetUpSpeed() /* Turn back normal speed */
+{
+	auto actualtempcoords = getTempCoordsOnLevel();
 
-//
-//bool Pacman::canPacMove(float &dTime) const{ /* Collision detection */
-//
-//	sf::Vector2u pacNextPosA = { 0,0 }; /* These two vectors define that where the top and bottom - depending on which direction is pacman going -
-//									of pacman's tile will be after the movement is added to the current position. */
-//	sf::Vector2u pacNextPosB = { 0,0 };
-//
-//	sf::Vector2f tempPosition = body.getPosition();
-//	sf::Vector2u tempCoordinates = getTempCoordsOnLevel();
-//
-//	sf::Vector2f movement = { sf::Vector2f(speed * dTime * tempDirection.x, speed * dTime * tempDirection.y)};
-//
-//	movement.x *= tempDirection.x;
-//	movement.y *= tempDirection.y;
-//
-//	/* Decide which direction is pacman going. Then I calculate the position where pacman will be after movement vector is added to the position. */
-//
-//	if (tempDirection.x == 1) {
-//
-//		pacNextPosA.x = (unsigned int)(((tempPosition.x+ PACMANSIZEX) + movement.x + OFFSETMOVE) / CELLSIZE); //calculation of the top right corner of the rectangleshape
-//		pacNextPosA.y = tempCoordinates.y;
-//
-//		pacNextPosB.x = pacNextPosA.x;
-//		pacNextPosB.y = (unsigned int)(((tempPosition.y + PACMANSIZEY) + movement.y) / CELLSIZE); //calculation of the bottom right corner of the rectangleshape
-//		
-//	}
-//	else if (tempDirection.y == 1) {
-//
-//		pacNextPosA.x = tempCoordinates.x;
-//		pacNextPosA.y = (unsigned int)(((tempPosition.y+PACMANSIZEY + OFFSETMOVE) + movement.y) / CELLSIZE);
-//
-//		pacNextPosB.x = (unsigned int)((tempPosition.x+PACMANSIZEX ) / CELLSIZE);
-//		pacNextPosB.y = pacNextPosA.y;
-//	}
-//	else if(tempDirection.x == -1){
-//
-//		pacNextPosA.x = (unsigned int)((tempPosition.x + movement.x - OFFSETMOVE) / CELLSIZE);
-//		pacNextPosA.y = tempCoordinates.y;
-//
-//		pacNextPosB.x = pacNextPosA.x;
-//		pacNextPosB.y = (unsigned int)((tempPosition.y + PACMANSIZEY ) / CELLSIZE);
-//		
-//	}
-//	else if(tempDirection.y == -1) {
-//		
-//		pacNextPosA.x = tempCoordinates.x;
-//		pacNextPosA.y = (unsigned int)((tempPosition.y + movement.y - OFFSETMOVE) / CELLSIZE);
-//
-//		pacNextPosB.x = (unsigned int)((tempPosition.x + PACMANSIZEX )/ CELLSIZE);
-//		pacNextPosB.y = pacNextPosA.y;
-//	}
-//	
-//	//if(level[pacNextPosA.y][pacNextPosA.x] != 0 || level[pacNextPosB.y][pacNextPosB.x] != 0){ //Coordinates are switched (y first then x) because moving horizontally means moving between columns in the level matrix and moving vertically means moving trough the rows in the level matrix.
-//	//	
-//	//	return false;
-//	//}
-//	return true;
-//}
+	if (Map::FrightenMode == ON) {
+		if (DotSpeed == ON && speed != levelValues[LEVELNUMBER][10] && sTempCoordsOnLevel != actualtempcoords) //if pacman stepped one tile further turn off dot speed
+			speed = levelValues[LEVELNUMBER][10];
+		return;
+	}
 
-//bool Pacman::canPacBufferedMove() const { /* Using the exact same logic like in the canPacMove() function.
-//																 The only difference is that I check more further into the direction Pacman would like to go.
-//																 This is to tell for sure that the cell is free or not. */
-//
-//	sf::Vector2u pacNextPosA = { 0,0 }; 
-//	sf::Vector2u pacNextPosB = { 0,0 };
-//
-//	sf::Vector2f tempPosition = body.getPosition();
-//	sf::Vector2u tempCoordinates = getTempCoordsOnLevel();
-//
-//	if (bufferedDirection.x == 1) {
-//
-//		pacNextPosA.x = (unsigned int)((tempPosition.x + (PACMANSIZEX + OFFSET)) / CELLSIZE); //calculation of the top right corner of the rectangleshape
-//		pacNextPosA.y = tempCoordinates.y;
-//
-//		pacNextPosB.x = pacNextPosA.x;
-//		pacNextPosB.y = (unsigned int)((tempPosition.y + PACMANSIZEY) / CELLSIZE); //calculation of the bottom right corner of the rectangleshape
-//
-//	}
-//	else if (bufferedDirection.y == 1) {
-//
-//		pacNextPosA.x = tempCoordinates.x;
-//		pacNextPosA.y = (unsigned int)((tempPosition.y + (PACMANSIZEY + OFFSET)) / CELLSIZE);
-//
-//		pacNextPosB.x = (unsigned int)((tempPosition.x + PACMANSIZEX) / CELLSIZE);
-//		pacNextPosB.y = pacNextPosA.y;
-//	}
-//	else if (bufferedDirection.x == -1) {
-//
-//		pacNextPosA.x = (unsigned int)((tempPosition.x - OFFSET) / CELLSIZE);
-//		pacNextPosA.y = tempCoordinates.y;
-//
-//		pacNextPosB.x = pacNextPosA.x;
-//		pacNextPosB.y = (unsigned int)((tempPosition.y + PACMANSIZEY) / CELLSIZE);
-//
-//	}
-//	else if (bufferedDirection.y == -1) {
-//
-//		pacNextPosA.x = tempCoordinates.x;
-//		pacNextPosA.y = (unsigned int)((tempPosition.y - OFFSET) / CELLSIZE);
-//
-//		pacNextPosB.x = (unsigned int)((tempPosition.x + PACMANSIZEX) / CELLSIZE);
-//		pacNextPosB.y = pacNextPosA.y;
-//	}
-//
-//	//if (level[pacNextPosA.y][pacNextPosA.x] != 0 || level[pacNextPosB.y][pacNextPosB.x] != 0) { //
-//	//comes from Map.h also the coordinates are switched watch for it, y is first.
-//	//	return false;
-//	//}
-//
-//	return true;
-//}
+	if (DotSpeed == ON && speed != levelValues[LEVELNUMBER][2] && sTempCoordsOnLevel != actualtempcoords) { //same here
+		speed = levelValues[LEVELNUMBER][2];
+		return;
+	}
+
+}

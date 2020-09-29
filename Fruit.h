@@ -14,7 +14,7 @@ using namespace sf;
 class Fruit
 {
 public:
-	enum fruitState{Active,Eaten,NotActive};
+	enum fruitState { Active, Eaten , NotActive};
 	Fruit();
 	void Update();
 	void Draw(RenderWindow& window);
@@ -22,10 +22,15 @@ public:
 	bool checkCollision(FloatRect);
 	void eaten();
 	void activate(unsigned short int);
+	void activate();
 	void deactivate();
-private:
+	static bool isactive() { return active; }
+	void SetPosition(Vector2f&);
 
 private:
+	
+private:
+	static bool active;
 	fruitState state;
 	Texture fruitTexture;
 	RectangleShape fruitShape;

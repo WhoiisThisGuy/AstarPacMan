@@ -1,10 +1,9 @@
 #include "Ghost.h"
 
-//#include "ActorState.h"
-//#include "Scatter.h"
 #ifndef H_CLYDE
 #define H_CLYDE
-#define CLYDETEXTUREPATH "Textures/clyde.png"
+#define CLYDESTARTX 15.70
+#define CLYDESTARTY 14
 
 class Clyde :public Ghost
 {
@@ -14,8 +13,6 @@ public:
 	Clyde();
 	~Clyde();
 	void Update(const float& dt);
-	//void Draw(RenderWindow& window);
-	void setTargetNode(Vector2i) override;
 	void setChaseTargetNode() override;
 	void setScatterTargetNode() override;
 	void SetStartState() override;
@@ -28,13 +25,9 @@ public:
 	unsigned short int GetActivationDotLimit() override;
 private:
 	/* Constants start */
-	const float CLYDESTARTX = 15.70;
-	const float CLYDESTARTY = 14;
 
 	const Vector2i scatterTargetNode = { 0,34 };
-	Texture ClydeTexture;//Have to do this at every single character... change it
-	Texture targettexture;
-	CircleShape clydeCircle;
+
 	/* Constants end */
 };
 

@@ -3,16 +3,14 @@
 
 using namespace std;
 
+bool Fruit::active = false;
+
 Fruit::Fruit()
 {
-	//Initialization
-
-
 	//Texture and shape
 	fruitTexture.loadFromFile("Textures/Fruits.png");
 	
 	fruitShape.setTexture(&fruitTexture);
-	//fruitShape.setFillColor(Color::Yellow);
 	fruitShape.setSize(Vector2f(FRUITSIZE, FRUITSIZE));
 	fruitShape.setOrigin(FRUITSIZE / 2, FRUITSIZE / 2);
 	fruitShape.setPosition(Vector2f(FRUITX,FRUITY));
@@ -26,7 +24,7 @@ Fruit::Fruit()
 	//state
 	
 	state = NotActive;
-	
+	active = false;
 }
 
 void Fruit::Update()
@@ -41,6 +39,8 @@ void Fruit::Update()
 		if (fruitClock.getElapsedTime().asSeconds() > 4) {
 			state = NotActive;
 			scoreText.setString("");
+
+			active = false;
 		}
 	}
 
@@ -48,7 +48,7 @@ void Fruit::Update()
 
 void Fruit::Draw(RenderWindow& window)
 {
-	if (state == Active) {
+	if (state == Active ) {
 		window.draw(fruitShape);
 	}
 	else if (state == Eaten ) {
@@ -80,13 +80,25 @@ void Fruit::eaten()
 void Fruit::activate(unsigned short int fruitNumber)
 {
 	if (state != Active) {
+		active = true;
 		setFruitTexture(fruitNumber);
 		state = Active;
 		fruitClock.restart().asSeconds();
 	}
 }
 
+void Fruit::activate()
+{
+	active = true;
+	state = Active;
+}
+
 void Fruit::deactivate()
 {
 	state = NotActive;
+}
+
+void Fruit::SetPosition(Vector2f& pos)
+{
+	fruitShape.setPosition(pos);
 }

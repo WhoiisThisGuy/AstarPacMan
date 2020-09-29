@@ -28,7 +28,6 @@ void Chase::Update(const float& dt)
 	if (!Game_Over && ghost->collideWithPacman())
 	{
 		paused = true;
-		Map::pauseTime = 2;
 		Game_Over = true;
 		Exit(eGameOver);
 		return;
@@ -37,13 +36,13 @@ void Chase::Update(const float& dt)
 	ghost->animation.Update(dt,ghost->ANIMATIONSWITCHTIME);
 	ghost->UpdateTexture();
 
-	if (glob_powerOn && !ghost->isFrightened) {
+	if (ghost->isFrightened) {
 	
 		Exit(eFrighten);
 		return;
 	}
 
-	if (LEVELNUMBER < 4 && STATENUMBER < 5 && stateTime > chaseTimings[LEVELNUMBER][STATENUMBER]) {
+	if (LEVELNUMBER < 3 && stateTime > chaseTimings[LEVELNUMBER][ghost->ScatterStateCounter]) {
 		Exit();
 		return;
 	}
@@ -64,6 +63,8 @@ void Chase::Update(const float& dt)
 
 void Chase::Init()
 {
+	if (ghost->ChaseStateCounter<4)
+		++ghost->ChaseStateCounter;
 	ghost->currentState = eChase;
 	
 	ghost->speed = elroy1 ? levelValues[LEVELNUMBER][7] : elroy2 ? levelValues[LEVELNUMBER][9] : levelValues[LEVELNUMBER][4];
@@ -78,24 +79,23 @@ void Chase::Init()
 	ghost->animation.lastImage = 2;
 }
 
-void Chase::Exit(const ghostState& state)
+void Chase::Exit(const GhostState& state)
 {
-
+	
 	switch (state) {
-	case eScatter:
-		++STATENUMBER;
-		ghost->turnAround();
-		ghost->setState(new Scatter(ghost));
-		break;
-	case eFrighten:
-		
-		ghost->setState(new Frighten(ghost, ghost->currentState));
-		break;
-	case eGameOver:
-		ghost->setState(new GhostGameOver(ghost));
-		break;
-	case eTunneling:
-		ghost->setState(new Tunneling(ghost));
-		break;
+		case eScatter:
+			++STATENUMBER;
+			ghost->turnAround();
+			ghost->setState(new Scatter(ghost));
+			break;
+		case eFrighten:
+			ghost->setState(new Frighten(ghost, ghost->currentState));
+			break;
+		case eGameOver:
+			ghost->setState(new GhostGameOver(ghost));
+			break;
+		case eTunneling:
+			ghost->setState(new Tunneling(ghost));
+			break;
 	}
 }

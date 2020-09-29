@@ -18,7 +18,7 @@ every speed is calculated from the basic speed value of the characters
 fruits: are numbered from 0 to 6 which is the order of the images on the texture sprite sheet
 value 0 means, no value change in the speed limit or no limit like the frighten mode in the last rows has no time limit because there is no frighten mode anymore on those levels.
 */
-
+//20 rows
 unsigned short int levelValues[][15] =
 { {0,100,percentage(PACMANBASICSPEED,80),percentage(PACMANBASICSPEED,71),percentage(GHOSTBASICSPEED,75),percentage(GHOSTBASICSPEED,40),20,percentage(GHOSTBASICSPEED,80),10,percentage(GHOSTBASICSPEED,90),percentage(PACMANBASICSPEED,90),percentage(PACMANBASICSPEED,79),percentage(GHOSTBASICSPEED,50),6,5}, //x
 {1,300,percentage(PACMANBASICSPEED,90),percentage(PACMANBASICSPEED,79),percentage(GHOSTBASICSPEED,85),percentage(GHOSTBASICSPEED,45),30,percentage(GHOSTBASICSPEED,90),15,percentage(GHOSTBASICSPEED,95),percentage(PACMANBASICSPEED,95),percentage(PACMANBASICSPEED,83),percentage(GHOSTBASICSPEED,55),5,5},//x
@@ -47,7 +47,7 @@ float scatterTimings[4][5]{
 	{7,7,7,7,5},
 	{7,7,7,7,5},
 	{5,5,5,5,5},
-	{1 / 60,1 / 60,1 / 60,1 / 60,1 / 60}
+	{0,0,0,0,0}
 };
 
 /* 0 means infinite */
@@ -61,13 +61,12 @@ unsigned short int chaseTimings[4][5]{
 
 unsigned short int fruitAppear[22] = { 170 ,75,170 ,75, 170 ,75, 170 ,75, 165, 75,165, 75, 165, 75, 165, 75, 165, 75, 165, 75, 165, 75 };
 
-unsigned short int LEVELNUMBER = 0; //0. is the first level
+unsigned short int LEVELNUMBER = 2; //0. is the first level
 
 /* Level variables */
 bool Game_Over = false;
 bool Game_Win = false;
 bool paused = true;
-bool glob_powerOn = OFF;
 bool elroy1 = OFF;
 bool elroy2 = OFF;
 bool SpecialCounter = OFF;
