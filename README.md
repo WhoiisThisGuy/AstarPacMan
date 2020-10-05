@@ -19,7 +19,9 @@ How they work: Luxy likes where its dark, Darky likes to go towards shiney thing
 I used the original Pacman textures, some of them I draw it by myself using pixeldraw online.
 I got the original sounds from youtube. Every file that I used for the project sounds, textures, fonts are published.
 
-I hope you enjoy it,
+Youtube video about the game: https://www.youtube.com/watch?v=cMhmSmINeR0
+
+Hope you enjoy it,
 have fun.
 
 @Near
