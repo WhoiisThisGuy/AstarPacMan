@@ -1,6 +1,0 @@
-Ezzel a configgal működik jelenleg jól - legalábbis nem bugolt míg játszottam vele: 
-
--#define OFFSET 20.0f
-#define PACMANSIZEX 43.0f
-#define PACMANSIZEY 43.0f
-#define CellSizeDef 50.0f
