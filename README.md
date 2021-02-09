@@ -1,5 +1,5 @@
 # Pacman
-Pacman recreation in C++ using SFML from scratch.
+Pacman re-implementation in C++ using SFML from scratch.
 
 Purpose:
 
